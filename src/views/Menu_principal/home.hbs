@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/imagenes/logo_pestaña.PNG" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@100;200;300;400;500;600;700;800;900&family=Lato:wght@100;300;400;700;900&family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Principal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<Style>
+  
+
+
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 6%;
+        height: 100%;
+        background-color: #2d98d2;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+        z-index: 1500;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 20px;
+    }
+
+    .menu-horizontal {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .menu-item {
+        width: 100%;
+        text-align: center;
+    }
+
+    .menu-item a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 0;
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+        border-bottom: 1px solid black;
+    }
+
+    .menu-item a .fas {
+        font-size: 24px;
+        margin-bottom: 5px;
+    }
+
+    .menu-item a span {
+        display: block;
+        font-size: 12px;
+    }
+
+    .menu-item:hover {
+        background-color: #555;
+    }
+
+    .menu-vertical {
+        display: none;
+        position: absolute;
+        left: 100%;
+        top: 0;
+        background-color:#666567;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        width: 200px;
+    }
+
+    .menu-item:hover .menu-vertical {
+        display: block;
+    }
+
+    .menu-vertical li {
+        border-bottom: 1px solid #444;
+    }
+
+    .menu-vertical li a {
+        display: block;
+        padding: 15px;
+        color: white;
+        text-decoration: none;
+        text-align: left;
+    }
+
+    .menu-vertical li:hover {
+        background-color: rgba(144, 201, 167, 0.5);
+    }
+
+  
+ 
+
+
+  
+
+    .anuncios {
+        background-color: #ffcc00;
+        color: #000;
+        padding: 20px;
+        margin: 20px auto;
+        border-radius: 10px;
+        width: 80%;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+  .nav {
+        position: relative;
+        left: 10%;
+        width: 70%;
+    
+    }
+
+    
+</Style>
+<body>
+    <div class="background-container"></div>
+
+    <nav class="navbar">
+        <label class="logo" for="logo"></label>
+        <ul class="menu-horizontal">
+
+
+       <li class="menu-item">
+                <a href="/menuGerencia" class="active">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Gerencia</span>
+                </a>
+                <ul class="menu-vertical">
+                    <li><a href="/menuGerencia">Gerencia</a></li>
+                </ul>
+            </li>
+         
+
+            <li class="menu-item">
+                <a href="/operaciones" class="active">
+                    <i class="fas fa-user"></i>
+                    <span>Operaciones</span>
+                </a>
+                <ul class="menu-vertical">
+                    <li><a href="/operaciones">Operaciones</a></li>
+                </ul>
+            </li>
+
+
+
+       <li class="menu-item">
+                <a href="/menuContablidad" class="active">
+                    <i class="fas fa-calculator"></i>
+                    <span>CONTABILIDAD Y FINANZAD</span>
+                </a>
+                <ul class="menu-vertical">
+                    <li><a href="/operaciones">Operaciones</a></li>
+                </ul>
+            </li>
+
+
+
+
+     
+
+
+
+
+           
+
+
+
+
+            <li class="menu-item">
+                <a href="/nuevo_tikect_soporte" class="active">
+                    <i class="fas fa-headset"></i>
+                    <span>Soporte Técnico</span>
+                </a>
+                <ul class="menu-vertical">
+                    <li><a href="/nuevo_tikect_soporte">Enviar Ticket</a></li>
+                    <li><a href="/revisar_tickets">Ver Tickets Pendientes</a></li>
+                </ul>
+            </li>
+
+        </ul>
+
+    </nav>
+
+   
+ 
+
+    <div class="anuncios">
+        REUNION OPERATIVA 09/07/2024 HORA INICIO 10:00 
+    </div>
+
+
+</body>
+
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Comunicado General</title>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+        }
+        .container {
+            margin-top: 50px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1a252f;
+            margin-bottom: 30px;
+        }
+        .form-group label {
+            color: #1a252f;
+            font-weight: bold;
+        }
+        .form-control, .form-control-file {
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+        .btn-primary {
+            background-color: #2d98d2;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #d9d9d9;
+        }
+        .file-list {
+            margin-top: 10px;
+            padding-left: 0;
+        }
+        .file-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #e9ecef;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            list-style-type: none;
+        }
+        .file-list button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .file-list button:hover {
+            background: #c82333;
+        }
+        .dropzone {
+            border: 2px dashed #1a252f;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            color: #1a252f;
+            margin-top: 10px;
+        }
+        .dropzone.dragover {
+            background-color: #f1f1f1;
+        }
+        #loadingIndicator {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #1a252f;
+        }
+        body{
+
+
+            background-color: FFFFF0;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Enviar Comunicado General</h1>
+        <form action="/enviarComunicado" method="POST" enctype="multipart/form-data" id="comunicadoForm">
+            <div class="form-group">
+                <label for="edificios">Seleccione los edificios:</label>
+                <select id="edificios" name="edificiosSeleccionados[]" multiple="multiple" class="form-control" style="width: 100%;">
+                    <option value="all">Todos</option>
+                    {{#each edificios}}
+                        <option value="{{this.id}}">{{this.nombre}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="mensaje">Mensaje:</label>
+                <textarea name="mensaje" id="mensaje" rows="4" class="form-control"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="archivos">Adjuntar Fotos y PDFs:</label>
+                <input type="file" id="archivos" class="form-control-file" multiple>
+                <div id="dropzone" class="dropzone">Arrastra y suelta los archivos aquí o haz clic para seleccionarlos</div>
+                <ul id="fileList" class="file-list"></ul>
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar Comunicado</button>
+        </form>
+        <div id="loadingIndicator">Enviando...</div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#edificios').select2({
+                placeholder: 'Seleccione los edificios',
+                allowClear: true
+            });
+
+            $('#edificios').on('change', function() {
+                if ($(this).val().includes('all')) {
+                    $(this).find('option').not(':first').prop('selected', true).trigger('change');
+                }
+            });
+
+            const fileInput = document.getElementById('archivos');
+            const dropzone = document.getElementById('dropzone');
+            const fileList = document.getElementById('fileList');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            let filesArray = [];
+
+            fileInput.addEventListener('change', function(event) {
+                handleFiles(fileInput.files);
+                fileInput.value = '';
+            });
+
+            dropzone.addEventListener('dragover', function(event) {
+                event.preventDefault();
+                dropzone.classList.add('dragover');
+            });
+
+            dropzone.addEventListener('dragleave', function(event) {
+                dropzone.classList.remove('dragover');
+            });
+
+            dropzone.addEventListener('drop', function(event) {
+                event.preventDefault();
+                dropzone.classList.remove('dragover');
+                handleFiles(event.dataTransfer.files);
+            });
+
+            dropzone.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            function handleFiles(files) {
+                for (let i = 0; i < files.length; i++) {
+                    filesArray.push(files[i]);
+                }
+                renderFileList();
+            }
+
+            function renderFileList() {
+                fileList.innerHTML = '';
+                filesArray.forEach((file, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = file.name;
+                    const removeButton = document.createElement('button');
+                    removeButton.textContent = 'X';
+                    removeButton.setAttribute('data-index', index);
+                    removeButton.addEventListener('click', function() {
+                        const fileIndex = parseInt(this.getAttribute('data-index'));
+                        filesArray.splice(fileIndex, 1);
+                        renderFileList();
+                    });
+                    listItem.appendChild(removeButton);
+                    fileList.appendChild(listItem);
+                });
+            }
+
+            $('#comunicadoForm').on('submit', function(event) {
+                event.preventDefault();
+                loadingIndicator.style.display = 'block';
+                const formData = new FormData(this);
+                filesArray.forEach(file => {
+                    formData.append('archivos', file);
+                });
+
+                $.ajax({
+                    url: this.action,
+                    method: this.method,
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        alert('Comunicado enviado correctamente.');
+                        loadingIndicator.style.display = 'none';
+                        location.reload();
+                    },
+                    error: function(error) {
+                        alert('Error al enviar el comunicado.');
+                        loadingIndicator.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

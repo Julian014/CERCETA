@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validar Pagos de Apartamentos</title>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1a252f;
+            margin-bottom: 30px;
+        }
+        .form-group label {
+            color: #1a252f;
+            font-weight: bold;
+        }
+        .form-control, .form-control-file {
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+        .btn-primary {
+            background-color: #1a252f;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #163144;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Validar Pagos de Apartamentos</h1>
+        <form id="validarPagosForm">
+            <div class="form-group">
+                <label for="edificios">Seleccione el edificio:</label>
+                <select id="edificios" name="edificioSeleccionado" class="form-control" style="width: 100%;">
+                    {{#each edificios}}
+                        <option value="{{this.id}}">{{this.nombre}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="apartamentos">Seleccione el apartamento:</label>
+                <select id="apartamentos" name="apartamentoSeleccionado" class="form-control" style="width: 100%;">
+                    <!-- Los apartamentos serán cargados aquí dinámicamente -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="mes">Mes:</label>
+                <select id="mes" name="mes" class="form-control">
+                    <option value="1">Enero</option>
+                    <option value="2">Febrero</option>
+                    <option value="3">Marzo</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Mayo</option>
+                    <option value="6">Junio</option>
+                    <option value="7">Julio</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="año">Año:</label>
+                <input type="number" id="año" name="año" class="form-control" value="2024">
+            </div>
+            <div class="form-group">
+                <label for="fecha_pago">Fecha de Pago:</label>
+                <input type="date" id="fecha_pago" name="fecha_pago" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="valor_pago">Valor del Pago:</label>
+                <input type="number" id="valor_pago" name="valor_pago" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Validar Pago</button>
+        </form>
+        <div id="loadingIndicator" style="display: none;">Validando...</div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#edificios').select2({
+                placeholder: 'Seleccione el edificio',
+                allowClear: true
+            });
+
+            $('#apartamentos').select2({
+                placeholder: 'Seleccione el apartamento',
+                allowClear: true
+            });
+
+            $('#edificios').on('change', function() {
+                const edificioSeleccionado = $(this).val();
+                if (edificioSeleccionado) {
+                    $.ajax({
+                        url: '/getApartamentos',
+                        method: 'POST',
+                        data: JSON.stringify({ edificioSeleccionado: edificioSeleccionado }),
+                        contentType: 'application/json',
+                        success: function(response) {
+                            const apartamentosSelect = $('#apartamentos');
+                            apartamentosSelect.empty();
+                            response.forEach(apartamento => {
+                                apartamentosSelect.append(new Option(apartamento.numero, apartamento.id));
+                            });
+                        },
+                        error: function(error) {
+                            console.error('Error al obtener los apartamentos:', error);
+                        }
+                    });
+                }
+            });
+
+            $('#validarPagosForm').on('submit', function(event) {
+                event.preventDefault();
+                $('#loadingIndicator').show();
+                const formData = $(this).serialize();
+
+                $.ajax({
+                    url: '/validarPago',
+                    method: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        alert('Pago validado correctamente.');
+                        $('#loadingIndicator').hide();
+                        $('#validarPagosForm')[0].reset();
+                        $('#apartamentos').empty();
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 400) {
+                            alert('Ya existe un pago registrado para este mes y año.');
+                        } else {
+                            alert('Error al validar el pago.');
+                        }
+                        $('#loadingIndicator').hide();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

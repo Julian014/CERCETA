@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Consultar Apartamentos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .search-container {
+            width: 30%;
+            padding: 20px;
+            background-color: #f7f7f7;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-container h2 {
+            text-align: center;
+            color: #413d4b;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .search-container select, .search-container button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .results-container {
+            width: 65%;
+            padding: 20px;
+        }
+
+        .apartamento-detalles {
+            display: none;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .apartamento-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+
+        .apartamento-detalles img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        .edit-button {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            background-color: #2d98d2;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+        }
+         .edit-button:hover{
+    
+            background-color: #d9d9d9;
+          
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-container">
+            <h2>Buscar Apartamentos</h2>
+            <select id="edificioSelect" class="select-edificio">
+                <option value="" disabled selected>Seleccione un edificio</option>
+            </select>
+            <select id="apartamentoSelect" class="select-apartamento" style="display: none;">
+                <option value="" disabled selected>Seleccione un apartamento</option>
+            </select>
+        </div>
+        <div class="results-container">
+            <div id="apartamentoDetalles" class="apartamento-detalles"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Obtener edificios al cargar la página
+            fetch('/getEdificios')
+                .then(response => response.json())
+                .then(data => {
+                    const edificioSelect = document.getElementById('edificioSelect');
+                    data.edificios.forEach(edificio => {
+                        const option = document.createElement('option');
+                        option.value = edificio.id;
+                        option.textContent = edificio.nombre;
+                        edificioSelect.appendChild(option);
+                    });
+                });
+
+            // Manejar selección de edificio
+            document.getElementById('edificioSelect').addEventListener('change', function() {
+                const edificioId = this.value;
+                const apartamentoSelect = document.getElementById('apartamentoSelect');
+                apartamentoSelect.style.display = 'none';
+                apartamentoSelect.innerHTML = '<option value="" disabled selected>Seleccione un apartamento</option>';
+                document.getElementById('apartamentoDetalles').style.display = 'none';
+
+                fetch(`/getApartamentos?edificioId=${edificioId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.apartamentos.length > 0) {
+                            apartamentoSelect.style.display = 'block';
+                            data.apartamentos.forEach(apartamento => {
+                                const option = document.createElement('option');
+                                option.value = apartamento.id;
+                                option.textContent = `APARTAMENTO N°: ${apartamento.numero}`;
+                                apartamentoSelect.appendChild(option);
+                            });
+                        }
+                    });
+            });
+
+            // Manejar selección de apartamento
+            document.getElementById('apartamentoSelect').addEventListener('change', function() {
+                const apartamentoId = this.value;
+
+                fetch(`/getApartamentoDetalles?apartamentoId=${apartamentoId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const detallesDiv = document.getElementById('apartamentoDetalles');
+                        detallesDiv.style.display = 'block';
+                        detallesDiv.innerHTML = `
+                            <h2>Detalles del Apartamento</h2>
+                            ${data.apartamento.foto ? `<img src="data:image/jpeg;base64,${data.apartamento.foto}" alt="Foto del apartamento">` : ''}
+                            <p><strong>Número:</strong> ${data.apartamento.numero}</p>
+                            <p><strong>Piso:</strong> ${data.apartamento.piso}</p>
+                            <p><strong>Responsable:</strong> ${data.apartamento.responsable}</p>
+                            <p><strong>Celular:</strong> ${data.apartamento.celular}</p>
+                            <p><strong>Correo:</strong> ${data.apartamento.correo}</p>
+                            <br>
+                            <br>
+                            <a href="/editar_apartamento?apartamentoId=${data.apartamento.id}" class="edit-button">Editar Apartamento</a>
+                        `;
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

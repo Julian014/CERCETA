@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar cliente</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #413d4b;
+        }
+
+        hr {
+            border: 0;
+            height: 2px;
+            background: #2d98d2;
+            margin: 40px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            color: #1a252f;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #413d4b;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #90c9a7;
+        }
+
+
+
+
+
+
+
+        button {
+            font-weight: bold;
+            grid-column: 1 / -1;
+            padding: 10px;
+            background-color: #2d98d2;
+            color: black;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #d9d9d9;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .alert {
+            display: none;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            grid-column: 1 / -1;
+        }
+
+        .alert.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AGREGAR NUEVO EDIFICIO</h1>
+        <br>
+        <div id="alert" class="alert"></div>
+
+        <form id="proveedorForm" method="POST" action="/agregar-edificio" enctype="multipart/form-data">
+            <div>
+                <label for="fechaincio">FECHA DE INICIO:</label>
+                <input type="date" id="fechaincio" name="fechaincio" required>
+            </div>
+            <div>
+                <label for="nombre">NOMBRE EDIFICIO:</label>
+                <input type="text" id="nombre" name="nombre" required>
+            </div>
+            <div>
+                <label for="nit">NIT:</label>
+                <input type="text" id="nit" name="nit" required>
+            </div>
+            <div>
+                <label for="cedula_representante_legal">CEDULA REPRESENTANTE LEGAL:</label>
+                <input type="text" id="cedula_representante_legal" name="cedula_representante_legal" required>
+            </div>
+            <div>
+                <label for="nombre_representante_legal">NOMBRE DEL REPRESENTANTE LEGAL:</label>
+                <input type="text" id="nombre_representante_legal" name="nombre_representante_legal" required>
+            </div>
+            <div>
+                <label for="direccion">DIRECCION:</label>
+                <input type="text" id="direccion" name="direccion" required>
+            </div>
+            <div>
+                <label for="correorepresentante">CORREO ELECTRONICO REPRESENTANTE:</label>
+                <input type="email" id="correorepresentante" name="correorepresentante" required>
+            </div>
+            <div>
+                <label for="telefono">TELEFONO :</label>
+                <input type="tel" id="telefono" name="telefono" required>
+            </div>
+    <div>
+        <label for="foto">FOTO:</label>
+                <input type="file" id="foto" name="foto" accept="image/*" required>
+    </div>
+    <br>
+            <hr>
+            <br>
+            <h2 class="section-title">MIEMBROS DEL CONSEJO</h2>
+<br>
+            <h3>MIEMBRO 1</h3>
+                            <br>
+
+            <div>
+                <label for="miembro1">NOMBRE COMPLETO:</label>
+                <input type="text" id="miembro1" name="miembro1">
+            </div>
+            <div>
+                <label for="direccion1">DIRECCION:</label>
+                <input type="text" id="direccion1" name="direccion1">
+            </div>
+            <div>
+                <label for="correo1">CORREO ELECTRONICO:</label>
+                <input type="email" id="correo1" name="correo1">
+            </div>
+            <div>
+                <label for="telefono1">TELEFONO:</label>
+                <input type="tel" id="telefono1" name="telefono1">
+            </div>
+
+            <h3>MIEMBRO 2</h3>
+            <br>
+            <div>
+                <label for="miembro2">NOMBRE COMPLETO:</label>
+                <input type="text" id="miembro2" name="miembro2">
+            </div>
+            <div>
+                <label for="direccion2">DIRECCION:</label>
+                <input type="text" id="direccion2" name="direccion2">
+            </div>
+            <div>
+                <label for="correo2">CORREO ELECTRONICO:</label>
+                <input type="email" id="correo2" name="correo2">
+            </div>
+            <div>
+                <label for="telefono2">TELEFONO:</label>
+                <input type="tel" id="telefono2" name="telefono2">
+            </div>
+
+            <h3>MIEMBRO 3</h3>
+            <br>
+            <div>
+                <label for="miembro3">NOMBRE COMPLETO:</label>
+                <input type="text" id="miembro3" name="miembro3">
+            </div>
+            <div>
+                <label for="direccion3">DIRECCION:</label>
+                <input type="text" id="direccion3" name="direccion3">
+            </div>
+            <div>
+                <label for="correo3">CORREO ELECTRONICO:</label>
+                <input type="email" id="correo3" name="correo3">
+            </div>
+            <div>
+                <label for="telefono3">TELEFONO:</label>
+                <input type="tel" id="telefono3" name="telefono3">
+            </div>
+
+            <button type="submit">AGREGAR EDIFICIO</button>
+        </form>
+    </div>
+
+ <script>
+        $(document).ready(function(){
+            $('#proveedorForm').on('submit', function(e){
+                e.preventDefault();
+                var formData = new FormData(this);
+                $.ajax({
+                    type: 'POST',
+                    url: '/agregar-edificio',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        alert('Edificio agregado correctamente');
+                        $('#proveedorForm')[0].reset();
+                    },
+                    error: function(err) {
+                        alert('Error al agregar el proveedor');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

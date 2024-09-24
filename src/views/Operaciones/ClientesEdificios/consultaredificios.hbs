@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Consultar Edificios</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #413d4b;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .input-container {
+            margin-bottom: 20px;
+        }
+
+        .input-container input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .select-edificio {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: #f7f7f7;
+            margin-bottom: 20px;
+        }
+
+        .edificio-detalles {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .edificio {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .edificio h2 {
+            color: #1a252f;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .info-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .info-item {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .info-item:last-child {
+            margin-right: 0;
+        }
+
+        .field {
+            margin-bottom: 15px;
+        }
+
+        .field label {
+            font-weight: bold;
+            color: #413d4b;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .field span {
+            display: block;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        .foto-container {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .foto {
+            max-width: 200px;
+            margin-left: 20px;
+            display: block;
+            border-radius: 5px;
+        }
+
+        .highlight {
+            background-color: #f0f8ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .apartamentos {
+            margin-top: 20px;
+        }
+
+        .apartamento-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+
+        .edit-button {
+            font-weight: bold;
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            background-color: #2d98d2;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+              .edit-button:hover {
+            background-color: #d9d9d9;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Consultar Edificios</h1>
+        <div class="input-container">
+            <input type="text" id="filterInput" placeholder="Escriba para filtrar edificios">
+        </div>
+        <select id="edificioSelect" class="select-edificio">
+            <option value="" disabled selected>Seleccione un edificio</option>
+            {{#each edificios}}
+                <option value="{{this.id}}">{{this.nombre}}</option>
+            {{/each}}
+        </select>
+        <button id="verApartamentosBtn" style="display: none;">Ver Apartamentos</button>
+        <div id="apartamentos" class="apartamentos"></div>
+        {{#each edificios}}
+        <div class="edificio-detalles" id="edificio-{{this.id}}">
+            <div class="edificio">
+                <h2>{{this.nombre}}</h2>
+                <div class="info-container">
+                    <div class="info-item">
+                        <div class="field">
+                            <label>Fecha de Inicio:</label>
+                            <span class="fecha-inicio">{{this.fechaincio}}</span>
+                        </div>
+                        <div class="field">
+                            <label>Nombre Representante Legal:</label>
+                            <span>{{this.nombre_representante_legal}}</span>
+                        </div>
+                    </div>
+                    <div class="foto-container">
+                        {{#if this.foto}}
+                        <img src="data:image/jpeg;base64,{{this.foto}}" alt="Foto del edificio" class="foto">
+                        {{/if}}
+                    </div>
+                </div>
+                <div class="field">
+                    <label>NIT:</label>
+                    <span>{{this.nit}}</span>
+                </div>
+                <div class="field">
+                    <label>Cédula Representante Legal:</label>
+                    <span>{{this.cedula_representante_legal}}</span>
+                </div>
+                <div class="field">
+                    <label>Dirección:</label>
+                    <span>{{this.direccion}}</span>
+                </div>
+                <div class="field">
+                    <label>Correo Representante:</label>
+                    <span>{{this.correorepresentante}}</span>
+                </div>
+                <div class="field">
+                    <label>Teléfono:</label>
+                    <span>{{this.telefono}}</span>
+                </div>
+                <div class="highlight">
+                    <h3>MIEMBROS DEL CONSEJO</h3>
+                    <br>
+                    <div class="info-container">
+                        <div class="info-item field">
+                            <label>Miembro 1:</label>
+                            <span>{{this.miembro1_nombre}}</span>
+                            <span>{{this.miembro1_direccion}}</span>
+                            <span>{{this.miembro1_correo}}</span>
+                            <span>{{this.miembro1_telefono}}</span>
+                        </div>
+                        <div class="info-item field">
+                            <label>Miembro 2:</label>
+                            <span>{{this.miembro2_nombre}}</span>
+                            <span>{{this.miembro2_direccion}}</span>
+                            <span>{{this.miembro2_correo}}</span>
+                            <span>{{this.miembro2_telefono}}</span>
+                        </div>
+                        <div class="info-item field">
+                            <label>Miembro 3:</label>
+                            <span>{{this.miembro3_nombre}}</span>
+                            <span>{{this.miembro3_direccion}}</span>
+                            <span>{{this.miembro3_correo}}</span>
+                            <span>{{this.miembro3_telefono}}</span>
+                        </div>
+                    </div>
+                </div>
+                <a href="/editar_edificio?edificioId={{this.id}}" class="edit-button">Editar Edificio</a>
+                <a href="/editar_miembros_consejo?edificioId={{this.id}}" class="edit-button">Editar Miembros del Consejo</a>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+    
+    <script>
+        function formatFecha(fecha) {
+            const options = { day: '2-digit', month: 'long', year: 'numeric' };
+            const date = new Date(fecha);
+            return isNaN(date) ? fecha : date.toLocaleDateString('es-ES', options);
+        }
+
+        function formatVisibleFechas() {
+            var fechas = document.querySelectorAll('.edificio-detalles:not([style*="display: none"]) .fecha-inicio');
+            fechas.forEach(function(fecha) {
+                fecha.textContent = formatFecha(fecha.getAttribute('data-raw'));
+            });
+        }
+
+        document.getElementById('edificioSelect').addEventListener('change', function() {
+            var selectedId = this.value;
+            var detalles = document.querySelectorAll('.edificio-detalles');
+            detalles.forEach(function(detalle) {
+                detalle.style.display = 'none';
+            });
+            var selectedDetalle = document.getElementById('edificio-' + selectedId);
+            if (selectedDetalle) {
+                selectedDetalle.style.display = 'block';
+                // Formatear fechas visibles
+                formatVisibleFechas();
+            }
+
+            // Mostrar el botón de ver apartamentos
+            document.getElementById('verApartamentosBtn').style.display = 'block';
+        });
+
+        // Guardar las fechas en data-raw inicialmente
+        document.addEventListener('DOMContentLoaded', function() {
+            var fechas = document.querySelectorAll('.fecha-inicio');
+            fechas.forEach(function(fecha) {
+                fecha.setAttribute('data-raw', fecha.textContent);
+            });
+
+            // Mostrar el detalle del edificio seleccionado por defecto
+            var selectedId = document.getElementById('edificioSelect').value;
+            if (selectedId) {
+                var selectedDetalle = document.getElementById('edificio-' + selectedId);
+                selectedDetalle.style.display = 'block';
+
+                // Formatear fechas visibles
+                formatVisibleFechas();
+            }
+        });
+
+        document.getElementById('filterInput').addEventListener('keyup', function() {
+            var filter = this.value.toLowerCase();
+            var select = document.getElementById('edificioSelect');
+            var options = select.getElementsByTagName('option');
+
+            for (var i = 1; i < options.length; i++) { // Start at 1 to skip the disabled "Seleccione un edificio" option
+                var option = options[i];
+                var text = option.textContent.toLowerCase();
+                if (text.indexOf(filter) > -1) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            }
+        });
+
+        document.getElementById('verApartamentosBtn').addEventListener('click', function() {
+            var selectedId = document.getElementById('edificioSelect').value;
+            if (selectedId) {
+                fetch('/getApartamentos?edificioId=' + selectedId)
+                    .then(response => response.json())
+                    .then(data => {
+                        var apartamentosDiv = document.getElementById('apartamentos');
+                        apartamentosDiv.innerHTML = '<h3>Apartamentos</h3>';
+                        if (data.apartamentos.length > 0) {
+                            data.apartamentos.sort((a, b) => a.numero.localeCompare(b.numero)); // Ordenar por número de apartamento
+                            data.apartamentos.forEach(apartamento => {
+                                apartamentosDiv.innerHTML += '<div class="apartamento-item">' +
+                                    '<p>APARTAMENTO N°: ' + apartamento.numero + '</p>' +
+                                    '<p>Piso: ' + apartamento.piso + '</p>' +
+                                    '<p>PROPIETARIO: ' + apartamento.responsable + '</p>' +
+                                    '</div>';
+                            });
+                        } else {
+                            apartamentosDiv.innerHTML += '<p>No hay apartamentos en este edificio.</p>';
+                        }
+                    });
+            }
+        });
+    </script>
+</body>
+</html>

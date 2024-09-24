@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Edificio</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #413d4b;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            margin-bottom: 20px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+            background-color: #413d4b;
+            color: white;
+            cursor: pointer;
+        }
+
+        .foto-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .foto-container img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Editar Edificio</h1>
+        <form action="/update_edificio" method="post">
+            <input type="hidden" name="id" value="{{edificio.id}}">
+            <div class="foto-container">
+                {{#if edificio.foto}}
+                <img src="data:image/jpeg;base64,{{edificio.foto}}" alt="Foto del edificio">
+                {{/if}}
+            </div>
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre" value="{{edificio.nombre}}" required>
+
+        <label for="fechaincio">Fecha de Inicio</label>
+<input type="date" id="fechaincio" name="fechaincio" value="{{edificio.fechaincio}}" required>
+
+            <label for="nombre_representante_legal">Nombre del Representante Legal</label>
+            <input type="text" id="nombre_representante_legal" name="nombre_representante_legal" value="{{edificio.nombre_representante_legal}}" required>
+
+            <label for="nit">NIT</label>
+            <input type="text" id="nit" name="nit" value="{{edificio.nit}}" required>
+
+            <label for="cedula_representante_legal">Cédula del Representante Legal</label>
+            <input type="text" id="cedula_representante_legal" name="cedula_representante_legal" value="{{edificio.cedula_representante_legal}}" required>
+
+            <label for="direccion">Dirección</label>
+            <input type="text" id="direccion" name="direccion" value="{{edificio.direccion}}" required>
+
+            <label for="correorepresentante">Correo del Representante</label>
+            <input type="email" id="correorepresentante" name="correorepresentante" value="{{edificio.correorepresentante}}" required>
+
+            <label for="telefono">Teléfono</label>
+            <input type="text" id="telefono" name="telefono" value="{{edificio.telefono}}" required>
+
+            <button type="submit">Guardar Cambios</button>
+        </form>
+    </div>
+</body>
+</html>
