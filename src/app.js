@@ -1029,8 +1029,6 @@ app.get("/menuContablidad", (req, res) => {
 
 
 
-
-
 // Ruta para obtener los edificios y renderizar la vista
 app.get('/validar_pagos', async (req, res) => {
     if (req.session.loggedin === true) {
@@ -1051,20 +1049,22 @@ app.get('/validar_pagos', async (req, res) => {
 });
 
 
-
-// Ruta para obtener los apartamentos del edificio seleccionado
-app.post('/getApartamentos', async (req, res) => {
+app.post('/getApartamentosss', async (req, res) => {
     const { edificioSeleccionado } = req.body;
+    console.log("Edificio seleccionado:", edificioSeleccionado); // Verifica el valor del edificio seleccionado
+
     const query = `
-        SELECT * 
-        FROM apartamentos 
-        WHERE edificio_id = ?
+        SELECT a.id, a.numero, e.nombre AS nombre_edificio
+        FROM apartamentos a
+        JOIN edificios e ON a.edificio_id = e.id
+        WHERE a.edificio_id = ?
     `;
     try {
         const [results] = await pool.query(query, [edificioSeleccionado]);
-        res.json(results);
+        console.log("Apartamentos encontrados:", results); // Verifica los resultados de la consulta
+        res.json(results); // Envía los resultados como JSON
     } catch (err) {
-        console.error(err);
+        console.error('Error al obtener los apartamentos:', err);
         res.status(500).send('Error al obtener los apartamentos');
     }
 });
@@ -1072,34 +1072,97 @@ app.post('/getApartamentos', async (req, res) => {
 
 
 
-// Ruta para validar el pago del apartamento
-app.post('/validarPago', async (req, res) => {
-    const { apartamentoSeleccionado, mes, año, fecha_pago, valor_pago } = req.body;
+// Ruta para validar el pago del apartamento con documento de pago
+app.post('/validarPago', upload.single('documento_pago'), async (req, res) => {
+    const { apartamentoSeleccionado, fecha_pago, valor_pago } = req.body;
+    const documentoPago = req.file; // El archivo subido
+    
+    // Verificar que se haya subido un archivo
+    if (!documentoPago) {
+        return res.status(400).send('Debe subir un documento de pago.');
+    }
+
+    // Convertir el archivo a BLOB para almacenarlo en la base de datos
+    const documentoBuffer = documentoPago.buffer;
+
+    // Consulta para verificar si el pago ya existe
     const querySelect = `
         SELECT * 
         FROM pagos_apartamentos 
-        WHERE apartamento_id = ? AND mes = ? AND año = ?
+        WHERE apartamento_id = ? AND fecha_pago = ?
     `;
+    // Consulta para insertar el nuevo pago, incluyendo nombre de edificio y número de apartamento
     const queryInsert = `
-        INSERT INTO pagos_apartamentos (apartamento_id, mes, año, fecha_pago, valor_pago, estado)
-        VALUES (?, ?, ?, ?, ?, 'Pagado')
+        INSERT INTO pagos_apartamentos (apartamento_id, nombre_edificio, numero_apartamento, fecha_pago, valor_pago, documento_pago, estado)
+        VALUES (?, ?, ?, ?, ?, ?, 'Pagado')
     `;
+    // Consulta para obtener los detalles del apartamento seleccionado
+    const queryApartamentoDetalles = `
+        SELECT a.id AS apartamento_id, a.numero AS numero_apartamento, e.nombre AS nombre_edificio
+        FROM apartamentos a
+        JOIN edificios e ON a.edificio_id = e.id
+        WHERE a.id = ?
+    `;
+
     try {
-        const [results] = await pool.query(querySelect, [apartamentoSeleccionado, mes, año]);
+        // Verificar si ya existe un pago para el apartamento y fecha especificada
+        const [results] = await pool.query(querySelect, [apartamentoSeleccionado, fecha_pago]);
         if (results.length > 0) {
-            res.status(400).send('Ya existe un pago registrado para este mes y año.');
+            return res.status(400).send('Ya existe un pago registrado para esta fecha.');
         } else {
-            await pool.query(queryInsert, [apartamentoSeleccionado, mes, año, fecha_pago, valor_pago]);
-            res.send('Pago validado correctamente.');
+            // Obtener los detalles del apartamento seleccionado
+            const [apartamentoDetalles] = await pool.query(queryApartamentoDetalles, [apartamentoSeleccionado]);
+            if (apartamentoDetalles.length > 0) {
+                const { nombre_edificio, numero_apartamento } = apartamentoDetalles[0];
+
+                // Insertar el pago en la base de datos con nombre de edificio y número de apartamento
+                await pool.query(queryInsert, [apartamentoSeleccionado, nombre_edificio, numero_apartamento, fecha_pago, valor_pago, documentoBuffer]);
+
+                // Consulta para obtener el correo electrónico del apartamento seleccionado
+                const queryCorreo = `
+                    SELECT correo 
+                    FROM apartamentos 
+                    WHERE id = ?
+                `;
+                const [correoResults] = await pool.query(queryCorreo, [apartamentoSeleccionado]);
+                if (correoResults.length > 0) {
+                    const correoDestinatario = correoResults[0].correo;
+                    
+                    // Configuración del mensaje de correo
+                    const mailOptions = {
+                        from: 'nexus.innovationss@gmail.com', // Reemplaza con tu correo
+                        to: correoDestinatario,
+                        subject: 'Confirmación de Pago - Cerceta',
+                        text: `Estimado propietario,
+
+Hemos recibido su pago correspondiente al edificio ${nombre_edificio}, apartamento ${numero_apartamento}. Agradecemos su cumplimiento y esperamos seguir brindándole un excelente servicio.
+
+Atentamente,
+Cerceta`
+                    };
+
+                    // Enviar el correo
+                    transporter.sendMail(mailOptions, function(error, info) {
+                        if (error) {
+                            console.error('Error al enviar el correo:', error);
+                            return res.status(500).send('Pago registrado, pero no se pudo enviar el correo de confirmación.');
+                        } else {
+                            console.log('Correo enviado: ' + info.response);
+                            return res.send('Pago validado correctamente y correo de confirmación enviado.');
+                        }
+                    });
+                } else {
+                    return res.status(404).send('Pago validado, pero no se encontró un correo asociado al apartamento.');
+                }
+            } else {
+                return res.status(404).send('No se encontró el apartamento seleccionado.');
+            }
         }
     } catch (err) {
         console.error(err);
-        res.status(500).send('Error al validar el pago');
+        return res.status(500).send('Error al validar el pago');
     }
 });
-
-
-
 
 
 

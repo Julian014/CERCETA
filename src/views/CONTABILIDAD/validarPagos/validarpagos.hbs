@@ -45,7 +45,7 @@
 <body>
     <div class="container">
         <h1>Validar Pagos de Apartamentos</h1>
-        <form id="validarPagosForm">
+        <form id="validarPagosForm" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="edificios">Seleccione el edificio:</label>
                 <select id="edificios" name="edificioSeleccionado" class="form-control" style="width: 100%;">
@@ -61,33 +61,16 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="mes">Mes:</label>
-                <select id="mes" name="mes" class="form-control">
-                    <option value="1">Enero</option>
-                    <option value="2">Febrero</option>
-                    <option value="3">Marzo</option>
-                    <option value="4">Abril</option>
-                    <option value="5">Mayo</option>
-                    <option value="6">Junio</option>
-                    <option value="7">Julio</option>
-                    <option value="8">Agosto</option>
-                    <option value="9">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="año">Año:</label>
-                <input type="number" id="año" name="año" class="form-control" value="2024">
-            </div>
-            <div class="form-group">
                 <label for="fecha_pago">Fecha de Pago:</label>
-                <input type="date" id="fecha_pago" name="fecha_pago" class="form-control">
+                <input type="date" id="fecha_pago" name="fecha_pago" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="valor_pago">Valor del Pago:</label>
-                <input type="number" id="valor_pago" name="valor_pago" class="form-control">
+                <input type="number" id="valor_pago" name="valor_pago" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="documento_pago">Documento de Pago:</label>
+                <input type="file" id="documento_pago" name="documento_pago" class="form-control-file" required>
             </div>
             <button type="submit" class="btn btn-primary">Validar Pago</button>
         </form>
@@ -95,65 +78,64 @@
     </div>
 
     <script>
-        $(document).ready(function() {
-            $('#edificios').select2({
-                placeholder: 'Seleccione el edificio',
-                allowClear: true
-            });
-
-            $('#apartamentos').select2({
-                placeholder: 'Seleccione el apartamento',
-                allowClear: true
-            });
-
-            $('#edificios').on('change', function() {
-                const edificioSeleccionado = $(this).val();
-                if (edificioSeleccionado) {
-                    $.ajax({
-                        url: '/getApartamentos',
-                        method: 'POST',
-                        data: JSON.stringify({ edificioSeleccionado: edificioSeleccionado }),
-                        contentType: 'application/json',
-                        success: function(response) {
-                            const apartamentosSelect = $('#apartamentos');
-                            apartamentosSelect.empty();
-                            response.forEach(apartamento => {
-                                apartamentosSelect.append(new Option(apartamento.numero, apartamento.id));
-                            });
-                        },
-                        error: function(error) {
-                            console.error('Error al obtener los apartamentos:', error);
-                        }
+   $(document).ready(function() {
+    // Evento para cargar apartamentos al cambiar el edificio
+    $('#edificios').on('change', function() {
+        const edificioSeleccionado = $(this).val();
+        if (edificioSeleccionado) {
+            $.ajax({
+                url: '/getApartamentosss',
+                method: 'POST',
+                data: JSON.stringify({ edificioSeleccionado: edificioSeleccionado }),
+                contentType: 'application/json',
+                success: function(response) {
+                    const apartamentosSelect = $('#apartamentos');
+                    apartamentosSelect.empty(); // Limpiar el select de apartamentos
+                    response.forEach(apartamento => {
+                        // Mostrar el número del apartamento junto con el nombre del edificio
+                        apartamentosSelect.append(new Option(`${apartamento.numero} - ${apartamento.nombre_edificio}`, apartamento.id));
                     });
+                },
+                error: function(error) {
+                    console.error('Error al obtener los apartamentos:', error);
                 }
             });
+        } else {
+            $('#apartamentos').empty(); // Limpiar el select si no hay edificio seleccionado
+        }
+    });
 
-            $('#validarPagosForm').on('submit', function(event) {
-                event.preventDefault();
-                $('#loadingIndicator').show();
-                const formData = $(this).serialize();
+    // Evento para manejar el envío del formulario
+    $('#validarPagosForm').on('submit', function(event) {
+        event.preventDefault();
+        $('#loadingIndicator').show(); // Mostrar indicador de carga
+        
+        const formData = new FormData(this);
 
-                $.ajax({
-                    url: '/validarPago',
-                    method: 'POST',
-                    data: formData,
-                    success: function(response) {
-                        alert('Pago validado correctamente.');
-                        $('#loadingIndicator').hide();
-                        $('#validarPagosForm')[0].reset();
-                        $('#apartamentos').empty();
-                    },
-                    error: function(xhr) {
-                        if (xhr.status === 400) {
-                            alert('Ya existe un pago registrado para este mes y año.');
-                        } else {
-                            alert('Error al validar el pago.');
-                        }
-                        $('#loadingIndicator').hide();
-                    }
-                });
-            });
+        $.ajax({
+            url: '/validarPago',
+            method: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                alert('Pago validado correctamente.');
+                $('#loadingIndicator').hide();
+                $('#validarPagosForm')[0].reset();
+                $('#apartamentos').val(null).trigger('change');
+            },
+            error: function(xhr) {
+                if (xhr.status === 400) {
+                    alert('Ya existe un pago registrado para este mes y año.');
+                } else {
+                    alert('Error al validar el pago.');
+                }
+                $('#loadingIndicator').hide(); // Ocultar indicador de carga
+            }
         });
+    });
+});
+
     </script>
 </body>
 </html>
