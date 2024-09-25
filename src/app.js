@@ -27,6 +27,13 @@ const pool = mysql.createPool({
     queueLimit: 0
 }).promise();  // Agregar .promise() para obtener un pool basado en promesas
 
+
+
+
+
+
+
+
 // Session middleware
 app.use(session({
     secret: 'secret',
@@ -1072,6 +1079,7 @@ app.post('/getApartamentosss', async (req, res) => {
 
 
 
+
 // Ruta para validar el pago del apartamento con documento de pago
 app.post('/validarPago', upload.single('documento_pago'), async (req, res) => {
     const { apartamentoSeleccionado, fecha_pago, valor_pago } = req.body;
@@ -1163,6 +1171,77 @@ Cerceta`
         return res.status(500).send('Error al validar el pago');
     }
 });
+
+
+
+
+
+
+
+app.get('/Consulta_Comprobantes_de_Pago', (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+        res.render('CONTABILIDAD/validarPagos/consultar_pagos.hbs', { nombreUsuario });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+app.post('/obtener_pagos', (req, res) => {
+    const { fechaInicio, fechaFin } = req.body;
+
+    // Si los valores de fecha están vacíos, los reemplazamos con fechas extremas
+    const fechaInicioFiltro = fechaInicio || '1900-01-01';
+    const fechaFinFiltro = fechaFin || '2100-12-31';
+
+    // Consulta SQL para filtrar por rango de fechas en `fecha_pago`
+    const query = `
+        SELECT 
+            id, fecha_pago, valor_pago, nombre_edificio, numero_apartamento, estado
+        FROM 
+            pagos_apartamentos
+        WHERE 
+            fecha_pago BETWEEN ? AND ?`;
+
+    // Parámetros de la consulta: rango de fechas
+    const params = [fechaInicioFiltro, fechaFinFiltro];
+
+    pool.query(query, params, (err, results) => {
+        if (err) {
+            console.error('Error al consultar pagos:', err);
+            res.status(500).json({ message: 'Error al consultar pagos' });
+        } else {
+            console.log('Resultados:', results); // Mostrar resultados en consola
+            res.json(results);
+        }
+    });
+});
+
+
+
+// Ruta para descargar el comprobante de pago
+app.get('/descargar_comprobante/:id', (req, res) => {
+    const { id } = req.params;
+
+    const query = `SELECT documento_pago FROM pagos_apartamentos WHERE id = ?`;
+    pool.query(query, [id], (err, results) => {
+        if (err) {
+            console.error('Error al obtener el comprobante:', err);
+            res.status(500).json({ message: 'Error al obtener el comprobante' });
+        } else {
+            if (results.length > 0 && results[0].documento_pago) {
+                res.setHeader('Content-Disposition', `attachment; filename=comprobante_${id}.pdf`);
+                res.setHeader('Content-Type', 'application/pdf');
+                res.send(results[0].documento_pago);
+            } else {
+                res.status(404).json({ message: 'Comprobante no encontrado' });
+            }
+        }
+    });
+});
+
+
+
 
 
 
