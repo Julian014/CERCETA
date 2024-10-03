@@ -1090,6 +1090,30 @@ app.get('/api/apartamentos-count', async (req, res) => {
 });
 
 
+
+app.get('/agregar_usuarios', (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+        res.render('administrativo/usuarios/crear_usuarios.hbs', { nombreUsuario });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Iniciar el servidor
 app.listen(3000, () => {
     console.log('Servidor corriendo en el puerto 3000');

@@ -119,63 +119,21 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Agregar Apartamento</h1>
-        <div id="alert" class="alert"></div>
-        <form id="apartamentoForm" method="POST" action="/agregar_apartamento" enctype="multipart/form-data">
-            <div>
-                <label for="numero">Número del Apartamento:</label>
-                <input type="text" id="numero" name="numero" required>
-            </div>
+  
 
-            <div>
-                <label for="edificio">Edificio:</label>
-                <select id="edificio" name="edificio" required>
-                    <option value="" disabled selected>Seleccione un edificio</option>
-                    {{#each edificios}}
-                        <option value="{{this.id}}">{{this.nombre}}</option>
-                    {{/each}}
-                </select>
-            </div>        
 
-            <div>
-                <label for="responsable">Responsable:</label>
-                <input type="text" id="responsable" name="responsable" required>
-            </div>
 
-            <div>
-                <label for="cedula_representante_legal">Cédula Representante Legal:</label>
-                <input type="text" id="cedula_representante_legal" name="cedula_representante_legal" required>
-            </div>
 
-            <div>
-                <label for="piso">Piso:</label>
-                <input type="number" id="piso" name="piso" required>
-            </div>
 
-            <div>
-                <label for="celular">Celular:</label>
-                <input type="text" id="celular" name="celular" required>
-            </div>
 
-            <div>
-                <label for="correo">Correo:</label>
-                <input type="email" id="correo" name="correo" required>
-            </div>
 
-            <div>
-                <label for="telefono">Teléfono:</label>
-                <input type="tel" id="telefono" name="telefono" required>
-            </div>
 
-            <div>
-                <label for="foto">Foto:</label>
-                <input type="file" id="foto" name="foto" accept="image/*" required>
-            </div>
 
-            <button type="submit">AGREGAR APARTAMENTO</button>
-        </form>
-    </div>
+
+
+
+
+  
     
     <script>
         $(document).ready(function(){
