@@ -1066,8 +1066,28 @@ app.get('/descargar_comprobante/:id', (req, res) => {
     });
 });
 
+app.get('/api/edificios-count', async (req, res) => {
+    try {
+        const [results] = await pool.query('SELECT COUNT(*) AS count FROM edificios');  // No necesitas .promise() aquí
+        const count = results[0].count;
+        res.json({ count });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al obtener el conteo de edificios' });
+    }
+});
 
 
+app.get('/api/apartamentos-count', async (req, res) => {
+    try {
+        const [results] = await pool.query('SELECT COUNT(*) AS count FROM apartamentos');  // No necesitas .promise() aquí
+        const count = results[0].count;
+        res.json({ count });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error al obtener el conteo de edificios' });
+    }
+});
 
 
 // Iniciar el servidor

@@ -9,24 +9,33 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.css" rel="stylesheet">
 </head>
 <style>
+    @font-face {
+        font-family: 'sensation';
+        src:url(fuentes/Sansation/Sansation_Regular.ttf) ;
+        font-weight: bold;
+        font-style: bold;
+    }
 :root {
-    --bg-dark: black; /* Color primario de tu empresa */
+    --bg-dark: #2d2d2d; /* Color primario de tu empresa */
     --bg-darker: white; /* Segundo color */
     --primary-color: #2e9ed5; /* Tercer color */
     --text-light: #f5f5f5; /* Texto claro */
     --text-muted: #b0b0b0; /* Texto suavizado */
-    --accent-color: #f6a82a; /* Color acento */
+    --accent-color: #1E99D3; /* Color acento */
     --sidebar-width: 250px;
 }
     * {
+        font-family:'sensation';
+       font-weight: bold;
+        font-style: bold;
         margin: 0;
         padding: 0;
         box-sizing: border-box;
     }
 
     body {
-        font-family: 'Inter', sans-serif;
-        background-color: #c5d58a;
+        font-family:'sensation';
+        background-color: #d6cec3;
         color: var(--text-light);
         display: flex;
     }
@@ -52,7 +61,7 @@
     }
 
     .sidebar-header img.logo {
-        width: 200px;
+        width: 250px;
         margin-bottom: 10px;
     }
 
@@ -106,7 +115,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 15px;
-        background-color:#ffa62b;
+        background-color:#C92458;
         border-radius: 10px;
         margin-bottom: 20px;
         color: white;
@@ -312,6 +321,50 @@ font-size: 25px;
     text-decoration: none;
     color: white;
 }
+h2 {
+    font-weight: 600;
+    font-size: 2rem; /* Mejora la visibilidad del título */
+}
+
+p {
+    font-size: 1rem;
+    color: var(--text-muted); /* Texto más sutil */
+}
+.card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Sombra más intensa al pasar el ratón */
+}
+.submenu {
+    transition: max-height 0.5s ease, opacity 0.5s ease;
+    opacity: 0;
+}
+
+.submenu.show {
+    opacity: 1;
+}
+
+button, .menu-item:hover {
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button:hover {
+    transform: scale(1.05); /* Ligero zoom */
+}
+.dropdown-menu {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 </style>
 
 <body>
@@ -325,7 +378,7 @@ font-size: 25px;
 <br>
 <br>
 <div class="fondologo"></div>
-    <img class="logo" src="imagenes/logo negro.png" alt="AdminKit Logo">
+    <img class="logo" src="imagenes/2022cercetafinal-BLANCO_Mesa de trabajo 1.png" alt="AdminKit Logo">
     <br>
     <br>
     <p>MENU</p>
@@ -430,21 +483,21 @@ font-size: 25px;
             <div class="dashboard-content">
                 <div class="card welcome">
                     <h2>BIENVENIDO</h2>
-                    <p>Hello {{name}}, </p>
+                    <p>{{name}} </p>
                 </div>
                 <div class="grid-container">
                     <div class="card stat">
-                        <i class="fas fa-envelope stat-icon"></i>
+                        <i class="fas fa-city stat-icon"></i>
                         <div>
-                            <h3>1,245</h3>
-                            <p>Emails</p>
+        <h3 id="edificios-count">Cargando...</h3> <!-- Marcador de posición para el conteo dinámico -->
+                            <p>EDIFICIOS</p>
                         </div>
                     </div>
                     <div class="card stat">
-                        <i class="fas fa-project-diagram stat-icon"></i>
+                        <i class="fas fa-building stat-icon"></i>
                         <div>
-                            <h3>34</h3>
-                            <p>Projects</p>
+        <h3 id="apartamentos-count">Cargando...</h3> <!-- Marcador de posición para el conteo dinámico -->
+                            <p>apartamentos</p>
                         </div>
                     </div>
                     <div class="card stat">
@@ -481,11 +534,11 @@ font-size: 25px;
                 datasets: [{
                     label: 'Data Set 1',
                     data: [45, 25, 50, 30, 55, 25, 45, 20],
-                    backgroundColor: '#0d6efd',
+                    backgroundColor: '#1E99D3',
                 }, {
                     label: 'Data Set 2',
                     data: [20, 40, 30, 45, 25, 35, 20, 50],
-                    backgroundColor: '#dc3545',
+                    backgroundColor: '#C92458',
                 }]
             },
             options: {
@@ -507,13 +560,13 @@ font-size: 25px;
                 datasets: [{
                     label: 'Data Set 1',
                     data: [10, 20, 15, 30, 25, 20, 30, 35],
-                    borderColor: '#0d6efd',
+                    borderColor: '#1E99D3',
                     fill: false,
                     tension: 0.1
                 }, {
                     label: 'Data Set 2',
                     data: [15, 25, 20, 35, 30, 25, 40, 45],
-                    borderColor: '#dc3545',
+                    borderColor: '#C92458',
                     fill: false,
                     tension: 0.1
                 }]
@@ -549,24 +602,32 @@ font-size: 25px;
         
 
 
-        // Toggle submenu visibility
-        const menuItems = document.querySelectorAll('.menu-item');
+// Toggle submenu visibility
+const menuItems = document.querySelectorAll('.menu-item');
 
-        menuItems.forEach(item => {
-            item.addEventListener('click', function () {
-                // Remove active class from all menu items
-                menuItems.forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-
-                // Show or hide the submenu
-                const submenu = this.querySelector('.submenu');
-                if (submenu) {
-                    submenu.classList.toggle('show');
-                    submenu.style.maxHeight = submenu.classList.contains('show') ? submenu.scrollHeight + "px" : null;
-                }
-            });
+menuItems.forEach(item => {
+    item.addEventListener('click', function () {
+        // Remove active class from all menu items and hide all submenus
+        menuItems.forEach(i => {
+            const submenu = i.querySelector('.submenu');
+            if (submenu && submenu !== this.querySelector('.submenu')) {
+                submenu.classList.remove('show');
+                submenu.style.maxHeight = null;
+            }
+            i.classList.remove('active');
         });
 
+        // Add active class to the clicked menu item
+        this.classList.add('active');
+
+        // Show or hide the submenu of the clicked item
+        const submenu = this.querySelector('.submenu');
+        if (submenu) {
+            submenu.classList.toggle('show');
+            submenu.style.maxHeight = submenu.classList.contains('show') ? submenu.scrollHeight + "px" : null;
+        }
+    });
+});
         // Handle submenu item selection
         const submenuItems = document.querySelectorAll('.submenu li');
 
@@ -594,6 +655,37 @@ document.getElementById('toggle-menu').addEventListener('click', function () {
         mainContent.classList.remove('expanded-content');
     }
 });
+document.addEventListener("DOMContentLoaded", function () {
+    // Fetch the edificios count from the API
+    fetch('/api/edificios-count')
+        .then(response => response.json())
+        .then(data => {
+            // Update the number in the HTML
+            document.getElementById('edificios-count').innerText = data.count;
+        })
+        .catch(error => console.error('Error fetching edificios count:', error));
+});
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Fetch the edificios count from the API
+    fetch('/api/apartamentos-count')
+        .then(response => response.json())
+        .then(data => {
+            // Update the number in the HTML
+            document.getElementById('apartamentos-count').innerText = data.count;
+        })
+        .catch(error => console.error('Error fetching apartamentos count:', error));
+});
+
+
+
+
+
+
+
+
+
 
     </script>
 </body>
