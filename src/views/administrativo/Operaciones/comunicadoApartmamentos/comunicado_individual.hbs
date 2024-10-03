@@ -86,7 +86,7 @@
 <body>
     <div class="container">
         <h1>Enviar Comunicado Individual</h1>
-        <form action="/enviarComunicado" method="POST" enctype="multipart/form-data" id="comunicadoForm">
+        <form action="/enviarComunicado_individual" method="POST" enctype="multipart/form-data" id="comunicadoForm">
             <div class="form-group">
                 <label for="edificios">Seleccione los edificios:</label>
                 <select id="edificios" name="edificiosSeleccionados[]" multiple="multiple" class="form-control" style="width: 100%;">
@@ -127,28 +127,40 @@
                 placeholder: 'Seleccione los apartamentos',
                 allowClear: true
             });
-
-            $('#edificios').on('change', function() {
-                const edificiosSeleccionados = $(this).val();
-                if (edificiosSeleccionados.length > 0) {
-                    $.ajax({
-                        url: '/getApartamentos',
-                        method: 'POST',
-                        data: JSON.stringify({ edificiosSeleccionados: edificiosSeleccionados }),
-                        contentType: 'application/json',
-                        success: function(response) {
-                            const apartamentosSelect = $('#apartamentos');
-                            apartamentosSelect.empty();
-                            response.forEach(apartamento => {
-                                apartamentosSelect.append(new Option(apartamento.numero, apartamento.id));
-                            });
-                        },
-                        error: function(error) {
-                            console.error('Error al obtener los apartamentos:', error);
-                        }
+$('#edificios').on('change', function() {
+    const edificiosSeleccionados = $(this).val();
+    
+    if (edificiosSeleccionados.length > 0) {
+        $.ajax({
+            url: '/getApartamentos_envio',
+            method: 'POST',
+            data: JSON.stringify({ edificiosSeleccionados: edificiosSeleccionados }),  // Asegúrate de enviar los datos en JSON
+            contentType: 'application/json',
+            success: function(response) {
+                const apartamentosSelect = $('#apartamentos');
+                apartamentosSelect.empty();
+                
+                if (response.length > 0) {
+                    response.forEach(apartamento => {
+                        apartamentosSelect.append(new Option(apartamento.numero, apartamento.id));
                     });
+                } else {
+                    apartamentosSelect.append(new Option('No hay apartamentos disponibles', ''));
                 }
-            });
+            },
+            error: function(error) {
+                console.error('Error al obtener los apartamentos:', error);
+            }
+        });
+    } else {
+        $('#apartamentos').empty();  // Limpia los apartamentos si no hay edificio seleccionado
+    }
+});
+
+
+
+
+
 
             const fileInput = document.getElementById('archivos');
             const dropzone = document.getElementById('dropzone');

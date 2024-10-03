@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BioPolab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.css" rel="stylesheet">
+</head>
+<style>
+:root {
+    --bg-dark: #1d1f27; /* Darker background for better contrast */
+    --bg-darker: #15161c; /* Even darker background */
+    --primary-color: #ff7f50; /* Coral color for a striking primary tone */
+    --text-light: #f5f5f5; /* Light text for readability */
+    --text-muted: #b0b0b0; /* Softer muted text */
+    --accent-color: #4caf50; /* Green accent for highlights */
+    --sidebar-width: 250px;
+}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-darker);
+        color: var(--text-light);
+        display: flex;
+    }
+
+.container {
+    display: flex;
+    width: 100%;
+    transition: width 0.3s ease; /* Añadimos transición suave para el contenedor */
+}
+    .sidebar {
+        width: var(--sidebar-width);
+        background-color: var(--bg-dark);
+        padding: 20px;
+        height: 100vh;
+    }
+
+    .sidebar-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        margin-bottom: 30px;
+    }
+
+    .sidebar-header img.logo {
+        width: 200px;
+        margin-bottom: 10px;
+    }
+
+    .sidebar-header p {
+        font-size: 20px;
+        color: var(--text-light);
+    }
+
+    .sidebar-menu {
+        list-style: none;
+        padding: 0;
+    }
+
+    .sidebar-menu li {
+        padding: 15px 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        color: var(--text-light);
+        position: relative;
+    }
+
+    .sidebar-menu li:hover {
+    background-color: var(--primary-color); /* Highlighted coral hover */
+        border-radius: 10px;
+    }
+
+    .sidebar-menu li i {
+        margin-right: 10px;
+    }
+
+.sidebar.hidden-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+}
+
+.main-content {
+    width: calc(100% - var(--sidebar-width)); /* Cuando el sidebar está visible */
+    padding: 20px;
+    transition: width 0.3s ease; /* Transición suave */
+}
+
+.main-content.expanded-content {
+    width: 100% !important; /* Ancho completo cuando el sidebar está oculto */
+}
+
+    .top-navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+    background-color: white ; /* Coral navbar */
+        border-radius: 10px;
+        margin-bottom: 20px;
+        color: black;
+    }
+
+    .top-right {
+        display: flex;
+        align-items: center;
+    }
+
+    .top-right i {
+        margin-left: 20px;
+        font-size: 24px;
+        position: relative;
+    }
+
+    .badge {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background-color: var(--accent-color);
+        color: white;
+        padding: 5px 8px;
+        border-radius: 50%;
+        font-size: 12px;
+    }
+
+    .dashboard-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card {
+        background-color: var(--bg-dark);
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .stat {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .stat-icon {
+        font-size: 40px;
+        color: var(--accent-color);
+    }
+
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 20px;
+    }
+
+    .chart-container {
+        padding: 20px;
+        background-color: var(--bg-dark);
+        border-radius: 10px;
+    }
+
+    /* Dropdown menu styling */
+    .profile-menu {
+        position: relative;
+        display: inline-block;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 40px;
+        right: 0;
+        background-color: var(--bg-dark);
+        border-radius: 10px;
+        padding: 10px;
+        display: none;
+        flex-direction: column;
+        width: 150px;
+        z-index: 1;
+    }
+
+    .dropdown-menu a {
+        padding: 10px;
+        text-decoration: none;
+        color: var(--text-light);
+        display: block;
+    }
+
+    .dropdown-menu a:hover {
+        background-color: var(--primary-color);
+        border-radius: 5px;
+    }
+
+    /* Class to toggle visibility */
+    .hidden {
+        display: none;
+    }
+
+    .show {
+        display: flex;
+    }
+
+    /* Submenu styles */
+    .submenu {
+        list-style: none;
+        padding-left: 0;
+        margin-top: 0;
+        display: none;
+        max-height: 0;
+        overflow: hidden;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 200px;
+        background-color: var(--bg-dark);
+        border-radius: 5px;
+        z-index: 1000;
+        transition: max-height 0.3s ease-out;
+    }
+
+    .menu-item {
+        display: block;
+        margin-bottom: 10px;
+        position: relative;
+    }
+
+    .submenu.show {
+        display: block;
+        max-height: 500px;
+        transition: max-height 0.3s ease-in;
+    }
+
+    .submenu li {
+        background-color: white;
+        padding: 10px;
+        cursor: pointer;
+        color: black;
+    }
+
+    .submenu li:hover {
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 5px;
+    }
+
+    /* Active item styles */
+    .menu-item.active {
+        background-color: #4b6b96;
+        color: white;
+        border-radius: 10px;
+    }
+
+    .submenu li.active {
+        background-color: #4b6b96;
+        color: white;
+        border-radius: 5px;
+    }
+    A{
+
+text-decoration: none;
+
+
+    }
+
+.toggle-menu-btn {
+    background: none;
+    border: none;
+    color: black;
+    font-size: 24px;
+    cursor: pointer;
+    margin-right: 20px; /* Ajuste de espaciado entre los íconos */
+    display: flex;
+    align-items: center;
+}
+.hidden-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+}
+
+.sidebar {
+    transition: transform 0.3s ease;
+}
+
+
+.main-content {
+    width: calc(100% - var(--sidebar-width)); /* Ancho calculado cuando el menú está visible */
+    padding: 20px;
+    transition: width 0.3s ease; /* Transición suave */
+}
+
+
+
+
+
+
+.sidebar.hidden-sidebar ~ .main-content {
+    width: 100% !important; /* Ancho completo cuando el menú está oculto */
+}
+
+
+
+
+
+.sidebar.hidden-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+}
+
+.main-content {
+    width: calc(100% - var(--sidebar-width)); /* Ancho calculado cuando el menú está visible */
+    padding: 20px;
+    transition: width 0.3s ease; /* Transición suave */
+}
+
+.main-content.expanded-content {
+    width: 100% !important; /* Ancho completo cuando el menú está oculto */
+}
+#home{
+
+    text-decoration: none;
+    color: white;
+}
+</style>
+
+<body>
+    <div class="container">
+
+
+
+
+        <aside class="sidebar">
+       <div class="sidebar-header">
+
+    <img class="logo" src="https://www.biopolab.com/wp-content/uploads/2023/06/Logotipo-Biopolab.webp" alt="AdminKit Logo">
+    <br>
+    <br>
+    <p>MENU</p>
+</div>
+            <ul class="sidebar-menu">
+                     <li class="menu-item">
+                    <i class="fas fa-home"></i> <a id="home" href="/menuAdministrativo">INICIO</a> 
+                 
+                </li>
+                <li class="menu-item">
+                    <i class="fas fa-user"></i> USUARIOS
+                    <ul class="submenu">
+                        <li>Agregar Usuario</li>
+                        <li>Ver Usuarios</li>
+                    </ul>
+                </li>
+
+
+                
+                <li class="menu-item">
+                    <i class="fas fa-file-alt"></i> TAREAS
+                    <ul class="submenu">
+                        <li>Crear Tarea</li>
+                          <li>Importar tareas</li>
+                          <li>Consulta Tareas</li>
+                         <li>Editar Tareas</li>
+                        <li>Seguimiento</li>
+                    </ul>
+                </li>
+                <li class="menu-item">
+                    <i class="fas fa-calendar"></i> CALENDARIO
+                    <ul class="submenu">
+                        <li>Ver Calendario</li>
+                        <li>Agregar Evento</li>
+                    </ul>
+                </li>
+                <li class="menu-item">
+                    <i class="fas fa-chart-line"></i> SEGUIMIENTO
+                    <ul class="submenu">
+                        <li>Ver Reportes</li>
+                        <li>Generar Reporte</li>
+                    </ul>
+                </li>
+                <li class="menu-item">
+                    <i class="fas fa-cogs"></i> CONFIGURACION
+                    <ul class="submenu">
+                        <li>Preferencias</li>
+                        <li>Seguridad</li>
+                    </ul>
+                </li>
+                <li class="menu-item">
+                    <i class="fas fa-map-marker-alt"></i> MAPA-GEOLOCALIZACION
+                    <ul class="submenu">
+                        
+                        <li><a href="/geolocalizacion">VER MAPA</a></li>
+                        <li>Agregar Ubicación</li>
+                    </ul>
+                </li>
+            </ul>
+    
+
+     
+        </aside>
+
+
+
+
+
+
+
+        <section class="main-content">
+
+
+
+
+
+
+
+
+<nav class="top-navbar">
+    <div class="brand">BioPolab-Administracion</div>
+    <div class="top-right">
+        <i class="fas fa-bell"></i> <span class="badge"></span>
+        <i class="fas fa-envelope"></i> <span class="badge"></span>
+        <div class="profile-menu">
+            <i class="fas fa-user-circle" id="profile-icon"></i>
+            <div id="dropdown-menu" class="dropdown-menu hidden">
+                <a href="#">Editar</a>
+                <a href="/logout">Cerrar Sesión</a>
+            </div>
+        </div>
+        <!-- Aquí está el botón corregido -->
+        <button id="toggle-menu" class="toggle-menu-btn">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+</nav>
+
+
+
+
+
+
+
+         <div class="dashboard-content">
+    <div id="map" style="height: 500px; width: 100%;"></div>
+</div>
+
+        </section>
+    </div>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <!-- Include Chart.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"></script>
+    <script>
+    
+
+        // Toggle profile dropdown menu
+        document.getElementById('profile-icon').addEventListener('click', function () {
+            var dropdown = document.getElementById('dropdown-menu');
+            dropdown.classList.toggle('show');
+        });
+
+        // Close dropdown if clicked outside
+        window.onclick = function (event) {
+            if (!event.target.matches('#profile-icon')) {
+                var dropdowns = document.getElementsByClassName("dropdown-menu");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+        
+
+
+        // Toggle submenu visibility
+        const menuItems = document.querySelectorAll('.menu-item');
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', function () {
+                // Remove active class from all menu items
+                menuItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+
+                // Show or hide the submenu
+                const submenu = this.querySelector('.submenu');
+                if (submenu) {
+                    submenu.classList.toggle('show');
+                    submenu.style.maxHeight = submenu.classList.contains('show') ? submenu.scrollHeight + "px" : null;
+                }
+            });
+        });
+
+        // Handle submenu item selection
+        const submenuItems = document.querySelectorAll('.submenu li');
+
+        submenuItems.forEach(subitem => {
+            subitem.addEventListener('click', function (e) {
+                e.stopPropagation();  // Prevent click from closing the submenu
+
+                // Remove active class from all submenu items
+                submenuItems.forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        // Toggle sidebar visibility
+document.getElementById('toggle-menu').addEventListener('click', function () {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+
+    // Toggle visibility of the sidebar
+    sidebar.classList.toggle('hidden-sidebar');
+
+    // Adjust the main content width accordingly
+    if (sidebar.classList.contains('hidden-sidebar')) {
+        mainContent.classList.add('expanded-content');
+    } else {
+        mainContent.classList.remove('expanded-content');
+    }
+});
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Inicializa el mapa centrado en Bogotá
+    var map = L.map('map').setView([4.60971, -74.08175], 13);
+
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, HERE, Garmin, OpenStreetMap contributors, and the GIS community',
+    maxZoom: 16
+}).addTo(map);
+
+
+    // Icono personalizado para clientes
+    var clienteIcon = L.icon({
+        iconUrl: 'imagenes/placeholder_2110941.png', // URL del icono del cliente
+        iconSize: [45, 39], // tamaño del icono
+        iconAnchor: [22, 38], // punto donde se posiciona el icono
+        popupAnchor: [-3, -38] // posición del popup respecto al icono
+    });
+
+    // Icono personalizado para oficina
+    var oficinaIcon = L.icon({
+        iconUrl: 'imagenes/gps_14956287.png', // URL del icono de la oficina
+        iconSize: [45, 39], // tamaño del icono
+        iconAnchor: [22, 38], // punto donde se posiciona el icono
+        popupAnchor: [-3, -38] // posición del popup respecto al icono
+    });
+
+    // Icono personalizado para técnicos
+    var tecnicoIcon = L.icon({
+        iconUrl: 'imagenes/pin_1149859.png', // URL del icono del técnico
+        iconSize: [45, 39], // tamaño del icono
+        iconAnchor: [22, 38], // punto donde se posiciona el icono
+        popupAnchor: [-3, -38] // posición del popup respecto al icono
+    });
+
+    // Definir las ubicaciones de tus clientes, oficina y técnicos
+    var ubicaciones = [
+        { name: "Cliente 1", coords: [4.68972, -74.05585], type: 'cliente' },
+        { name: "Cliente 2", coords: [4.65607, -74.05959], type: 'cliente' },
+        { name: "Cliente 3", coords: [4.68972, -74.04585], type: 'cliente' },
+        { name: "Oficina Central", coords: [4.60971, -74.08175], type: 'oficina' },
+        { name: "Técnico 1", coords: [4.6485, -74.0930], type: 'tecnico' }, // Ubicación de un técnico
+        { name: "Técnico 2", coords: [4.6702, -74.0365], type: 'tecnico' }  // Otra ubicación de técnico
+    ];
+
+    // Agregar los marcadores con iconos personalizados
+    ubicaciones.forEach(function (location) {
+        var icon;
+        if (location.type === 'cliente') {
+            icon = clienteIcon;
+        } else if (location.type === 'oficina') {
+            icon = oficinaIcon;
+        } else if (location.type === 'tecnico') {
+            icon = tecnicoIcon;
+        }
+        
+        var marker = L.marker(location.coords, { icon: icon }).addTo(map)
+            .bindPopup(location.name);
+    });
+});
+
+
+    </script>
+</body>
+</html>

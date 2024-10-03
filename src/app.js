@@ -1,103 +1,92 @@
-const express = require("express");
-const session = require("express-session");
-const mysql = require("mysql2");
-const { engine } = require("express-handlebars");
+const express = require('express');
+const session = require('express-session');
+const hbs = require('hbs');
+const pool = require('./db'); // Importamos la configuración de la base de datos
+const path = require('path');
 
 const app = express();
-app.set("port", process.env.PORT || 3000);
 
-// Configure view engine
-app.set("views", __dirname + "/views");
-app.engine(".hbs", engine({ extname: ".hbs" }));  // Configura Handlebars como motor de vistas
-app.set("view engine", "hbs");
-
-
-app.use(express.json());  // Middleware para parsear JSON en las solicitudes
-app.use(express.urlencoded({ extended: true }));  // Middleware para parsear URL-encoded en las solicitudes
-app.use(express.static(__dirname + '/public'));  // Middleware para servir archivos estáticos desde el directorio 'public'
-
-// Database connection
-const pool = mysql.createPool({
-    host: '127.0.0.1',
-    user: 'root',
-    password: '',
-    database: 'aplicacion',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-}).promise();  // Agregar .promise() para obtener un pool basado en promesas
-
-
-
-
-
-
-
-
-// Session middleware
+// Configurar la sesión
 app.use(session({
-    secret: 'secret',
-    resave: true,
+    secret: 'mysecret',  // Cambia este secreto
+    resave: false,
     saveUninitialized: true
 }));
 
+// Configurar el motor de plantillas
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'views'));  // Asegúrate de que apunte correctamente a tu carpeta de vistas
+app.use(express.static(__dirname + '/public'));
+
+// Middleware para parsing
+app.use(express.urlencoded({ extended: false }));
 
 
-
-
-
-
-
-
-
-// Render login form
-app.get("/login", (req, res) => {
-    if (req.session.loggedin) {
-        res.redirect("/");  // Redirigir a la página principal si ya está autenticado
-    } else {
-        res.render("login/index.hbs", { error: null });  // Renderizar el formulario de inicio de sesión con un mensaje de error nulo
-    }
+// Ruta para mostrar el formulario de login
+app.get('/login', (req, res) => {
+    res.render('login/login');
 });
 
+// Asegúrate de que Express pueda manejar datos en formato JSON
+app.use(express.json());
 
 
-
-
-
-// Handle login authentication
-app.post("/auth", async (req, res) => {
-    const data = req.body;
+// Ruta para manejar el login
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
 
     try {
-        const [userData] = await pool.query("SELECT * FROM user WHERE email = ? AND password = ?", [data.email, data.password]);
+        // Query to check if user exists with the given email and password
+        const [results] = await pool.query('SELECT * FROM usuarios WHERE email = ? AND password = ?', [email, password]);
 
-        if (userData.length > 0) {
-            const user = userData[0];
-            req.session.loggedin = true;  // Establecer sesión como autenticada
-            req.session.name = user.name;  // Guardar nombre de usuario en la sesión
-            req.session.roles = typeof user.roles === 'string' ? user.roles.split(',') : [];  // Guardar roles del usuario en la sesión
+        if (results.length > 0) {
+            // Store user data in session
+            req.session.user = results[0];  // Store the entire user object
+            req.session.name = results[0].nombre;  // Save the user name to session
+            req.session.loggedin = true;  // Set logged-in status
+            req.session.roles = results[0].role;  // Save roles in session
 
-            res.redirect("/");  // Redirigir a la página principal después del inicio de sesión exitoso
+            const role = results[0].role;  // Fetch user role
+
+            // Redirect based on the user's role
+            if (role === 'admin') {
+                return res.redirect('/menuAdministrativo');
+            } else if (role === 'tecnico') {
+                return res.redirect('/tecnico');
+            } else if (role === 'cliente') {
+                return res.redirect('/cliente');
+            }
         } else {
-            // Renderizar página de inicio de sesión con mensaje de error
-            res.render("login/index.hbs", { error: "Usuario no encontrado o contraseña incorrecta" });
+            // Render login page with error message if credentials are incorrect
+            res.render('login/login', { error: 'Correo o contraseña incorrectos' });
         }
     } catch (err) {
-        console.error("Error fetching user from database:", err);  // Manejar errores al recuperar datos del usuario desde la base de datos
-        res.status(500).send("Internal Server Error");  // Enviar respuesta de error interno del servidor
+        // Handle errors and send a 500 response in case of any database or server issues
+        res.status(500).json({ error: err.message });
     }
 });
 
 
 
-
-
-// Render register form
-app.get("/register", (req, res) => {
-    if (req.session.loggedin) {
-        res.redirect("/");  // Redirigir a la página principal si ya está autenticado
+// Ruta para el menú administrativo
+app.get('/geolocalizacion', (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.user.name; // Use user session data
+        res.render('administrativo/mapa/ver_mapa.hbs', { nombreUsuario });
     } else {
-        res.render("login/register.hbs", { error: null });  // Renderizar el formulario de registro con mensaje de error nulo
+        res.redirect('/login');
+    }
+});
+
+
+
+// Ruta para el menú administrativo
+app.get('/figma', (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.user.name; // Use user session data
+        res.render('administrativo/figma.hbs', { nombreUsuario });
+    } else {
+        res.redirect('/login');
     }
 });
 
@@ -106,59 +95,18 @@ app.get("/register", (req, res) => {
 
 
 
-// Handle user registration
-app.post("/storeUser", async (req, res) => {
-    const data = req.body;
 
-    try {
-        // Verificar si el usuario ya existe
-        const [userData] = await pool.query("SELECT * FROM user WHERE email = ?", [data.email]);
-
-        if (userData.length > 0) {
-            res.render("login/register.hbs", { error: "User with this email already exists" });  // Renderizar página de registro con mensaje de usuario ya existente
-            return;
-        }
-
-        // Insertar nuevo usuario
-        await pool.query("INSERT INTO user SET ?", data);
-        console.log("User registered successfully");  // Registrar registro exitoso del usuario
-        res.redirect("/");  // Redirigir a la página principal después del registro exitoso
-    } catch (err) {
-        console.error("Error handling user registration:", err);  // Manejar errores al manejar el registro del usuario
-        res.status(500).send("Internal Server Error");  // Enviar respuesta de error interno del servidor
-    }
-});
-
-
-
-
-
-
-// Handle logout
-app.get("/logout", (req, res) => {
-    req.session.destroy(err => {
+// Ruta para manejar el cierre de sesión
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
         if (err) {
-            console.error("Error destroying session:", err);  // Manejar errores al destruir la sesión
-            res.status(500).send("Internal Server Error");  // Enviar respuesta de error interno del servidor
-        } else {
-            res.redirect("/login");  // Redirigir a la página de inicio de sesión después de cerrar sesión
+            return res.status(500).json({ error: 'Error al cerrar sesión' });
         }
+        res.redirect('/login');  // Redirige al usuario a la página de login
     });
 });
 
 
-
-
-
-
-// Middleware to protect routes that require authentication
-function requireLogin(req, res, next) {
-    if (req.session.loggedin) {
-        next();  // Pasar al siguiente middleware si está autenticado
-    } else {
-        res.redirect("/login");  // Redirigir a la página de inicio de sesión si no está autenticado
-    }
-}
 
 
 
@@ -182,191 +130,41 @@ const crypto = require('crypto'); // Importa el módulo crypto
 
 
 
+app.get("/menuAdministrativo", (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name || req.session.user.name;  // Use the session name or fallback
+        console.log(`El usuario ${nombreUsuario} está autenticado.`);
+        req.session.nombreGuardado = nombreUsuario; // Guarda el nombre en la sesión
 
+        const rolesString = req.session.roles;
+        const roles = Array.isArray(rolesString) ? rolesString : [];
 
-// Handle forgot password
+        const jefe = roles.includes('jefe');
+        const empleado = roles.includes('empleado');
 
-// Handle forgot password
-app.post("/forgot-password", async (req, res) => {
-    const { email } = req.body;
-
-    // Generar un token único y establecer la fecha de expiración
-    const resetToken = crypto.randomBytes(20).toString('hex');
-    const resetTokenExpiration = new Date();
-    resetTokenExpiration.setHours(resetTokenExpiration.getHours() + 1); // Token válido por 1 hora
-
-    try {
-        // Actualizar el token de restablecimiento y la fecha de expiración en la base de datos
-        const [result] = await pool.query("UPDATE user SET resetToken = ?, resetTokenExpiration = ? WHERE email = ?", [resetToken, resetTokenExpiration, email]);
-
-        // Check if user with provided email exists
-        if (result.affectedRows === 0) {
-            res.render("login/index.hbs", { error: "Correo electrónico no encontrado" });
-            return;
-        }
-
-        // Configuración del correo electrónico
-        const mailOptions = {
-            from: 'nexus.innovationss@gmail.com',
-            to: email,
-            subject: 'Recuperación de Contraseña',
-            html: `
-                <p>Hola,</p>
-                <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
-                <a href="http://localhost:3000/reset-password?token=${resetToken}">Restablecer Contraseña</a>
-                <p>Este enlace expirará en 1 hora.</p>
-                <p>Si no solicitaste esto, por favor ignora este correo y tu contraseña permanecerá sin cambios.</p>
-            `
-        };
-
-        // Enviar el correo electrónico
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.error("Error sending email:", error);
-                res.status(500).send("Error al enviar el correo electrónico");
-            } else {
-                console.log("Email sent:", info.response);
-                res.render("login/index.hbs", { successMessage: "Se ha enviado un correo electrónico con instrucciones para restablecer la contraseña" });
-            }
+        res.render("administrativo/menuadministrativo.hbs", {
+            name: nombreUsuario, // Pass the name to the template
+            jefe,
+            empleado
         });
-    } catch (err) {
-        console.error("Error updating reset token in database:", err);
-        res.status(500).send("Internal Server Error");
-    }
-});
-
-
-
-
-// Página para restablecer la contraseña (GET)
-app.get("/reset-password", async (req, res) => {
-    const token = req.query.token; // Obtiene el token de la consulta
-    console.log("Token recibido en GET:", token);
-  
-    try {
-        // Verificar si el token es válido y está dentro del tiempo de expiración adecuado
-        const [results] = await pool.query(
-            "SELECT * FROM user WHERE resetToken = ? AND resetTokenExpiration > NOW()",
-            [token]
-        );
-
-        if (results.length === 0) {
-            res.status(400).send("El token para restablecer la contraseña es inválido o ha expirado");
-        } else {
-            // Mostrar el formulario para restablecer la contraseña
-            res.render("login/reset-password.hbs", { token });
-        }
-    } catch (err) {
-        console.error("Error al verificar el token:", err);
-        res.status(500).send("Error interno al verificar el token");
-    }
-});
-
-
-
-
-
-
-// Página para restablecer la contraseña (GET)
-app.get("/reset-password", async (req, res) => {
-    const token = req.query.token; // Obtiene el token de la consulta
-    console.log("Token recibido en GET:", token);
-  
-    try {
-        // Verificar si el token es válido y está dentro del tiempo de expiración adecuado
-        const [results] = await pool.query(
-            "SELECT * FROM user WHERE resetToken = ? AND resetTokenExpiration > NOW()",
-            [token]
-        );
-
-        if (results.length === 0) {
-            res.status(400).send("El token para restablecer la contraseña es inválido o ha expirado");
-        } else {
-            // Mostrar el formulario para restablecer la contraseña
-            res.render("login/reset-password.hbs", { token });
-        }
-    } catch (err) {
-        console.error("Error al verificar el token:", err);
-        res.status(500).send("Error interno al verificar el token");
-    }
-});
-
-
-
-
-
-// Ruta para la página principal 
-app.get("/", (req, res) => {
-    if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
-        console.log(`El usuario ${nombreUsuario} está autenticado.`);
-        req.session.nombreGuardado = nombreUsuario; // Guarda el nombre en la sesión
-
-        const rolesString = req.session.roles;
-        const roles = Array.isArray(rolesString) ? rolesString : [];
-
-
-
-        const jefe = roles.includes('jefe');
-        const empleado = roles.includes('empleado');
- 
-
-        res.render("Menu_principal/home.hbs",{ name: req.session.name,jefe,empleado }); // Pasar los roles a la plantilla
     } else {
         res.redirect("/login");
     }
 });
-
-
-
-
-
-
-
-
-// Ruta para la página principal 
-app.get("/operaciones", (req, res) => {
-    if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
-        console.log(`El usuario ${nombreUsuario} está autenticado.`);
-        req.session.nombreGuardado = nombreUsuario; // Guarda el nombre en la sesión
-
-        const rolesString = req.session.roles;
-        const roles = Array.isArray(rolesString) ? rolesString : [];
-
-
-
-        const jefe = roles.includes('jefe');
-        const empleado = roles.includes('empleado');
- 
-
-        res.render("Operaciones/menu_operacines.hbs",{ name: req.session.name,jefe,empleado }); // Pasar los roles a la plantilla
-    } else {
-        res.redirect("/login");
-    }
-});
-
 
 
 
 app.get('/agregar_edificio', (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
-        res.render('Operaciones/ClientesEdificios/agregaredificio.hbs', { nombreUsuario });
+        res.render('administrativo/Operaciones/ClientesEdificios/agregaredificio.hbs', { nombreUsuario });
     } else {
         res.redirect('/login');
     }
 });
 
 
-
-
-
-
-
 const multer = require('multer');
-
-
 
 
 
@@ -437,13 +235,14 @@ app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
 
 
 
+
 // Ruta para agregar apartamentos
 app.get('/agregar_apartamento', async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
         try {
             const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
-            res.render('Operaciones/apartementos/agregarapartamento.hbs', { nombreUsuario, edificios });
+            res.render('administrativo/Operaciones/apartementos/agregarapartamento.hbs', { nombreUsuario, edificios });
         } catch (error) {
             console.error('Error al obtener edificios:', error);
             res.status(500).send('Error al obtener edificios');
@@ -452,6 +251,7 @@ app.get('/agregar_apartamento', async (req, res) => {
         res.redirect('/login');
     }
 });
+
 
 
 
@@ -470,6 +270,7 @@ app.get('/api/edificios', async (req, res) => {
         res.redirect('/login');
     }
 });
+
 
 
 
@@ -509,6 +310,12 @@ app.post('/agregar_apartamento', upload.single('foto'), async (req, res) => {
 
 
 
+
+
+
+
+
+
 app.get('/consultar_edificios', async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
@@ -522,7 +329,7 @@ app.get('/consultar_edificios', async (req, res) => {
                 }
             });
 
-            res.render('Operaciones/ClientesEdificios/consultaredificios.hbs', { nombreUsuario, edificios });
+            res.render('administrativo/Operaciones/ClientesEdificios/consultaredificios.hbs', { nombreUsuario, edificios });
         } catch (error) {
             console.error('Error al obtener edificios:', error);
             res.status(500).send('Error al obtener edificios');
@@ -531,19 +338,19 @@ app.get('/consultar_edificios', async (req, res) => {
         res.redirect('/login');
     }
 });
+app.post('/getApartamentos_envio', async (req, res) => {
+    const { edificiosSeleccionados } = req.body;
 
+    console.log('Edificios seleccionados:', edificiosSeleccionados); // Verifica que los datos lleguen bien
 
-
-// Ruta para obtener los apartamentos
-app.get('/getApartamentos', async (req, res) => {
-    const edificioId = req.query.edificioId;
-    if (!edificioId) {
-        return res.status(400).send({ error: 'El ID del edificio es requerido' });
+    if (!edificiosSeleccionados || edificiosSeleccionados.length === 0) {
+        return res.status(400).send({ error: 'No se seleccionaron edificios' });
     }
 
     try {
-        const [rows] = await pool.query('SELECT * FROM apartamentos WHERE edificio_id = ?', [edificioId]);
-        res.json({ apartamentos: rows });
+        const [rows] = await pool.query('SELECT * FROM apartamentos WHERE edificio_id IN (?)', [edificiosSeleccionados]);
+        console.log('Apartamentos:', rows); // Verifica que los apartamentos se obtienen correctamente
+        res.json(rows);
     } catch (error) {
         console.error(error);
         res.status(500).send({ error: 'Error al obtener los apartamentos' });
@@ -552,16 +359,23 @@ app.get('/getApartamentos', async (req, res) => {
 
 
 
-// Ruta
+
+
+
 // Ruta para consultar apartamentos
 app.get('/Consulta_apartamentos', (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
-        res.render('Operaciones/apartementos/consulta_apartamentos', { nombreUsuario });
+        res.render('administrativo/Operaciones/apartementos/consulta_apartamentos', { nombreUsuario });
     } else {
         res.redirect('/login');
     }
 });
+
+
+
+
+
 
 // Ruta para obtener los edificios
 app.get('/getEdificios', async (req, res) => {
@@ -573,6 +387,9 @@ app.get('/getEdificios', async (req, res) => {
         res.status(500).send({ error: 'Error al obtener los edificios' });
     }
 });
+
+
+
 
 // Ruta para obtener los apartamentos por edificio
 app.get('/getApartamentos', async (req, res) => {
@@ -589,6 +406,9 @@ app.get('/getApartamentos', async (req, res) => {
         res.status(500).send({ error: 'Error al obtener los apartamentos' });
     }
 });
+
+
+
 
 // Ruta para obtener los detalles de un apartamento
 app.get('/getApartamentoDetalles', async (req, res) => {
@@ -614,6 +434,12 @@ app.get('/getApartamentoDetalles', async (req, res) => {
 
 
 
+
+
+
+
+
+
 app.get('/editar_apartamento', async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
@@ -631,7 +457,7 @@ app.get('/editar_apartamento', async (req, res) => {
                 apartamento.foto = apartamento.foto.toString('base64');
             }
 
-            res.render('Operaciones/apartementos/editar_apartamentos', { nombreUsuario, apartamento });
+            res.render('administrativo/Operaciones/apartementos/editar_apartamentos', { nombreUsuario, apartamento });
         } catch (error) {
             console.error(error);
             res.status(500).send('Error al obtener los detalles del apartamento');
@@ -640,7 +466,6 @@ app.get('/editar_apartamento', async (req, res) => {
         res.redirect('/login');
     }
 });
-
 
 
 app.post('/update_apartamento', async (req, res) => {
@@ -661,6 +486,10 @@ app.post('/update_apartamento', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
+
 
 
 
@@ -687,7 +516,7 @@ app.get('/editar_edificio', async (req, res) => {
                 edificio.foto = edificio.foto.toString('base64');
             }
 
-            res.render('Operaciones/ClientesEdificios/editar_edificios.hbs', { nombreUsuario, edificio });
+            res.render('administrativo/Operaciones/ClientesEdificios/editar_edificios.hbs', { nombreUsuario, edificio });
         } catch (error) {
             console.error(error);
             res.status(500).send('Error al obtener los detalles del edificio');
@@ -696,6 +525,9 @@ app.get('/editar_edificio', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
 
 
 
@@ -720,6 +552,12 @@ app.post('/update_edificio', async (req, res) => {
 
 
 
+
+
+
+
+
+
 app.get('/editar_miembros_consejo', async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
@@ -733,7 +571,7 @@ app.get('/editar_miembros_consejo', async (req, res) => {
             const [rows] = await pool.query('SELECT * FROM edificios WHERE id = ?', [edificioId]);
             const edificio = rows[0];
 
-            res.render('Operaciones/ClientesEdificios/editar_miembros_consejo.hbs', { nombreUsuario, edificio });
+            res.render('administrativo/Operaciones/ClientesEdificios/editar_miembros_consejo.hbs', { nombreUsuario, edificio });
         } catch (error) {
             console.error(error);
             res.status(500).send('Error al obtener los detalles del edificio');
@@ -776,12 +614,6 @@ app.post('/update_miembros_consejo', async (req, res) => {
 
 
 
-
-
-
-
-
-
 //
 // Ruta para mostrar la lista de edificios
 app.get('/ComunicadosGeneral', async (req, res) => {
@@ -791,7 +623,7 @@ app.get('/ComunicadosGeneral', async (req, res) => {
 
         try {
             const [results] = await pool.query(query);
-            res.render('Operaciones/comunicadoGeneral/nuevocomunicadoGeneral.hbs', { 
+            res.render('administrativo/Operaciones/comunicadoGeneral/nuevocomunicadoGeneral.hbs', { 
                 nombreUsuario,
                 edificios: results 
             });
@@ -894,19 +726,13 @@ app.post('/enviarComunicado', upload.array('archivos'), async (req, res) => {
 
 
 
-
-
-
-
-
-
 // Ruta para obtener los edificios y renderizar la vista
 app.get('/envio_apartamentos', async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
         try {
             const [results] = await pool.query('SELECT * FROM edificios');
-            res.render('Operaciones/comunicadoApartmamentos/comunicado_individual.hbs', { 
+            res.render('administrativo/Operaciones/comunicadoApartmamentos/comunicado_individual.hbs', { 
                 nombreUsuario,
                 edificios: results
             });
@@ -918,6 +744,13 @@ app.get('/envio_apartamentos', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
+
+
+
+
 
 // Ruta para obtener los apartamentos de los edificios seleccionados
 app.post('/getApartamentos', async (req, res) => {
@@ -936,8 +769,14 @@ app.post('/getApartamentos', async (req, res) => {
     }
 });
 
+
+
+
+
+
+
 // Ruta para enviar el comunicado
-app.post('/enviarComunicado', upload.array('archivos'), async (req, res) => {
+app.post('/enviarComunicado_individual', upload.array('archivos'), async (req, res) => {
     const { apartamentosSeleccionados, mensaje } = req.body;
     let archivos = req.files;
 
@@ -976,7 +815,7 @@ app.post('/enviarComunicado', upload.array('archivos'), async (req, res) => {
         let mailOptions = {
             from: '"nexus" <nexus.innovationss@gmail.com>', // dirección del remitente
             to: correos.join(','), // lista de destinatarios
-            subject: `Comunicado General - ${uniqueId}`, // asunto con identificador único
+            subject: `Comunicado individual - ${uniqueId}`, // asunto con identificador único
             text: mensaje, // cuerpo del texto plano
             html: `
                 <h1>Comunicado Importante</h1>
@@ -1004,31 +843,6 @@ app.post('/enviarComunicado', upload.array('archivos'), async (req, res) => {
 
 
 
-// Ruta para la página principal 
-app.get("/menuContablidad", (req, res) => {
-    if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
-        console.log(`El usuario ${nombreUsuario} está autenticado.`);
-        req.session.nombreGuardado = nombreUsuario; // Guarda el nombre en la sesión
-
-        const rolesString = req.session.roles;
-        const roles = Array.isArray(rolesString) ? rolesString : [];
-
-
-
-        const jefe = roles.includes('jefe');
-        const empleado = roles.includes('empleado');
- 
-
-        res.render("CONTABILIDAD/menucontabilidad.hbs",{ name: req.session.name,jefe,empleado }); // Pasar los roles a la plantilla
-    } else {
-        res.redirect("/login");
-    }
-});
-
-
-
-
 
 
 
@@ -1042,7 +856,7 @@ app.get('/validar_pagos', async (req, res) => {
         const nombreUsuario = req.session.name;
         try {
             const [results] = await pool.query('SELECT * FROM edificios');
-            res.render('CONTABILIDAD/validarPagos/validarpagos.hbs', { 
+            res.render('administrativo/CONTABILIDAD/validarPagos/validarpagos.hbs', { 
                 nombreUsuario,
                 edificios: results
             });
@@ -1054,6 +868,9 @@ app.get('/validar_pagos', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
 
 
 app.post('/getApartamentosss', async (req, res) => {
@@ -1075,6 +892,8 @@ app.post('/getApartamentosss', async (req, res) => {
         res.status(500).send('Error al obtener los apartamentos');
     }
 });
+
+
 
 
 
@@ -1181,11 +1000,16 @@ Cerceta`
 app.get('/Consulta_Comprobantes_de_Pago', (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
-        res.render('CONTABILIDAD/validarPagos/consultar_pagos.hbs', { nombreUsuario });
+        res.render('administrativo/CONTABILIDAD/validarPagos/consultar_pagos.hbs', { nombreUsuario });
     } else {
         res.redirect('/login');
     }
 });
+
+
+
+
+
 
 app.post('/obtener_pagos', (req, res) => {
     const { fechaInicio, fechaFin } = req.body;
@@ -1219,6 +1043,8 @@ app.post('/obtener_pagos', (req, res) => {
 
 
 
+
+
 // Ruta para descargar el comprobante de pago
 app.get('/descargar_comprobante/:id', (req, res) => {
     const { id } = req.params;
@@ -1244,9 +1070,7 @@ app.get('/descargar_comprobante/:id', (req, res) => {
 
 
 
-
-
-// Start server
-app.listen(app.get("port"), () => {
-    console.log("Server listening on port ", app.get("port"));  // Iniciar el servidor y escuchar en el puerto especificado
+// Iniciar el servidor
+app.listen(3000, () => {
+    console.log('Servidor corriendo en el puerto 3000');
 });
