@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXUS</title>
+    <title>CERCETA</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -224,8 +224,7 @@
             <h2>Inicia sesión</h2>
             <div class="button-container">
                 <button class="role-button" onclick="changeBackground('administrativo')">Administrativo</button>
-                <button class="role-button" onclick="changeBackground('tecnico')">Técnico</button>
-                <button class="role-button" onclick="changeBackground('clientes')">Clientes</button>
+                <button class="role-button" onclick="changeBackground('clientes')">Residentes</button>
             </div>
 
 <form action="/login" method="POST" class="form">
@@ -251,13 +250,13 @@
 
             switch (role) {
                 case 'administrativo':
-                    imageUrl = 'imagenes/Login%20segun%20tipo%20de%20usuario%20Biopolab_page-0001.jpg';
+                    imageUrl = 'imagenes/FONDOADMINISTATIVO.png';
                     break;
                 case 'tecnico':
                     imageUrl = 'imagenes/Login%20segun%20tipo%20de%20usuario%20Biopolab_page-0002.jpg';
                     break;
                 case 'clientes':
-                    imageUrl = 'imagenes/Login%20segun%20tipo%20de%20usuario%20Biopolab_page-0003.jpg';
+                    imageUrl = 'imagenes/FONDORESIDENTES.png';
                     break;
                 default:
                     console.error("Role not recognized");
