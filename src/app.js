@@ -143,6 +143,8 @@ app.get("/menuAdministrativo", (req, res) => {
         const empleado = roles.includes('empleado');
 
         res.render("administrativo/menuadministrativo.hbs", {
+            layout: 'layouts/nav_admin.hbs', // Especifica el layout a usar
+
             name: nombreUsuario, // Pass the name to the template
             jefe,
             empleado
