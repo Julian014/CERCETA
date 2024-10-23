@@ -3,6 +3,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman:wght@400;700&amp;display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
   <style>
     /* General styles */
     body.body-bg {
@@ -238,6 +240,9 @@ body.body-bg {
       <input class="footer-signature" placeholder="Nombre del autor del boletín">
     </div>
   </div>
+  <button id="downloadBtn" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded">Descargar como PNG</button>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
    <script>
       // Obtener la fecha actual
       const fechaActual = new Date();
@@ -334,3 +339,15 @@ body.body-bg {
 </script>
 
 
+<script>
+    document.getElementById('downloadBtn').addEventListener('click', function () {
+        html2canvas(document.getElementById('contenido')).then(function (canvas) {
+            // Convertir el canvas a una imagen PNG
+            var imgData = canvas.toDataURL("image/png");
+            var link = document.createElement('a');
+            link.href = imgData;
+            link.download = 'boletin_informativo.png'; // Nombre del archivo
+            link.click();
+        });
+    });
+</script>

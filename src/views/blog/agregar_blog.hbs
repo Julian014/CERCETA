@@ -1,116 +1,31 @@
-<h2>Selecciona una plantilla</h2>
-<div class="plantillas">
-    {{#each plantillas}}
-        <div class="plantilla">
-            <h3>{{nombre}}</h3>
-            <p>{{descripcion}}</p>
-            <a href="{{ruta}}"><button>Seleccionar</button></a>
-        </div>
-    {{/each}}
-</div>
+<form action="/subir_publicacion" method="POST" enctype="multipart/form-data">
+    <label for="edificio">Seleccione el Edificio:</label>
+    <select name="edificio" id="edificio" required>
+        {{#each edificios}}
+            <option value="{{this.id}}">{{this.nombre}}</option>
+        {{/each}}
+    </select>
 
-/* General styles */
-body.body-bg {
-    font-family: 'Times New Roman', serif;
-    background-color: white;
-    padding: 1rem; /* Reducir el padding general */
-}
+    <label for="titulo">Título de la Publicación:</label>
+    <input type="text" name="titulo" id="titulo" required>
 
-/* Container */
-.container {
-    max-width: 30rem; /* Reducir el ancho máximo del contenedor */
-    margin: 0 auto;
-    border: 1px solid #D1D5DB;
-    padding: 1rem; /* Reducir el padding del contenedor */
-}
-/* Title */
-.title {
-    font-size: 2.25rem;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 2rem;
-}
+    <label for="fecha">Fecha de la Publicación:</label>
+    <input type="date" name="fecha" id="fecha" required>
 
-/* Section styles */
-.section {
-    margin-bottom: 2rem;
-}
+    <label for="descripcion">Descripción o Información Adicional:</label>
+    <textarea name="descripcion" id="descripcion" rows="4"></textarea>
 
-.section-title {
-    font-size: 1.25rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-}
+    <label for="imagen">Subir Imagen:</label>
+    <input type="file" name="imagen" id="imagen" accept="image/*">
 
-/* Input titles */
-.input-title {
-    width: 100%;
-    font-weight: bold;
-    padding: 0.5rem;
-}
+    <label for="pdf">Subir PDF:</label>
+    <input type="file" name="pdf" id="pdf" accept="application/pdf">
 
-/* Section content */
-.section-content {
-    display: flex;
-}
+    <label for="word">Subir Documento Word:</label>
+    <input type="file" name="word" id="word" accept=".doc,.docx">
 
-.text-section {
-    width: 50%;
-    padding-right: 1rem;
-}
+    <label for="excel">Subir Hoja de Cálculo Excel:</label>
+    <input type="file" name="excel" id="excel" accept=".xls,.xlsx">
 
-.image-section {
-    width: 50%;
-}
-
-/* Image */
-.image {
-    width: 100%;
-    margin-bottom: 1rem;
-    height: auto;
-}
-
-/* Textarea content */
-.textarea-content {
-    width: 100%;
-    height: 100%;
-    text-align: justify;
-    padding: 0.5rem;
-}
-
-/* Footer section */
-.footer-section {
-    border-top: 1px solid black;
-    padding-top: 1rem;
-}
-
-.footer-inputs {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.75rem;
-}
-
-.footer-input {
-    width: 32%;
-    padding: 0.5rem;
-}
-
-.footer-signature {
-    font-weight: bold;
-    width: 100%;
-    padding: 0.5rem;
-    text-align: center;
-}
-
-/* Container */
-#contenido {
-    width: 743px;
-    height: 2091px;
-    transform: translate(793px, 627px);
-    position: relative;
-    left: -735px;
-    top: -637px;
-}
-
-#tarea-foter{
-
+    <button type="submit">Subir Publicación</button>
+</form>

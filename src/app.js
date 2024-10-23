@@ -1107,42 +1107,7 @@ app.get('/agregar_usuarios', (req, res) => {
 
 
 
-
-
-app.get('/agregar_blog_usuarios', async (req, res) => {
-    if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
-
-        try {
-            // Obtener edificios
-            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
-            
-            // Cargar las plantillas desde una tabla o directamente desde un archivo
-            const templates = [
-                { id: 1, nombre: 'Plantilla Simple', descripcion: 'Una plantilla simple y limpia.', ruta: '/crear_blog/simple' },
-                { id: 2, nombre: 'Plantilla Fotográfica', descripcion: 'Ideal para publicaciones con muchas imágenes.', ruta: '/crear_blog/fotografica' },
-                { id: 3, nombre: 'Plantilla Moderna', descripcion: 'Con un diseño más moderno y colorido.', ruta: '/crear_blog/moderna' }
-            ];
-
-            // Renderizar la vista con los edificios y las plantillas
-            res.render('blog/agregar_blog.hbs', { 
-                nombreUsuario, 
-                edificios: edificios, 
-                plantillas: templates 
-            });
-        } catch (error) {
-            console.error('Error al obtener los edificios o plantillas:', error);
-            return res.status(500).send('Hubo un error al cargar los datos.');
-        }
-    } else {
-        res.redirect('/login');
-    }
-});
-
-
-
-// Ruta para crear un blog usando la plantilla Simple
-app.get('/crear_blog/simple', (req, res) => {
+app.get('/plantilla_blog', (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
         res.render('blog/plantilla_simple.hbs', { nombreUsuario });
@@ -1151,30 +1116,20 @@ app.get('/crear_blog/simple', (req, res) => {
     }
 });
 
-// Ruta para crear un blog usando la plantilla Fotográfica
-app.get('/crear_blog/fotografica', (req, res) => {
+app.get('/subir_publicacion', async (req, res) => {
     if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
-        res.render('blog/plantilla_fotografica.hbs', { nombreUsuario });
+        try {
+            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
+            const nombreUsuario = req.session.name;
+            res.render('blog/agregar_blog.hbs', { nombreUsuario, edificios });
+        } catch (error) {
+            console.error('Error al obtener los edificios:', error);
+            res.status(500).send('Error interno del servidor');
+        }
     } else {
         res.redirect('/login');
     }
 });
-
-// Ruta para crear un blog usando la plantilla Moderna
-app.get('/crear_blog/moderna', (req, res) => {
-    if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
-        res.render('blog/plantilla_moderna.hbs', { nombreUsuario });
-    } else {
-        res.redirect('/login');
-    }
-});
-
-
-
-
-
 
 
 
@@ -1224,9 +1179,68 @@ app.post('/guardar-blog', (req, res) => {
 
 
 
+app.post('/subir_publicacion', upload.fields([
+    { name: 'imagen', maxCount: 1 },
+    { name: 'pdf', maxCount: 1 },
+    { name: 'word', maxCount: 1 },
+    { name: 'excel', maxCount: 1 }
+]), async (req, res) => {
+    if (req.session.loggedin === true) {
+        const { edificio, titulo, fecha, descripcion } = req.body;
+        const archivos = req.files;
 
+        // Variables para almacenar los datos de los archivos
+        let imagen = null, imagenMime = null;
+        let pdf = null, pdfMime = null;
+        let word = null, wordMime = null;
+        let excel = null, excelMime = null;
 
+        // Asignar valores si los archivos han sido subidos
+        if (archivos.imagen) {
+            imagen = archivos.imagen[0].buffer;
+            imagenMime = archivos.imagen[0].mimetype;
+        }
+        if (archivos.pdf) {
+            pdf = archivos.pdf[0].buffer;
+            pdfMime = archivos.pdf[0].mimetype;
+        }
+        if (archivos.word) {
+            word = archivos.word[0].buffer;
+            wordMime = archivos.word[0].mimetype;
+        }
+        if (archivos.excel) {
+            excel = archivos.excel[0].buffer;
+            excelMime = archivos.excel[0].mimetype;
+        }
 
+        try {
+            // Insertar la publicación en la base de datos
+            const query = `
+                INSERT INTO publicaciones (
+                    edificio_id, titulo, fecha, descripcion, 
+                    imagen, imagen_mime, 
+                    pdf, pdf_mime, 
+                    word, word_mime, 
+                    excel, excel_mime
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            await pool.query(query, [
+                edificio, titulo, fecha, descripcion,
+                imagen, imagenMime,
+                pdf, pdfMime,
+                word, wordMime,
+                excel, excelMime
+            ]);
+
+            res.status(200).send('Publicación subida con éxito');
+        } catch (error) {
+            console.error('Error al guardar la publicación:', error);
+            res.status(500).send('Error interno del servidor');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
 
 
 
