@@ -1109,59 +1109,74 @@ app.get('/agregar_usuarios', (req, res) => {
 
 
 
-
-
-
-
 app.get('/agregar_blog_usuarios', async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
 
         try {
-            // Usar async/await para manejar la consulta
-            const [results] = await pool.query('SELECT id, nombre FROM edificios');
+            // Obtener edificios
+            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
             
-            // Renderizar la vista con los resultados
-            res.render('blog/agregar_blog.hbs', { nombreUsuario, edificios: results });
+            // Cargar las plantillas desde una tabla o directamente desde un archivo
+            const templates = [
+                { id: 1, nombre: 'Plantilla Simple', descripcion: 'Una plantilla simple y limpia.', ruta: '/crear_blog/simple' },
+                { id: 2, nombre: 'Plantilla Fotográfica', descripcion: 'Ideal para publicaciones con muchas imágenes.', ruta: '/crear_blog/fotografica' },
+                { id: 3, nombre: 'Plantilla Moderna', descripcion: 'Con un diseño más moderno y colorido.', ruta: '/crear_blog/moderna' }
+            ];
+
+            // Renderizar la vista con los edificios y las plantillas
+            res.render('blog/agregar_blog.hbs', { 
+                nombreUsuario, 
+                edificios: edificios, 
+                plantillas: templates 
+            });
         } catch (error) {
-            console.error('Error al obtener los edificios:', error);
-            return res.status(500).send('Hubo un error al cargar los edificios.');
+            console.error('Error al obtener los edificios o plantillas:', error);
+            return res.status(500).send('Hubo un error al cargar los datos.');
         }
     } else {
         res.redirect('/login');
     }
 });
 
-let temporaryFiles = {};  // Objeto en memoria para almacenar las imágenes temporalmente
-// Ruta para manejar la subida de imágenes desde GrapesJS
 
-app.post('/path-to-your-upload-handler', upload.array('file', 10), (req, res) => {
-    if (!req.files || req.files.length === 0) {
-        return res.status(400).json({
-            uploaded: false,
-            error: { message: 'No se han podido subir las imágenes.' }
-        });
+
+// Ruta para crear un blog usando la plantilla Simple
+app.get('/crear_blog/simple', (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+        res.render('blog/plantilla_simple.hbs', { nombreUsuario });
+    } else {
+        res.redirect('/login');
     }
-    // Procesa cada archivo y guárdalo temporalmente
-    req.files.forEach(file => {
-        const fileId = Date.now().toString();
-        const tempFilePath = path.join(__dirname, 'uploads', `${fileId}-${file.originalname}`);
-        fs.writeFile(tempFilePath, file.buffer, (err) => {
-            if (err) {
-                return res.status(500).json({
-                    uploaded: false,
-                    error: { message: 'Error al guardar la imagen.' }
-                });
-            }
-        });
-    });
-
-    res.status(200).json({
-        uploaded: true,
-        message: 'Imágenes subidas correctamente',
-        urls: req.files.map(file => `/uploads/${Date.now().toString()}-${file.originalname}`)
-    });
 });
+
+// Ruta para crear un blog usando la plantilla Fotográfica
+app.get('/crear_blog/fotografica', (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+        res.render('blog/plantilla_fotografica.hbs', { nombreUsuario });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+// Ruta para crear un blog usando la plantilla Moderna
+app.get('/crear_blog/moderna', (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+        res.render('blog/plantilla_moderna.hbs', { nombreUsuario });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+
+
+
+
+
 
 
 

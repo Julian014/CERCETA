@@ -1,0 +1,336 @@
+<html><head>
+  <title>Boletín Informativo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman:wght@400;700&amp;display=swap" rel="stylesheet">
+  <style>
+    /* General styles */
+    body.body-bg {
+        font-family: 'Times New Roman', serif;
+        background-color: white;
+        padding: 1rem;
+    }
+    /* Container */
+    .container {
+        max-width: 30rem;
+        margin: 0 auto;
+        border: 1px solid #D1D5DB;
+        padding: 1rem;
+    }
+    /* Title */
+    .title {
+        font-size: 2.25rem;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    /* Section styles */
+    .section {
+        margin-bottom: 2rem;
+    }
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    /* Image Upload Section */
+    .upload-section {
+        width: 100%;
+        height: 200px;
+        border: 2px dashed #ccc;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    .upload-section img {
+        max-width: 100%;
+        max-height: 100%;
+    }
+    .upload-section p {
+        font-size: 1rem;
+        text-align: center;
+    }
+    .upload-section input[type="file"] {
+        display: none;
+    }
+    /* Preview Image */
+    .image-preview {
+        width: 100%;
+        height: auto;
+        margin-top: 10px;
+    }
+    /* General styles */
+body.body-bg {
+    font-family: 'Times New Roman', serif;
+    background-color: white;
+    padding: 1rem; /* Reducir el padding general */
+}
+
+/* Container */
+.container {
+    max-width: 30rem; /* Reducir el ancho máximo del contenedor */
+    margin: 0 auto;
+    border: 1px solid #D1D5DB;
+    padding: 1rem; /* Reducir el padding del contenedor */
+}
+/* Title */
+.title {
+    font-size: 2.25rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Section styles */
+.section {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+/* Input titles */
+.input-title {
+    width: 100%;
+    font-weight: bold;
+    padding: 0.5rem;
+}
+
+/* Section content */
+.section-content {
+    display: flex;
+}
+
+.text-section {
+    width: 50%;
+    padding-right: 1rem;
+}
+
+.image-section {
+    width: 50%;
+}
+
+/* Image */
+.image {
+    width: 100%;
+    margin-bottom: 1rem;
+    height: auto;
+}
+
+/* Textarea content */
+.textarea-content {
+    width: 100%;
+    height: 100%;
+    text-align: justify;
+    padding: 0.5rem;
+}
+
+/* Footer section */
+.footer-section {
+    border-top: 1px solid black;
+    padding-top: 1rem;
+}
+
+.footer-inputs {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+}
+
+.footer-input {
+    width: 32%;
+    padding: 0.5rem;
+}
+
+.footer-signature {
+    font-weight: bold;
+    width: 100%;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+/* Container */
+#contenido {
+    width: 743px;
+    height: 2091px;
+    transform: translate(793px, 627px);
+    position: relative;
+    left: -735px;
+    top: -637px;
+}
+  </style>
+<style>/* ! tailwindcss v3.4.5 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]{display:none}*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }.container{width:100%}@media (min-width: 640px){.container{max-width:640px}}@media (min-width: 768px){.container{max-width:768px}}@media (min-width: 1024px){.container{max-width:1024px}}@media (min-width: 1280px){.container{max-width:1280px}}@media (min-width: 1536px){.container{max-width:1536px}}.mt-8{margin-top:2rem}.text-center{text-align:center}</style><style>/* ! tailwindcss v3.4.5 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]{display:none}*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }.container{width:100%}@media (min-width: 640px){.container{max-width:640px}}@media (min-width: 768px){.container{max-width:768px}}@media (min-width: 1024px){.container{max-width:1024px}}@media (min-width: 1280px){.container{max-width:1280px}}@media (min-width: 1536px){.container{max-width:1536px}}.mt-8{margin-top:2rem}.text-center{text-align:center}</style></head>
+
+<body class="body-bg" style="">
+  <div id="contenido" class="container" style="height: 1187px;">
+    <!-- Header con logo a la izquierda y fecha a la derecha -->
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #ccc;">
+      <!-- Logo de la empresa -->
+      <div class="logo" style="display: flex; align-items: center;">
+        <img src="../imagenes/CERCETA.png" alt="Logo de la empresa" style="height: 50px;">
+        <span style="font-size: 1.5rem; font-weight: bold; margin-left: 1rem;"></span>
+      </div>
+      
+      <!-- Fecha del día -->
+      <div class="fecha">
+        <span id="fechaActual" style="font-size: 1rem;">23 de octubre de 2024</span>
+      </div>
+    </header>
+
+
+    <h1 class="title">Boletín Informativo</h1>
+
+    <div class="section">
+      <h2 class="section-title">
+        <input class="input-title" placeholder="Agrega un subtítulo">
+      </h2>
+      <div class="section-content">
+        <div class="text-section">
+          <textarea class="textarea-content" placeholder="Agrega tod la informacion de lo que se realizo"></textarea>
+        </div>
+<div class="image-section">
+  <div class="upload-section" id="uploadSection1">
+    <input type="file" id="fileInput1" accept="image/*">
+    <p>Arrastra y suelta una imagen o haz clic para subir</p>
+    <img id="previewImage1" class="image" alt="Vista previa de imagen" style="display: none;">
+  </div>
+</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="section-title">
+        <input class="input-title" placeholder="Agrega un subtítulo aquí">
+      </h2>
+      <div class="section-content">
+        <div class="image-section">
+     <div class="upload-section" id="uploadSection2">
+    <input type="file" id="fileInput2" accept="image/*">
+    <p>Arrastra y suelta una imagen o haz clic para subir</p>
+    <img id="previewImage2" class="image" alt="Vista previa de imagen" style="display: none;">
+    </div>
+
+        </div>
+        <div class="text-section">
+          <textarea class="textarea-content" placeholder="Escribe aquí la información del subtítulo"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-section">
+      <h2 class="section-title">
+        <input class="input-title" placeholder="Título final del boletín">
+      </h2>
+      <textarea id="tarea-foter" class="textarea" placeholder="Resumen o conclusiones aquí" style="width: 100%; height: 190px;"></textarea>
+      <div class="footer-inputs">
+        <input class="footer-input" placeholder="Idea adicional 1">
+        <input class="footer-input" placeholder="Idea adicional 2">
+        <input class="footer-input" placeholder="Idea adicional 3">
+      </div>
+    </div>
+    <div class="text-center mt-8">
+      <input class="footer-signature" placeholder="Nombre del autor del boletín">
+    </div>
+  </div>
+   <script>
+      // Obtener la fecha actual
+      const fechaActual = new Date();
+      const opciones = { year: 'numeric', month: 'long', day: 'numeric' };
+      document.getElementById('fechaActual').textContent = fechaActual.toLocaleDateString('es-ES', opciones);
+    </script>
+
+<script>
+    // Para la primera imagen
+    const uploadSection1 = document.getElementById('uploadSection1');
+    const fileInput1 = document.getElementById('fileInput1');
+    const previewImage1 = document.getElementById('previewImage1');
+
+    // Función para manejar subida de imagen
+    function handleImageUpload(event, previewImage, uploadSection) {
+        const file = event.target.files[0] || event.dataTransfer.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewImage.style.display = 'block';
+                // Ocultar el texto y cambiar el estilo del cuadro de subida
+                uploadSection.querySelector('p').style.display = 'none';
+                uploadSection.style.border = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Manejador para clic y subir
+    fileInput1.addEventListener('change', (event) => handleImageUpload(event, previewImage1, uploadSection1));
+
+    // Manejador para arrastrar y soltar
+    uploadSection1.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        uploadSection1.style.borderColor = "#4A90E2";
+    });
+
+    uploadSection1.addEventListener('dragleave', () => {
+        uploadSection1.style.borderColor = "#ccc";
+    });
+
+    uploadSection1.addEventListener('drop', (event) => {
+        event.preventDefault();
+        uploadSection1.style.borderColor = "#ccc";
+        handleImageUpload(event, previewImage1, uploadSection1);
+    });
+
+    uploadSection1.addEventListener('click', () => fileInput1.click());
+</script>
+<script>
+
+    // Para la segunda imagen (como ejemplo)
+    const uploadSection2 = document.getElementById('uploadSection2');
+    const fileInput2 = document.getElementById('fileInput2');
+    const previewImage2 = document.getElementById('previewImage2');
+
+    // Función para manejar subida de imagen
+    function handleImageUpload(event, previewImage, uploadSection) {
+        const file = event.target.files[0] || event.dataTransfer.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewImage.style.display = 'block';
+                // Ocultar el texto y cambiar el estilo del cuadro de subida
+                uploadSection.querySelector('p').style.display = 'none';
+                uploadSection.style.border = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Manejador para clic y subir
+    fileInput2.addEventListener('change', (event) => handleImageUpload(event, previewImage2, uploadSection2));
+
+    // Manejador para arrastrar y soltar
+    uploadSection2.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        uploadSection2.style.borderColor = "#4A90E2";
+    });
+
+    uploadSection2.addEventListener('dragleave', () => {
+        uploadSection2.style.borderColor = "#ccc";
+    });
+
+    uploadSection2.addEventListener('drop', (event) => {
+        event.preventDefault();
+        uploadSection2.style.borderColor = "#ccc";
+        handleImageUpload(event, previewImage2, uploadSection2);
+    });
+
+    uploadSection2.addEventListener('click', () => fileInput2.click());
+</script>
+
+
