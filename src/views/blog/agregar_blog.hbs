@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Blog con GrapesJS</title>
+    <script src="https://unpkg.com/grapesjs"></script>
+    <link href="https://unpkg.com/grapesjs/dist/css/grapes.min.css" rel="stylesheet"/>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #gjs {
+            height: 1000px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Hola, {{nombreUsuario}}</h1>
+
+<!-- Editor visual de GrapesJS -->
+<div id="gjs"></div>
+
+<script>
+    const editor = grapesjs.init({
+        container: '#gjs',
+        fromElement: true,
+        height: '700px',
+        width: 'auto',
+        storageManager: false,
+        blockManager: {
+            appendTo: '#gjs',
+            blocks: [
+                {
+                    id: 'section',
+                    label: '<b>Section</b>',
+                    attributes: { class:'gjs-block-section' },
+                    content: `<section>
+                        <h1>Encabezado</h1>
+                        <p>Este es un nuevo bloque de contenido.</p>
+                    </section>`,
+                },
+                {
+                    id: 'image',
+                    label: 'Imagen',
+                    content: '<img src="" alt="Imagen desde PC">',
+                    attributes: { class:'gjs-block-img' },
+                    activate: true,  // Activar este bloque por defecto al arrastrar
+                },
+                {
+                    id: 'text',
+                    label: 'Texto',
+                    content: '<div><p>Nuevo bloque de texto.</p></div>',
+                },
+            ],
+        },
+assetManager: {
+    upload: '/path-to-your-upload-handler',  // Ruta a tu backend que manejará la subida de archivos
+    uploadName: 'file',  // Nombre del archivo en la solicitud POST
+    headers: {
+        'Accept': 'application/json',
+    },
+    credentials: 'same-origin',
+    openAssetsOnDrop: true,
+    modalTitle: 'Seleccionar imagen desde tu dispositivo',
+    uploadText: 'Arrastra archivos aquí o haz clic para cargar desde tu dispositivo',
+    assets: [],  // Lista de activos cargados
+},
+   plugins: ['gjs-preset-webpage'],
+    });
+
+    // Abre el Asset Manager para subir imágenes desde el PC al seleccionar un bloque de imagen
+    editor.on('component:selected', (component) => {
+        if (component.getName() === 'Imagen') {
+            editor.runCommand('open-assets', {
+                target: component,  // Selecciona el bloque objetivo
+                types: ['image'],  // Solo permitir seleccionar imágenes
+                select: true,  // Habilitar selección
+            });
+        }
+    });
+
+    // Evento para manejar la subida de imagen desde el selector
+    editor.on('asset:upload:start', () => {
+        console.log('Subida de imagen iniciada...');
+    });
+
+    editor.on('asset:upload:end', () => {
+        console.log('Subida de imagen finalizada');
+    });
+
+    editor.on('asset:upload:error', (error) => {
+        console.log('Error al subir la imagen:', error);
+    });
+
+    editor.on('asset:upload:response', (response) => {
+        console.log('Respuesta del servidor:', response);
+    });
+</script>
+<script>
+    function guardarBlog() {
+        const blogContent = editor.getHtml();  // Obtener el contenido HTML del blog desde GrapesJS
+        const imageIds = [];  // Aquí almacenas los IDs de las imágenes temporales
+
+        // Supongamos que las URLs de las imágenes temporales tienen un ID en la ruta
+        const images = document.querySelectorAll('img');
+        images.forEach(img => {
+            const id = img.src.split('/').pop();  // Extraer el ID de la URL temporal
+            imageIds.push(id);
+        });
+
+        // Enviar el contenido del blog y las imágenes al backend para guardarlas
+        fetch('/guardar-blog', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ blogContent, imageIds })
+        }).then(response => response.json())
+          .then(data => {
+              alert(data.message);
+          });
+    }
+</script>
+
+<button onclick="guardarBlog()">Guardar Blog</button>
+
+</body>
+</html>

@@ -1008,7 +1008,7 @@ app.get('/Consulta_Comprobantes_de_Pago', (req, res) => {
 
 
 
-
+ 
 
 
 app.post('/obtener_pagos', (req, res) => {
@@ -1091,6 +1091,10 @@ app.get('/api/apartamentos-count', async (req, res) => {
 
 
 
+
+
+
+
 app.get('/agregar_usuarios', (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
@@ -1105,6 +1109,103 @@ app.get('/agregar_usuarios', (req, res) => {
 
 
 
+
+
+
+
+app.get('/agregar_blog_usuarios', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.name;
+
+        try {
+            // Usar async/await para manejar la consulta
+            const [results] = await pool.query('SELECT id, nombre FROM edificios');
+            
+            // Renderizar la vista con los resultados
+            res.render('blog/agregar_blog.hbs', { nombreUsuario, edificios: results });
+        } catch (error) {
+            console.error('Error al obtener los edificios:', error);
+            return res.status(500).send('Hubo un error al cargar los edificios.');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+let temporaryFiles = {};  // Objeto en memoria para almacenar las imágenes temporalmente
+// Ruta para manejar la subida de imágenes desde GrapesJS
+
+app.post('/path-to-your-upload-handler', upload.array('file', 10), (req, res) => {
+    if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+            uploaded: false,
+            error: { message: 'No se han podido subir las imágenes.' }
+        });
+    }
+    // Procesa cada archivo y guárdalo temporalmente
+    req.files.forEach(file => {
+        const fileId = Date.now().toString();
+        const tempFilePath = path.join(__dirname, 'uploads', `${fileId}-${file.originalname}`);
+        fs.writeFile(tempFilePath, file.buffer, (err) => {
+            if (err) {
+                return res.status(500).json({
+                    uploaded: false,
+                    error: { message: 'Error al guardar la imagen.' }
+                });
+            }
+        });
+    });
+
+    res.status(200).json({
+        uploaded: true,
+        message: 'Imágenes subidas correctamente',
+        urls: req.files.map(file => `/uploads/${Date.now().toString()}-${file.originalname}`)
+    });
+});
+
+
+
+
+
+
+// Servir las imágenes desde la carpeta "uploads"
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
+
+
+
+
+
+
+
+
+
+
+app.post('/guardar-blog', (req, res) => {
+    const { blogContent, imageIds } = req.body;  // Suponiendo que envías el contenido del blog y los IDs de las imágenes
+
+    // Guardar las imágenes desde memoria a disco (o base de datos)
+    imageIds.forEach(id => {
+        const file = temporaryFiles[id];
+        if (file) {
+            // Aquí puedes guardar el archivo en disco
+            const filePath = `uploads/${file.originalname}`;
+            require('fs').writeFileSync(filePath, file.buffer);
+
+            // O puedes guardarlo en la base de datos como BLOB
+            // db.query('INSERT INTO images (data, mimetype) VALUES (?, ?)', [file.buffer, file.mimetype]);
+        }
+    });
+
+    // Limpiar los archivos temporales de la memoria
+    imageIds.forEach(id => delete temporaryFiles[id]);
+
+    // Guardar el contenido del blog en la base de datos
+    // db.query('INSERT INTO blogs (content) VALUES (?)', [blogContent]);
+
+    res.status(200).json({ message: 'Blog guardado con éxito' });
+});
 
 
 
