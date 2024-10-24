@@ -1,257 +1,517 @@
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<style>
-    @import url("https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600&family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap");
-
-    /* VALORES POR DEFECTO */
-    *, *::before, *::after {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>CERCETA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    /* Sidebar Styling */
+    .sidebar {
+      width: 16rem;
+      padding: 1rem;
+      background-color: #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      justify-between: space-between;
+      transition: transform 0.3s ease-in-out;
+      max-height: 100vh;
+      overflow-y: auto;
     }
 
-    nav {
-        user-select: none;
+    .sidebar ul li a {
+      font-size: 0.875rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      display: flex;
+      align-items: center;
+      transition: background-color 0.3s, color 0.3s;
+      color: #4a5568;
     }
 
-    nav > ul, nav > ul > li {
-        outline: 0;
+    .sidebar ul li a:hover {
+      background-color: #e0f7fa;
+      color: #00796b;
+      transform: translateX(5px);
     }
 
-    nav > ul > li > a {
-        text-decoration: none;
+    .sidebar ul li a.active {
+      background-color: #00796b;
+      color: white;
     }
 
-    body {
-        min-height: 100vh;
-        transition: background-color 0.3s, color 0.3s;
+    .sidebar img {
+      width: 40px;
+      height: 40px;
     }
 
-    /* MENÚ PRINCIPAL */
-    .main-menu {
+    /* Badge Styling */
+    .badge {
+      background-color: #ef4444;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      border-radius: 50%;
+      margin-left: auto;
+    }
+
+    /* Search Bar */
+    .search-bar {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      background-color: #f1f5f9;
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+    }
+
+    .search-bar input {
+      border: none;
+      background: none;
+      outline: none;
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 0.875rem;
+      color: #4a5568;
+    }
+
+    .search-bar i {
+      color: #4a5568;
+    }
+
+    /* Profile Dropdown */
+    .profile-section {
+      margin-bottom: 2rem;
+    }
+
+    .profile-section .profile-info {
+      display: flex;
+      align-items: center;
+    }
+
+    .profile-section .profile-info img {
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+
+    .profile-section .profile-info span {
+      font-weight: 600;
+      color: #00796b;
+    }
+
+    /* Section Titles */
+    .section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      margin-top: 2rem;
+      padding-left: 1rem;
+    }
+
+    /* Hamburger Menu */
+    .hamburger {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 50;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      background-color: #00796b;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background-color: white;
+      margin-bottom: 5px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
         position: fixed;
         top: 0;
-        left: 0;
         height: 100%;
-        width: 60px;
-        overflow: hidden;
-        background: #1E99D3; /* Fondo para el tema oscuro usando color principal */
-        transition: width .05s linear;
-        z-index: 10;
-        padding-top: 10px;
-    }
+        transform: translateX(-100%);
+        z-index: 40;
+      }
 
-    .main-menu:hover {
-        width: 180px;
-        overflow: visible;
-    }
+      .sidebar.open {
+        transform: translateX(0);
+      }
 
-    .main-menu > ul > li {
-        position: relative;
+      .hamburger {
         display: block;
-        width: 180px;
+      }
     }
 
-    .main-menu > ul > li > a {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        color: #FFFFFF; /* Color del texto para el tema oscuro */
-        font-size: 1rem;
-        transition: all 0.1s linear;
-        padding: 10px 0;
-        font-weight: bold;
+    /* Dark mode styling */
+    .dark .sidebar {
+      background-color: #1a202c;
+      color: #cbd5e0;
     }
 
-    .nav-icon {
-        width: 60px;
-        height: 20px;
-        font-size: 20px;
-        text-align: center;
+    .dark .sidebar ul li a {
+      color: #cbd5e0;
     }
 
-    .nav-text {
-        width: 120px;
-        height: 20px;
-        font-family: "Mulish", sans-serif;
+    .dark .sidebar ul li a:hover {
+      background-color: #2d3748;
+      color: #81e6d9;
     }
 
-    .logout {
-        position: absolute;
-        left: 0;
-        bottom: 0;
+    .dark .section-title {
+      color: #718096;
     }
 
-    .main-menu li:hover > a, .main-menu li.active > a, .main-menu li > a:focus {
-        text-decoration: none;
-        color: #FFFFFF;
-        background-color: #EFA325; /* Color de acento usando el naranja secundario */
+    .dark .search-bar {
+      background-color: #2d3748;
     }
 
-    /* TEMA OSCURO */
-    body.dark-theme {
-        background: linear-gradient(90deg, #1B1B1B, #2E2E2E); /* Fondo del tema oscuro con negro y gris oscuro */
-        color: #FFFFFF; /* Color del texto para el tema oscuro */
+    .dark .search-bar input {
+      color: #cbd5e0;
     }
 
-    .dark-theme .main-menu {
-        background: #1E99D3; /* Fondo del menú principal en tema oscuro usando color principal azul */
+    .dark .hamburger {
+      background-color: #2d3748;
     }
-
-    .dark-theme .main-menu > ul > li > a {
-        color: #FFFFFF; /* Color de los enlaces del menú en tema oscuro */
-    }
-
-    .dark-theme .main-menu li:hover > a, .dark-theme .main-menu li.active > a, .dark-theme .main-menu li > a:focus {
-        color: #FFFFFF;
-        background-color: #7CB646; /* Color de fondo al pasar por encima o seleccionar un elemento en tema oscuro usando el rojo secundario */
-    }
-
-    /* TEMA CLARO */
-    body.light-theme {
-        background: linear-gradient(90deg, #FFFFFF, #F4F4F4); /* Fondo del tema claro */
-        color: #000000; /* Color del texto para el tema claro */
-    }
-
-    .light-theme .main-menu {
-        background: #7CB646; /* Fondo del menú principal en tema claro usando color verde principal */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .light-theme .main-menu > ul > li > a {
-        color: #1B1B1B; /* Color de los enlaces del menú en tema claro */
-    }
-
-    .light-theme .main-menu li:hover > a, .light-theme .main-menu li.active > a, .light-theme .main-menu li > a:focus {
-        color: #FFFFFF;
-        background-color: #1E99D3; /* Color de fondo al pasar por encima o seleccionar un elemento en tema claro usando el naranja secundario */
-    }
-</style>
+  </style>
 </head>
-<body class="light-theme">
-<nav class="main-menu">
-    <ul>
-        <br>
-        <li class="logo">
-            <img src="imagenes/logovianco_verde-removebg-preview.png" alt="Logo" class="logo-img">
-        </li>
-        <li>
-            <a href="javascript:window.history.back();">
-                <i class="fas fa-arrow-left nav-icon"></i>
-                <span class="nav-text">Atrás</span>
-            </a>
-        </li>
-        <br>
-        <li class="active">
-            <a href="/menu">
-                <i class="fas fa-home nav-icon"></i>
-                <span class="nav-text">Inicio</span>
-            </a>
-        </li>
-        <br>
-        <li>
-            <a href="/">
-                <i class="fas fa-user nav-icon"></i>
-                <span class="nav-text">Usuarios</span>
-            </a>
-        </li>
-        <br>
-        <li>
-            <a href="/menuGerencia">
-                <i class="fas fa-briefcase nav-icon"></i>
-                <span class="nav-text">Administración</span>
-            </a>
-        </li>
-        <br>
-        <li>
-            <a href="/menugestion_de_calidad">
-                <i class="fas fa-check-circle nav-icon"></i>
-                <span class="nav-text">Blog Residentes</span>
-            </a>
-        </li>
-        <br>
-        <li>
-            <a href="/menucontabilidad">
-                <i class="fas fa-file-alt nav-icon"></i>
-                <span class="nav-text">Pagos</span>
-            </a>
-        </li>
-        <br>
-        <li>
-            <a href="/menucomercial">
-                <i class="fas fa-chart-line nav-icon"></i>
-                <span class="nav-text">Dashboard</span>
-            </a>
-        </li>
-        <br>
-        <li>
-            <a href="/menu_geolocalizacion">
-                <i class="fas fa-map-marker-alt nav-icon"></i>
-                <span class="nav-text">Geolocalización</span>
-            </a>
-        </li>
-        <br>
-        <!-- Botón para cambiar de tema -->
-        <li>
-            <a href="javascript:void(0);" id="theme-toggle">
-                <i class="fas fa-adjust nav-icon"></i>
-                <span class="nav-text">Cambiar Tema</span>
-            </a>
-        </li>
-    </ul>
-    <ul class="logout">
-        <li>
-            <a href="#">
-                <i class="fas fa-cogs nav-icon"></i>
-                <span class="nav-text">Soporte</span>
-            </a>
-        </li>
-        <li>
-            <a href="/logout">
-                <i class="fas fa-sign-out-alt nav-icon"></i>
-                <span class="nav-text">Cerrar sesión</span>
-            </a>
-        </li>
-    </ul>
-</nav>
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+  <div class="flex h-screen">
+    <!-- Hamburger Icon -->
+    <div class="hamburger" id="hamburger-menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
 
-    <script>
-        const themeToggleButton = document.getElementById("theme-toggle");
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <!-- Profile Section -->
+      <div class="profile-section">
+        <div class="profile-info">
+          <img src="https://via.placeholder.com/40" alt="Profile Picture" />
+          <span>{{name}}</span>
+        </div>
+      </div>
 
-        themeToggleButton.addEventListener("click", () => {
-            document.body.classList.toggle("light-theme");
-            document.body.classList.toggle("dark-theme");
-        });
-    </script>
+      <!-- Search Bar -->
+      <div class="search-bar">
+        <input type="text" placeholder="Buscar...">
+        <i class="fas fa-search"></i>
+      </div>
 
-     {{{body}}} <!-- Aquí se insertará el contenido de las vistas -->
-</body>
-<script>
-    // Verificar si ya hay un tema guardado en localStorage y aplicarlo
-    document.addEventListener("DOMContentLoaded", () => {
-        const savedTheme = localStorage.getItem("theme");
-        if (savedTheme) {
-            document.body.classList.remove("light-theme", "dark-theme");
-            document.body.classList.add(savedTheme);
-        }
+      <!-- Navigation Links -->
+      <nav>
+        <ul>
+          <!-- General Section -->
+          <div class="section-title">General</div>
+          <li class="mb-2">
+  <a class="flex items-center" href="/menuAdministrativo" data-link="/menuAdministrativo" title="Vista General">
+              <i class="fas fa-home mr-2"></i> Vista General
+            </a>
+          </li>
+
+
+
+  <!-- Property Management Section -->
+          <div class="section-title">--Usuarios--</div>
+       
+ <!-- edificios Section -->
+<!-- Usuarios Section -->
+<li class="mb-2">
+  <a class="flex items-center justify-between cursor-pointer"  data-links="/agregar_usuarios,/menuOperativo,/menuFinanciero"  href="#" onclick="toggleSubmenu('submenu-Usuarios')">
+    <i class="fas fa-user mr-2"></i> Usuarios
+    <i class="fas fa-chevron-down"></i>
+  </a>
+  <ul id="submenu-Usuarios" class="hidden ml-4">
+    <li class="mb-2">
+      <a class="flex items-center" href="/agregar_usuarios" title="Usuarios">
+        <i class="fas fa-user-plus mr-2"></i> Agregar
+      </a>
+    </li>
+    <li class="mb-2">
+      <a class="flex items-center" href="" title="Editar Usuarios">
+        <i class="fas fa-user-edit mr-2"></i> Editar
+      </a>
+    </li>
+    <li class="mb-2">
+      <a class="flex items-center" href="" title="Consultar Usuarios">
+        <i class="fas fa-user-check mr-2"></i> Consultar
+      </a>
+    </li>
+  </ul>
+</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <!-- Property Management Section -->
+          <div class="section-title">Inmuebles</div>
+       
+ <!-- edificios Section -->
+<li class="mb-2">
+  <a class="flex items-center justify-between cursor-pointer" href="#" onclick="toggleSubmenu('submenu-edificios')"  data-links="/agregar_edificio,/consultar_edificios"  >
+    <i class="fas fa-city mr-2"></i> Edificios
+    <i class="fas fa-chevron-down"></i>
+  </a>
+  <ul id="submenu-edificios" class="hidden ml-4">
+    <li class="mb-2">
+      <a class="flex items-center" href="/agregar_edificio" title="Inmuebles">
+        <i class="fas fa-folder-open mr-2"></i> Agregar
+      </a>
+    </li>
+    <li class="mb-2">
+      <a class="flex items-center" href="" title="Editar Inmueble">
+        <i class="fas fa-edit mr-2"></i> Editar
+      </a>
+    </li>
+    <li class="mb-2">
+      <a class="flex items-center" href="/consultar_edificios" title="Consultar Inmueble">
+        <i class="fas fa-search mr-2"></i> Consultar
+      </a>
+    </li>
+  </ul>
+</li>
+
+<!-- apartamentos Section -->
+<li class="mb-2">
+  <a class="flex items-center justify-between cursor-pointer" href="#" onclick="toggleSubmenu('submenu-apartamentos')"  data-links="/agregar_apartamento,/Consulta_apartamentos">
+    <i class="fas fa-city mr-2"></i> Apartamentos
+    <i class="fas fa-chevron-down"></i>
+  </a>
+  <ul id="submenu-apartamentos" class="hidden ml-4">
+    <li class="mb-2">
+      <a class="flex items-center" href="/agregar_apartamento" title="Inmuebles">
+        <i class="fas fa-folder-open mr-2"></i> Agregar
+      </a>
+    </li>
+    <li class="mb-2">
+      <a class="flex items-center" href="" title="Editar Inmueble">
+        <i class="fas fa-edit mr-2"></i> Editar
+      </a>
+    </li>
+    <li class="mb-2">
+      <a class="flex items-center" href="/Consulta_apartamentos" title="Consultar Inmueble">
+        <i class="fas fa-search mr-2"></i> Consultar
+      </a>
+    </li>
+  </ul>
+</li>
+
+
+
+
+
+
+
+<!-- Property Management Section -->
+<div class="section-title">--Contabilidad--</div>
+
+
+<!-- Pagos Section -->
+<li class="mb-2">
+  <a class="flex items-center justify-between cursor-pointer" href="#" onclick="toggleSubmenu('submenu-Contabilidad')"   data-links="/validar_pagos,/Consulta_Comprobantes_de_Pago">
+    <i class="fas fa-money-check-alt mr-2"></i> Pagos
+    <i class="fas fa-chevron-down"></i>
+  </a>
+  <ul id="submenu-Contabilidad" class="hidden ml-4">
+    <li class="mb-2">
+      <a class="flex items-center" href="/validar_pagos" title="Agregar Pago">
+        <i class="fas fa-plus-circle mr-2"></i> Subir pago
+      </a>
+    </li>
+    <li class="mb-2">
+      <a class="flex items-center" href="/Consulta_Comprobantes_de_Pago" title="Consultar Pagos">
+        <i class="fas fa-search-dollar mr-2"></i> Consultar
+      </a>
+    </li>
+  </ul>
+</li>
+
+
+
+<!-- Property Management Section -->
+<div class="section-title">--Comunicados--</div>
+
+<!-- Comunicado Individual Section -->
+<li class="mb-2">
+  <a class="flex items-center" href="envio_apartamentos" title="Comunicado Individual"  data-links="/envio_apartamentos">
+    <i class="fas fa-envelope-open-text mr-2"></i> Comunicado Individual
+  </a>
+</li>
+
+<!-- Comunicado General Section -->
+<li class="mb-2">
+  <a class="flex items-center" href="/ComunicadosGeneral" title="Comunicado General" data-links="/ComunicadosGeneral">
+    <i class="fas fa-bullhorn mr-2"></i> Comunicado General
+  </a>
+</li>
+
+
+
+
+
+
+
+
+
+<!-- Property Management Section -->
+<div class="section-title">--Informes--</div>
+
+
+<!-- Pagos Section -->
+<!-- Blog para Residentes Section -->
+<!-- Informes Operativos Section -->
+<li class="mb-2">
+  <a class="flex items-center justify-between cursor-pointer" href="#" onclick="toggleSubmenu('submenu-Informes')">
+    <i class="fas fa-file-alt mr-2"></i> Informes operativos
+    <i class="fas fa-chevron-down"></i>
+  </a>
+  <ul id="submenu-Informes" class="hidden ml-4">
+    <li class="mb-2">
+      <a class="flex items-center" href="" title="Crear Informe">
+        <i class="fas fa-file-signature mr-2"></i> Crear
+      </a>
+    </li>
+    <li class="mb-2">
+      <a class="flex items-center" href="" title="Consultar Informes">
+        <i class="fas fa-folder-open mr-2"></i> Consultar
+      </a>
+    </li>
+  </ul>
+</li>
+
+
+
+
+
+
+
+<!-- Property Management Section -->
+<div class="section-title">--BLOG--</div>
+
+
+<!-- Pagos Section -->
+<!-- Blog para Residentes Section -->
+<li class="mb-2">
+  <a class="flex items-center justify-between cursor-pointer" href="#" onclick="toggleSubmenu('submenu-BLOG')">
+    <i class="fas fa-blog mr-2"></i> Blog para residentes
+    <i class="fas fa-chevron-down"></i>
+  </a>
+  <ul id="submenu-BLOG" class="hidden ml-4">
+    <li class="mb-2">
+      <a class="flex items-center" href="/plantilla_blog" title="Usar Plantilla">
+        <i class="fas fa-paint-roller mr-2"></i> Usar plantilla
+      </a>
+    </li>
+    <li class="mb-2">
+      <a class="flex items-center" href="/subir_publicacion" title="Nueva Publicación">
+        <i class="fas fa-pen mr-2"></i> Nueva publicación
+      </a>
+    </li>
+    <li class="mb-2">
+      <a class="flex items-center" href="/inmuebles/consult" title="Consultar Blog">
+        <i class="fas fa-search mr-2"></i> Consultar blog
+      </a>
+    </li>
+  </ul>
+</li>
+
+
+
+    <li class="mb-2">
+  <a class="flex items-center" href="/geolocalizacion" title="Geolocalización">
+    <i class="fas fa-map-marker-alt mr-2"></i> Geolocalización
+  </a>
+</li>
+
+       
+         
+        
+        </ul>
+      </nav>
+<br>
+      <!-- Theme Toggle Button -->
+      <div class="mt-auto">
+        <button id="theme-toggle" class="w-full py-2 px-4 text-white bg-blue-500 hover:bg-blue-600 rounded-lg">
+          Cambiar Tema
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6 bg-gray-50 dark:bg-gray-800 overflow-auto transition-colors duration-300">
+      <!-- Placeholder for dynamic body content -->
+
+   <div class="main-content">
+    {{{body}}}
+</div>
+
+    </div>
+  </div>
+  <script>
+    // Hamburger menu toggle
+    const hamburger = document.getElementById('hamburger-menu');
+    const sidebar = document.getElementById('sidebar');
+
+    hamburger.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
     });
 
-    // Función para cambiar de tema
-    const themeToggleButton = document.getElementById("theme-toggle");
+    // Theme toggle logic
+    const themeToggle = document.getElementById('theme-toggle');
+    const htmlElement = document.documentElement;
 
-    themeToggleButton.addEventListener("click", () => {
-        const currentTheme = document.body.classList.contains("light-theme") ? "light-theme" : "dark-theme";
-        const newTheme = currentTheme === "light-theme" ? "dark-theme" : "light-theme";
-
-        // Aplicar el nuevo tema
-        document.body.classList.remove("light-theme", "dark-theme");
-        document.body.classList.add(newTheme);
-
-        // Guardar el tema en localStorage
-        localStorage.setItem("theme", newTheme);
+    themeToggle.addEventListener('click', () => {
+      htmlElement.classList.toggle('dark');
+      if (htmlElement.classList.contains('dark')) {
+        localStorage.setItem('theme', 'dark');
+      } else {
+        localStorage.setItem('theme', 'light');
+      }
     });
+
+    // Load theme from localStorage
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme === 'dark') {
+      htmlElement.classList.add('dark');
+    }
+  </script>
+  <script>
+  // Obtener la ruta actual
+  const currentPath = window.location.pathname;
+
+  // Obtener todos los enlaces del menú
+  const menuLinks = document.querySelectorAll('.sidebar ul li a');
+
+  // Iterar sobre los enlaces y añadir la clase 'active' al enlace cuya ruta coincida
+  menuLinks.forEach(link => {
+    if (link.dataset.link === currentPath) {
+      link.classList.add('active');
+    }
+  });
+  function toggleSubmenu(id) {
+  const submenu = document.getElementById(id);
+  submenu.classList.toggle('hidden');
+}
+
 </script>
 
-</html>
+<

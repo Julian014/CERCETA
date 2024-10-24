@@ -130,25 +130,40 @@ const crypto = require('crypto'); // Importa el módulo crypto
 
 
 
-app.get("/menuAdministrativo", (req, res) => {
+app.get("/menuAdministrativo", async (req, res) => {
     if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name || req.session.user.name;  // Use the session name or fallback
-        console.log(`El usuario ${nombreUsuario} está autenticado.`);
-        req.session.nombreGuardado = nombreUsuario; // Guarda el nombre en la sesión
+        try {
+            const nombreUsuario = req.session.name || req.session.user.name; // Usa el nombre de la sesión o una alternativa
+            console.log(`El usuario ${nombreUsuario} está autenticado.`);
+            req.session.nombreGuardado = nombreUsuario; // Guarda el nombre en la sesión
 
-        const rolesString = req.session.roles;
-        const roles = Array.isArray(rolesString) ? rolesString : [];
+            const rolesString = req.session.roles;
+            const roles = Array.isArray(rolesString) ? rolesString : [];
 
-        const jefe = roles.includes('jefe');
-        const empleado = roles.includes('empleado');
+            const jefe = roles.includes('jefe');
+            const empleado = roles.includes('empleado');
 
-        res.render("administrativo/menuadministrativo.hbs", {
-            layout: 'layouts/nav_admin.hbs', // Especifica el layout a usar
+            // Realiza la consulta a la base de datos para contar la cantidad de apartamentos
+            const [apartamentosRows] = await pool.query('SELECT COUNT(*) AS totalApartamentos FROM apartamentos');
+            const totalApartamentos = apartamentosRows[0].totalApartamentos;
 
-            name: nombreUsuario, // Pass the name to the template
-            jefe,
-            empleado
-        });
+            // Realiza la consulta a la base de datos para contar la cantidad de edificios
+            const [edificiosRows] = await pool.query('SELECT COUNT(*) AS totaledificios FROM edificios');
+            const totaledificios = edificiosRows[0].totaledificios;
+
+            // Renderiza la vista y pasa los datos necesarios
+            res.render("administrativo/menuadministrativo.hbs", {
+                layout: 'layouts/nav_admin.hbs', // Especifica el layout a usar
+                name: nombreUsuario,
+                jefe,
+                empleado,
+                totalApartamentos,
+                totaledificios // Pasa el valor a la vista
+            });
+        } catch (error) {
+            console.error('Error al obtener el conteo de apartamentos:', error);
+            res.status(500).send('Error al cargar el menú administrativo');
+        }
     } else {
         res.redirect("/login");
     }
