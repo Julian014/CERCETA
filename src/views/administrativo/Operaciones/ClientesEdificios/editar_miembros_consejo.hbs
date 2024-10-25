@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Editar Miembros del Consejo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             margin: 0;
             padding: 0;
         }
-
         .container {
             max-width: 800px;
             margin: 50px auto;
@@ -17,24 +17,20 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
         }
-
         h1 {
             text-align: center;
             color: #413d4b;
             font-size: 2em;
             margin-bottom: 20px;
         }
-
         form {
             display: flex;
             flex-direction: column;
         }
-
         label {
             margin-bottom: 5px;
             font-weight: bold;
         }
-
         input {
             margin-bottom: 20px;
             padding: 10px;
@@ -42,7 +38,6 @@
             border-radius: 5px;
             border: 1px solid #ddd;
         }
-
         button {
             padding: 10px;
             font-size: 16px;
@@ -52,6 +47,25 @@
             color: white;
             cursor: pointer;
         }
+        .icon-label {
+            display: flex;
+            align-items: center;
+        }
+        .icon-label i {
+            margin-right: 8px;
+            color: #1E99D3;
+        }
+        h2 {
+            color: #413d4b;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        h2 i {
+            margin-right: 10px;
+            color: #C92458;
+        }
     </style>
 </head>
 <body>
@@ -59,47 +73,83 @@
         <h1>Editar Miembros del Consejo</h1>
         <form action="/update_miembros_consejo" method="post">
             <input type="hidden" name="id" value="{{edificio.id}}">
-            
-            <h2>Miembro 1</h2>
-            <label for="miembro1_nombre">Nombre</label>
+
+            <h2><i class="fas fa-user"></i> Miembro 1</h2>
+            <div class="icon-label">
+                <i class="fas fa-user"></i>
+                <label for="miembro1_nombre">Nombre</label>
+            </div>
             <input type="text" id="miembro1_nombre" name="miembro1_nombre" value="{{edificio.miembro1_nombre}}" required>
             
-            <label for="miembro1_direccion">Dirección</label>
+            <div class="icon-label">
+                <i class="fas fa-map-marker-alt"></i>
+                <label for="miembro1_direccion">Dirección</label>
+            </div>
             <input type="text" id="miembro1_direccion" name="miembro1_direccion" value="{{edificio.miembro1_direccion}}" required>
             
-            <label for="miembro1_correo">Correo</label>
+            <div class="icon-label">
+                <i class="fas fa-envelope"></i>
+                <label for="miembro1_correo">Correo</label>
+            </div>
             <input type="email" id="miembro1_correo" name="miembro1_correo" value="{{edificio.miembro1_correo}}" required>
             
-            <label for="miembro1_telefono">Teléfono</label>
+            <div class="icon-label">
+                <i class="fas fa-phone"></i>
+                <label for="miembro1_telefono">Teléfono</label>
+            </div>
             <input type="text" id="miembro1_telefono" name="miembro1_telefono" value="{{edificio.miembro1_telefono}}" required>
-            
-            <h2>Miembro 2</h2>
-            <label for="miembro2_nombre">Nombre</label>
-            <input type="text" id="miembro2_nombre" name="miembro2_nombre" value="{{edificio.miembro2_nombre}}" >
-            
-            <label for="miembro2_direccion">Dirección</label>
-            <input type="text" id="miembro2_direccion" name="miembro2_direccion" value="{{edificio.miembro2_direccion}}" >
-            
-            <label for="miembro2_correo">Correo</label>
-            <input type="email" id="miembro2_correo" name="miembro2_correo" value="{{edificio.miembro2_correo}}" >
-            
-            <label for="miembro2_telefono">Teléfono</label>
-            <input type="text" id="miembro2_telefono" name="miembro2_telefono" value="{{edificio.miembro2_telefono}}" >
-            
-            <h2>Miembro 3</h2>
-            <label for="miembro3_nombre">Nombre</label>
-            <input type="text" id="miembro3_nombre" name="miembro3_nombre" value="{{edificio.miembro3_nombre}}" >
-            
-            <label for="miembro3_direccion">Dirección</label>
-            <input type="text" id="miembro3_direccion" name="miembro3_direccion" value="{{edificio.miembro3_direccion}}" >
-            
-            <label for="miembro3_correo">Correo</label>
-            <input type="email" id="miembro3_correo" name="miembro3_correo" value="{{edificio.miembro3_correo}}" >
-            
-            <label for="miembro3_telefono">Teléfono</label>
-            <input type="text" id="miembro3_telefono" name="miembro3_telefono" value="{{edificio.miembro3_telefono}}" >
 
-            <button type="submit">Guardar Cambios</button>
+            <h2><i class="fas fa-user"></i> Miembro 2</h2>
+            <div class="icon-label">
+                <i class="fas fa-user"></i>
+                <label for="miembro2_nombre">Nombre</label>
+            </div>
+            <input type="text" id="miembro2_nombre" name="miembro2_nombre" value="{{edificio.miembro2_nombre}}">
+
+            <div class="icon-label">
+                <i class="fas fa-map-marker-alt"></i>
+                <label for="miembro2_direccion">Dirección</label>
+            </div>
+            <input type="text" id="miembro2_direccion" name="miembro2_direccion" value="{{edificio.miembro2_direccion}}">
+
+            <div class="icon-label">
+                <i class="fas fa-envelope"></i>
+                <label for="miembro2_correo">Correo</label>
+            </div>
+            <input type="email" id="miembro2_correo" name="miembro2_correo" value="{{edificio.miembro2_correo}}">
+
+            <div class="icon-label">
+                <i class="fas fa-phone"></i>
+                <label for="miembro2_telefono">Teléfono</label>
+            </div>
+            <input type="text" id="miembro2_telefono" name="miembro2_telefono" value="{{edificio.miembro2_telefono}}">
+
+            <h2><i class="fas fa-user"></i> Miembro 3</h2>
+            <div class="icon-label">
+                <i class="fas fa-user"></i>
+                <label for="miembro3_nombre">Nombre</label>
+            </div>
+            <input type="text" id="miembro3_nombre" name="miembro3_nombre" value="{{edificio.miembro3_nombre}}">
+
+            <div class="icon-label">
+                <i class="fas fa-map-marker-alt"></i>
+                <label for="miembro3_direccion">Dirección</label>
+            </div>
+            <input type="text" id="miembro3_direccion" name="miembro3_direccion" value="{{edificio.miembro3_direccion}}">
+
+            <div class="icon-label">
+                <i class="fas fa-envelope"></i>
+                <label for="miembro3_correo">Correo</label>
+            </div>
+            <input type="email" id="miembro3_correo" name="miembro3_correo" value="{{edificio.miembro3_correo}}">
+
+            <div class="icon-label">
+                <i class="fas fa-phone"></i>
+                <label for="miembro3_telefono">Teléfono</label>
+            </div>
+            <input type="text" id="miembro3_telefono" name="miembro3_telefono" value="{{edificio.miembro3_telefono}}">
+
+            <button type="submit"><i class="fas fa-save"></i> Guardar Cambios</button>
         </form>
     </div>
 </body>

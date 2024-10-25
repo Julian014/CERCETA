@@ -129,7 +129,6 @@ const crypto = require('crypto'); // Importa el módulo crypto
 
 
 
-
 app.get("/menuAdministrativo", async (req, res) => {
     if (req.session.loggedin === true) {
         try {
@@ -142,6 +141,10 @@ app.get("/menuAdministrativo", async (req, res) => {
 
             const jefe = roles.includes('jefe');
             const empleado = roles.includes('empleado');
+
+            // Realiza la consulta a la base de datos para contar los residentes con rol "clientes"
+            const [clientesRows] = await pool.query('SELECT COUNT(*) AS totalClientes FROM user WHERE roles = "clientes"');
+            const totalClientes = clientesRows[0].totalClientes;
 
             // Realiza la consulta a la base de datos para contar la cantidad de apartamentos
             const [apartamentosRows] = await pool.query('SELECT COUNT(*) AS totalApartamentos FROM apartamentos');
@@ -157,11 +160,12 @@ app.get("/menuAdministrativo", async (req, res) => {
                 name: nombreUsuario,
                 jefe,
                 empleado,
+                totalClientes, // Pasa el valor a la vista
                 totalApartamentos,
                 totaledificios // Pasa el valor a la vista
             });
         } catch (error) {
-            console.error('Error al obtener el conteo de apartamentos:', error);
+            console.error('Error al obtener el conteo de datos:', error);
             res.status(500).send('Error al cargar el menú administrativo');
         }
     } else {
@@ -173,8 +177,8 @@ app.get("/menuAdministrativo", async (req, res) => {
 
 app.get('/agregar_edificio', (req, res) => {
     if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
-        res.render('administrativo/Operaciones/ClientesEdificios/agregaredificio.hbs', { nombreUsuario });
+        const name = req.session.name;
+        res.render('administrativo/Operaciones/ClientesEdificios/agregaredificio.hbs', { name,layout: 'layouts/nav_admin.hbs' });
     } else {
         res.redirect('/login');
     }
@@ -256,10 +260,10 @@ app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
 // Ruta para agregar apartamentos
 app.get('/agregar_apartamento', async (req, res) => {
     if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
+        const name = req.session.name;
         try {
             const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
-            res.render('administrativo/Operaciones/apartementos/agregarapartamento.hbs', { nombreUsuario, edificios });
+            res.render('administrativo/Operaciones/apartementos/agregarapartamento.hbs', { name, edificios ,layout: 'layouts/nav_admin.hbs'});
         } catch (error) {
             console.error('Error al obtener edificios:', error);
             res.status(500).send('Error al obtener edificios');
@@ -346,7 +350,7 @@ app.get('/consultar_edificios', async (req, res) => {
                 }
             });
 
-            res.render('administrativo/Operaciones/ClientesEdificios/consultaredificios.hbs', { nombreUsuario, edificios });
+            res.render('administrativo/Operaciones/ClientesEdificios/consultaredificios.hbs', { nombreUsuario, edificios,layout: 'layouts/nav_admin.hbs' });
         } catch (error) {
             console.error('Error al obtener edificios:', error);
             res.status(500).send('Error al obtener edificios');
@@ -355,6 +359,9 @@ app.get('/consultar_edificios', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
 app.post('/getApartamentos_envio', async (req, res) => {
     const { edificiosSeleccionados } = req.body;
 
@@ -382,8 +389,8 @@ app.post('/getApartamentos_envio', async (req, res) => {
 // Ruta para consultar apartamentos
 app.get('/Consulta_apartamentos', (req, res) => {
     if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
-        res.render('administrativo/Operaciones/apartementos/consulta_apartamentos', { nombreUsuario });
+        const name = req.session.name;
+        res.render('administrativo/Operaciones/apartementos/consulta_apartamentos', { name ,layout: 'layouts/nav_admin.hbs'});
     } else {
         res.redirect('/login');
     }
@@ -459,7 +466,7 @@ app.get('/getApartamentoDetalles', async (req, res) => {
 
 app.get('/editar_apartamento', async (req, res) => {
     if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
+        const name = req.session.name;
         const apartamentoId = req.query.apartamentoId;
 
         if (!apartamentoId) {
@@ -474,7 +481,7 @@ app.get('/editar_apartamento', async (req, res) => {
                 apartamento.foto = apartamento.foto.toString('base64');
             }
 
-            res.render('administrativo/Operaciones/apartementos/editar_apartamentos', { nombreUsuario, apartamento });
+            res.render('administrativo/Operaciones/apartementos/editar_apartamentos', { name, apartamento ,layout: 'layouts/nav_admin.hbs'});
         } catch (error) {
             console.error(error);
             res.status(500).send('Error al obtener los detalles del apartamento');
@@ -512,7 +519,7 @@ app.post('/update_apartamento', async (req, res) => {
 
 app.get('/editar_edificio', async (req, res) => {
     if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
+        const name = req.session.name;
         const edificioId = req.query.edificioId;
 
         if (!edificioId) {
@@ -533,7 +540,7 @@ app.get('/editar_edificio', async (req, res) => {
                 edificio.foto = edificio.foto.toString('base64');
             }
 
-            res.render('administrativo/Operaciones/ClientesEdificios/editar_edificios.hbs', { nombreUsuario, edificio });
+            res.render('administrativo/Operaciones/ClientesEdificios/editar_edificios.hbs', { name, edificio, layout: 'layouts/nav_admin.hbs'});
         } catch (error) {
             console.error(error);
             res.status(500).send('Error al obtener los detalles del edificio');
@@ -577,7 +584,7 @@ app.post('/update_edificio', async (req, res) => {
 
 app.get('/editar_miembros_consejo', async (req, res) => {
     if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
+        const name = req.session.name;
         const edificioId = req.query.edificioId;
 
         if (!edificioId) {
@@ -588,7 +595,7 @@ app.get('/editar_miembros_consejo', async (req, res) => {
             const [rows] = await pool.query('SELECT * FROM edificios WHERE id = ?', [edificioId]);
             const edificio = rows[0];
 
-            res.render('administrativo/Operaciones/ClientesEdificios/editar_miembros_consejo.hbs', { nombreUsuario, edificio });
+            res.render('administrativo/Operaciones/ClientesEdificios/editar_miembros_consejo.hbs', { name, edificio ,layout: 'layouts/nav_admin.hbs'});
         } catch (error) {
             console.error(error);
             res.status(500).send('Error al obtener los detalles del edificio');
@@ -631,7 +638,6 @@ app.post('/update_miembros_consejo', async (req, res) => {
 
 
 
-//
 // Ruta para mostrar la lista de edificios
 app.get('/ComunicadosGeneral', async (req, res) => {
     if (req.session.loggedin === true) {
@@ -641,7 +647,8 @@ app.get('/ComunicadosGeneral', async (req, res) => {
         try {
             const [results] = await pool.query(query);
             res.render('administrativo/Operaciones/comunicadoGeneral/nuevocomunicadoGeneral.hbs', { 
-                nombreUsuario,
+                name: nombreUsuario, 
+                layout: 'layouts/nav_admin.hbs', 
                 edificios: results 
             });
         } catch (err) {
@@ -652,8 +659,6 @@ app.get('/ComunicadosGeneral', async (req, res) => {
         res.redirect('/login');
     }
 });
-
-
 
 
 
@@ -750,9 +755,11 @@ app.get('/envio_apartamentos', async (req, res) => {
         try {
             const [results] = await pool.query('SELECT * FROM edificios');
             res.render('administrativo/Operaciones/comunicadoApartmamentos/comunicado_individual.hbs', { 
-                nombreUsuario,
-                edificios: results
+                name: nombreUsuario, 
+                layout: 'layouts/nav_admin.hbs', 
+                edificios: results 
             });
+         
         } catch (err) {
             console.error(err);
             res.status(500).send('Error al obtener los edificios');
@@ -870,11 +877,12 @@ app.post('/enviarComunicado_individual', upload.array('archivos'), async (req, r
 // Ruta para obtener los edificios y renderizar la vista
 app.get('/validar_pagos', async (req, res) => {
     if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
+        const name = req.session.name;
         try {
             const [results] = await pool.query('SELECT * FROM edificios');
             res.render('administrativo/CONTABILIDAD/validarPagos/validarpagos.hbs', { 
-                nombreUsuario,
+                name,
+                layout: 'layouts/nav_admin.hbs',
                 edificios: results
             });
         } catch (err) {
@@ -1016,48 +1024,61 @@ Cerceta`
 
 app.get('/Consulta_Comprobantes_de_Pago', (req, res) => {
     if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.name;
-        res.render('administrativo/CONTABILIDAD/validarPagos/consultar_pagos.hbs', { nombreUsuario });
+        const name = req.session.name;
+        res.render('administrativo/CONTABILIDAD/validarPagos/consultar_pagos.hbs', { name,layout: 'layouts/nav_admin.hbs' });
     } else {
         res.redirect('/login');
     }
 });
 
 
+app.post('/buscarPagos', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const { id, apartamento_id, fecha_inicio, fecha_fin, nombre_edificio, numero_apartamento } = req.body;
 
- 
+        let query = "SELECT * FROM pagos_apartamentos WHERE 1=1";
+        const params = [];
 
-
-app.post('/obtener_pagos', (req, res) => {
-    const { fechaInicio, fechaFin } = req.body;
-
-    // Si los valores de fecha están vacíos, los reemplazamos con fechas extremas
-    const fechaInicioFiltro = fechaInicio || '1900-01-01';
-    const fechaFinFiltro = fechaFin || '2100-12-31';
-
-    // Consulta SQL para filtrar por rango de fechas en `fecha_pago`
-    const query = `
-        SELECT 
-            id, fecha_pago, valor_pago, nombre_edificio, numero_apartamento, estado
-        FROM 
-            pagos_apartamentos
-        WHERE 
-            fecha_pago BETWEEN ? AND ?`;
-
-    // Parámetros de la consulta: rango de fechas
-    const params = [fechaInicioFiltro, fechaFinFiltro];
-
-    pool.query(query, params, (err, results) => {
-        if (err) {
-            console.error('Error al consultar pagos:', err);
-            res.status(500).json({ message: 'Error al consultar pagos' });
-        } else {
-            console.log('Resultados:', results); // Mostrar resultados en consola
-            res.json(results);
+        if (id) {
+            query += " AND id = ?";
+            params.push(id);
         }
-    });
-});
+        if (apartamento_id) {
+            query += " AND apartamento_id = ?";
+            params.push(apartamento_id);
+        }
+        if (fecha_inicio && fecha_fin) {
+            query += " AND fecha_pago BETWEEN ? AND ?";
+            params.push(fecha_inicio, fecha_fin);
+        }
+        if (nombre_edificio) {
+            query += " AND nombre_edificio LIKE ?";
+            params.push(`%${nombre_edificio}%`);
+        }
+        if (numero_apartamento) {
+            query += " AND numero_apartamento LIKE ?";
+            params.push(`%${numero_apartamento}%`);
+        }
 
+        console.log("Query:", query);
+        console.log("Params:", params);
+
+        try {
+            const [results] = await pool.query(query, params);
+            console.log("Resultados de la consulta:", results);
+            res.render('administrativo/CONTABILIDAD/validarPagos/consultar_pagos.hbs', {
+                name: req.session.name,
+                pagos: results,
+                layout: 'layouts/nav_admin.hbs'
+            });
+        } catch (error) {
+            console.error("Error al consultar los pagos:", error);
+            res.status(500).send("Error en la consulta de pagos");
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
 
 
 

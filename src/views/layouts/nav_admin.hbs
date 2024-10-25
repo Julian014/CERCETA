@@ -98,7 +98,7 @@
     }
 
     .profile-section .profile-info span {
-      font-weight: 600;
+      font-weight: 700;
       color: #00796b;
     }
 
@@ -181,6 +181,11 @@
     .dark .hamburger {
       background-color: #2d3748;
     }
+    #perfil{
+width: 120px;
+height: 120px;
+
+    }
   </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
@@ -197,7 +202,7 @@
       <!-- Profile Section -->
       <div class="profile-section">
         <div class="profile-info">
-          <img src="https://via.placeholder.com/40" alt="Profile Picture" />
+          <img  id="perfil" src="imagenes/2022cercetafinal-BLANCO_Mesa de trabajo 1.png" alt="Profile Picture" />
           <span>{{name}}</span>
         </div>
       </div>
@@ -277,10 +282,7 @@
         <i class="fas fa-folder-open mr-2"></i> Agregar
       </a>
     </li>
-    <li class="mb-2">
-      <a class="flex items-center" href="" title="Editar Inmueble">
-        <i class="fas fa-edit mr-2"></i> Editar
-      </a>
+
     </li>
     <li class="mb-2">
       <a class="flex items-center" href="/consultar_edificios" title="Consultar Inmueble">
@@ -300,11 +302,6 @@
     <li class="mb-2">
       <a class="flex items-center" href="/agregar_apartamento" title="Inmuebles">
         <i class="fas fa-folder-open mr-2"></i> Agregar
-      </a>
-    </li>
-    <li class="mb-2">
-      <a class="flex items-center" href="" title="Editar Inmueble">
-        <i class="fas fa-edit mr-2"></i> Editar
       </a>
     </li>
     <li class="mb-2">

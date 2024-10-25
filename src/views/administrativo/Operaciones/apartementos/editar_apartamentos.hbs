@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Editar Apartamento</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             margin: 0;
             padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
         }
 
         .container {
@@ -20,7 +23,7 @@
 
         h1 {
             text-align: center;
-            color: #413d4b;
+            color: #1E99D3;
             font-size: 2em;
             margin-bottom: 20px;
         }
@@ -31,26 +34,51 @@
         }
 
         label {
-            margin-bottom: 5px;
             font-weight: bold;
+            color: #413d4b;
+            display: flex;
+            align-items: center;
         }
 
-        input, textarea {
-            margin-bottom: 20px;
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
+        .icon-label i {
+            margin-right: 8px;
+            color: #1E99D3;
+        }
+
+        .icon-input {
+            display: flex;
+            align-items: center;
             border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f4f4f4;
+            margin-bottom: 20px;
+        }
+
+        .icon-input input {
+            border: none;
+            outline: none;
+            width: 100%;
+            padding: 8px;
+            background-color: transparent;
+            font-size: 1em;
+            color: #413d4b;
         }
 
         button {
-            padding: 10px;
-            font-size: 16px;
+            padding: 12px;
+            font-size: 1.2em;
+            font-weight: bold;
             border-radius: 5px;
             border: none;
-            background-color: #413d4b;
+            background-color: #1E99D3;
             color: white;
             cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #C92458;
         }
 
         .foto-container {
@@ -63,12 +91,13 @@
             height: 150px;
             border-radius: 50%;
             object-fit: cover;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Editar Apartamento</h1>
+        <h1><i class="fas fa-edit"></i> Editar Apartamento</h1>
         <form action="/update_apartamento" method="post">
             <input type="hidden" name="id" value="{{apartamento.id}}">
             <div class="foto-container">
@@ -76,22 +105,33 @@
                 <img src="data:image/jpeg;base64,{{apartamento.foto}}" alt="Foto del apartamento">
                 {{/if}}
             </div>
-            <label for="numero">Número</label>
-            <input type="text" id="numero" name="numero" value="{{apartamento.numero}}" required>
 
-            <label for="piso">Piso</label>
-            <input type="number" id="piso" name="piso" value="{{apartamento.piso}}" required>
+            <label class="icon-label" for="numero"><i class="fas fa-door-closed"></i> Número</label>
+            <div class="icon-input">
+                <input type="text" id="numero" name="numero" value="{{apartamento.numero}}" required>
+            </div>
 
-            <label for="responsable">Responsable</label>
-            <input type="text" id="responsable" name="responsable" value="{{apartamento.responsable}}" required>
+            <label class="icon-label" for="piso"><i class="fas fa-layer-group"></i> Piso</label>
+            <div class="icon-input">
+                <input type="number" id="piso" name="piso" value="{{apartamento.piso}}" required>
+            </div>
 
-            <label for="celular">Celular</label>
-            <input type="text" id="celular" name="celular" value="{{apartamento.celular}}" required>
+            <label class="icon-label" for="responsable"><i class="fas fa-user"></i> Responsable</label>
+            <div class="icon-input">
+                <input type="text" id="responsable" name="responsable" value="{{apartamento.responsable}}" required>
+            </div>
 
-            <label for="correo">Correo</label>
-            <input type="email" id="correo" name="correo" value="{{apartamento.correo}}" required>
+            <label class="icon-label" for="celular"><i class="fas fa-mobile-alt"></i> Celular</label>
+            <div class="icon-input">
+                <input type="text" id="celular" name="celular" value="{{apartamento.celular}}" required>
+            </div>
 
-            <button type="submit">Guardar Cambios</button>
+            <label class="icon-label" for="correo"><i class="fas fa-envelope"></i> Correo</label>
+            <div class="icon-input">
+                <input type="email" id="correo" name="correo" value="{{apartamento.correo}}" required>
+            </div>
+
+            <button type="submit"><i class="fas fa-save"></i> Guardar Cambios</button>
         </form>
     </div>
 </body>
