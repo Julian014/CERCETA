@@ -1,31 +1,216 @@
-<form action="/subir_publicacion" method="POST" enctype="multipart/form-data">
-    <label for="edificio">Seleccione el Edificio:</label>
-    <select name="edificio" id="edificio" required>
-        {{#each edificios}}
-            <option value="{{this.id}}">{{this.nombre}}</option>
-        {{/each}}
-    </select>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir Publicación</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .form-container {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .form-container h2 {
+            text-align: center;
+            color: #413d4b;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            color: #666;
+        }
+        select, input[type="text"], input[type="date"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            color: #666;
+        }
+        .file-input-container {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px dashed #90c9a7;
+            border-radius: 5px;
+            margin-top: 5px;
+            color: #413d4b;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        .file-input-container:hover {
+            border-color: #76b08f;
+        }
+        .file-input-container i {
+            margin-right: 10px;
+            font-size: 1.2em;
+            color: #90c9a7;
+        }
+        .file-input-container input[type="file"] {
+            display: none;
+        }
+        .file-input-label {
+            flex: 1;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            display: none;
+        }
+        .success-message {
+            color: green;
+            font-size: 1em;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+        button[type="submit"] {
+            background-color: #90c9a7;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            padding: 12px;
+            width: 100%;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+        button[type="submit"]:hover {
+            background-color: #76b08f;
+        }
+    </style>
+</head>
+<body>
 
-    <label for="titulo">Título de la Publicación:</label>
-    <input type="text" name="titulo" id="titulo" required>
+<div class="form-container">
+    <h2>Subir Publicación</h2>
+    <form id="uploadForm">
+        <label for="edificio">Seleccione el Edificio:</label>
+        <select name="edificio" id="edificio" required>
+            {{#each edificios}}
+                <option value="{{this.id}}">{{this.nombre}}</option>
+            {{/each}}
+        </select>
 
-    <label for="fecha">Fecha de la Publicación:</label>
-    <input type="date" name="fecha" id="fecha" required>
+        <label for="titulo">Título de la Publicación:</label>
+        <input type="text" name="titulo" id="titulo" required>
 
-    <label for="descripcion">Descripción o Información Adicional:</label>
-    <textarea name="descripcion" id="descripcion" rows="4"></textarea>
+        <label for="fecha">Fecha de la Publicación:</label>
+        <input type="date" name="fecha" id="fecha" readonly>
 
-    <label for="imagen">Subir Imagen:</label>
-    <input type="file" name="imagen" id="imagen" accept="image/*">
+        <label for="descripcion">Descripción o Información Adicional:</label>
+        <textarea name="descripcion" id="descripcion" rows="4" placeholder="Escribe una breve descripción..."></textarea>
 
-    <label for="pdf">Subir PDF:</label>
-    <input type="file" name="pdf" id="pdf" accept="application/pdf">
+        <label for="imagen">Subir Imagen PNG:</label>
+        <div class="file-input-container" onclick="document.getElementById('imagen').click();">
+            <i class="fas fa-image"></i>
+            <span class="file-input-label">Seleccionar Imagen (PNG)</span>
+            <input type="file" name="imagen" id="imagen" accept="image/*">
+        </div>
+        <span class="error-message" id="imagenError">Archivo no compatible. Solo se permiten imágenes PNG.</span>
 
-    <label for="word">Subir Documento Word:</label>
-    <input type="file" name="word" id="word" accept=".doc,.docx">
+        <label for="pdf">Subir PDF:</label>
+        <div class="file-input-container" onclick="document.getElementById('pdf').click();">
+            <i class="fas fa-file-pdf"></i>
+            <span class="file-input-label">Seleccionar PDF</span>
+            <input type="file" name="pdf" id="pdf" accept="application/pdf">
+        </div>
+        <span class="error-message" id="pdfError">Archivo no compatible. Solo se permiten archivos PDF.</span>
 
-    <label for="excel">Subir Hoja de Cálculo Excel:</label>
-    <input type="file" name="excel" id="excel" accept=".xls,.xlsx">
+        <label for="word">Subir Documento Word:</label>
+        <div class="file-input-container" onclick="document.getElementById('word').click();">
+            <i class="fas fa-file-word"></i>
+            <span class="file-input-label">Seleccionar Documento Word</span>
+            <input type="file" name="word" id="word" accept=".doc,.docx">
+        </div>
+        <span class="error-message" id="wordError">Archivo no compatible. Solo se permiten archivos Word (.doc, .docx).</span>
 
-    <button type="submit">Subir Publicación</button>
-</form>
+        <label for="excel">Subir Hoja de Cálculo Excel:</label>
+        <div class="file-input-container" onclick="document.getElementById('excel').click();">
+            <i class="fas fa-file-excel"></i>
+            <span class="file-input-label">Seleccionar Hoja de Cálculo Excel</span>
+            <input type="file" name="excel" id="excel" accept=".xls,.xlsx">
+        </div>
+        <span class="error-message" id="excelError">Archivo no compatible. Solo se permiten archivos Excel (.xls, .xlsx).</span>
+
+        <button type="submit">Subir Publicación</button>
+    </form>
+    <p class="success-message" id="successMessage">Publicación subida exitosamente.</p>
+</div>
+
+<script>
+    window.onload = function() {
+        const fechaInput = document.getElementById('fecha');
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        fechaInput.value = `${year}-${month}-${day}`;
+    };
+
+document.getElementById('uploadForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+
+    fetch('/subir_publicacion', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            document.getElementById('successMessage').style.display = 'block';
+
+            // Recargar la página después de un breve retraso
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000); // Espera 1 segundo antes de recargar (ajustable)
+        } else {
+            alert('Hubo un error al subir la publicación.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Hubo un error al subir la publicación.');
+    });
+});
+
+    function validateFile(inputElement, allowedTypes, errorElementId) {
+        const file = inputElement.files[0];
+        const errorMessage = document.getElementById(errorElementId);
+        
+        if (file && !allowedTypes.includes(file.type)) {
+            inputElement.value = "";
+            errorMessage.style.display = "block";
+        } else {
+            errorMessage.style.display = "none";
+        }
+    }
+
+    document.getElementById('imagen').addEventListener('change', function() {
+        validateFile(this, ['image/png'], 'imagenError');
+    });
+
+    document.getElementById('pdf').addEventListener('change', function() {
+        validateFile(this, ['application/pdf'], 'pdfError');
+    });
+
+    document.getElementById('word').addEventListener('change', function() {
+        validateFile(this, ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'], 'wordError');
+    });
+
+    document.getElementById('excel').addEventListener('change', function() {
+        validateFile(this, ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'], 'excelError');
+    });
+</script>
+
+</body>
+</html>

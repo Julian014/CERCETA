@@ -1195,7 +1195,7 @@ app.get('/agregar_usuarios', (req, res) => {
 app.get('/plantilla_blog', (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
-        res.render('blog/plantilla_simple.hbs', { nombreUsuario });
+        res.render('blog/plantilla_simple.hbs', { nombreUsuario,layout: 'layouts/nav_admin.hbs' });
     } else {
         res.redirect('/login');
     }
@@ -1205,8 +1205,8 @@ app.get('/subir_publicacion', async (req, res) => {
     if (req.session.loggedin === true) {
         try {
             const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
-            const nombreUsuario = req.session.name;
-            res.render('blog/agregar_blog.hbs', { nombreUsuario, edificios });
+            const name = req.session.name;
+            res.render('blog/agregar_blog.hbs', { name, edificios ,layout: 'layouts/nav_admin.hbs'});
         } catch (error) {
             console.error('Error al obtener los edificios:', error);
             res.status(500).send('Error interno del servidor');
