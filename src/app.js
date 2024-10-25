@@ -3,6 +3,7 @@ const session = require('express-session');
 const hbs = require('hbs');
 const pool = require('./db'); // Importamos la configuración de la base de datos
 const path = require('path');
+const moment = require('moment');
 
 const app = express();
 
@@ -30,6 +31,11 @@ app.get('/login', (req, res) => {
 // Asegúrate de que Express pueda manejar datos en formato JSON
 app.use(express.json());
 
+
+
+hbs.registerHelper('formatDate', (date) => {
+    return moment(date).format('DD/MM/YYYY');
+});
 
 // Ruta para manejar el login
 app.post('/login', async (req, res) => {
@@ -1032,9 +1038,11 @@ app.get('/Consulta_Comprobantes_de_Pago', (req, res) => {
 });
 
 
+
+
 app.post('/buscarPagos', async (req, res) => {
     if (req.session.loggedin === true) {
-        const { id, apartamento_id, fecha_inicio, fecha_fin, nombre_edificio, numero_apartamento } = req.body;
+        const { id, apartamento_num, fecha_inicio, fecha_fin, nombre_edificio, numero_apartamento } = req.body;
 
         let query = "SELECT * FROM pagos_apartamentos WHERE 1=1";
         const params = [];
@@ -1043,9 +1051,9 @@ app.post('/buscarPagos', async (req, res) => {
             query += " AND id = ?";
             params.push(id);
         }
-        if (apartamento_id) {
-            query += " AND apartamento_id = ?";
-            params.push(apartamento_id);
+        if (apartamento_num) {
+            query += " AND numero_apartamento = ?";
+            params.push(apartamento_num);
         }
         if (fecha_inicio && fecha_fin) {
             query += " AND fecha_pago BETWEEN ? AND ?";
@@ -1060,12 +1068,8 @@ app.post('/buscarPagos', async (req, res) => {
             params.push(`%${numero_apartamento}%`);
         }
 
-        console.log("Query:", query);
-        console.log("Params:", params);
-
         try {
             const [results] = await pool.query(query, params);
-            console.log("Resultados de la consulta:", results);
             res.render('administrativo/CONTABILIDAD/validarPagos/consultar_pagos.hbs', {
                 name: req.session.name,
                 pagos: results,
@@ -1080,6 +1084,49 @@ app.post('/buscarPagos', async (req, res) => {
     }
 });
 
+app.get('/descargarDocumento/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const [rows] = await pool.query("SELECT documento_pago FROM pagos_apartamentos WHERE id = ?", [id]);
+        
+        if (rows.length > 0 && rows[0].documento_pago) {
+            const documento = rows[0].documento_pago;
+            res.setHeader('Content-Disposition', 'attachment; filename=comprobante_pago.png'); // Forzar extensión .png
+            res.setHeader('Content-Type', 'image/png'); // Tipo MIME para PNG
+            res.send(documento);
+        } else {
+            res.status(404).send("Documento no encontrado");
+        }
+    } catch (error) {
+        console.error("Error al descargar el documento:", error);
+        res.status(500).send("Error al descargar el documento");
+    }
+});
+
+
+
+// Ruta para obtener edificios
+app.get('/obtenerEdificios', async (req, res) => {
+    try {
+        const [edificios] = await pool.query("SELECT DISTINCT nombre_edificio FROM pagos_apartamentos");
+        res.json(edificios);
+    } catch (error) {
+        console.error("Error al obtener edificios:", error);
+        res.status(500).json({ error: "Error al obtener edificios" });
+    }
+});
+
+// Ruta para obtener los apartamentos de un edificio específico
+app.get('/obtenerApartamentos/:nombre_edificio', async (req, res) => {
+    const nombre_edificio = req.params.nombre_edificio;
+    try {
+        const [apartamentos] = await pool.query("SELECT DISTINCT numero_apartamento FROM pagos_apartamentos WHERE nombre_edificio = ?", [nombre_edificio]);
+        res.json(apartamentos);
+    } catch (error) {
+        console.error("Error al obtener apartamentos:", error);
+        res.status(500).json({ error: "Error al obtener apartamentos" });
+    }
+});
 
 
 
@@ -1279,6 +1326,84 @@ app.post('/subir_publicacion', upload.fields([
         res.redirect('/login');
     }
 });
+
+
+
+app.get('/estados_cuenta', (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        res.render('administrativo/CONTABILIDAD/validarPagos/estados_cuanta.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+// Ruta para obtener todos los edificios con sus apartamentos
+app.get('/obtenerEdificiosConApartamentos', async (req, res) => {
+    try {
+        const [resultados] = await pool.query(`
+            SELECT nombre_edificio, numero_apartamento 
+            FROM pagos_apartamentos
+            ORDER BY nombre_edificio, numero_apartamento
+        `);
+
+        // Organizar los datos en un formato adecuado para la vista
+        const edificios = resultados.reduce((acc, { nombre_edificio, numero_apartamento }) => {
+            if (!acc[nombre_edificio]) {
+                acc[nombre_edificio] = [];
+            }
+            acc[nombre_edificio].push(numero_apartamento);
+            return acc;
+        }, {});
+
+        res.json(edificios);
+    } catch (error) {
+        console.error("Error al obtener edificios con apartamentos:", error);
+        res.status(500).json({ error: "Error al obtener edificios con apartamentos" });
+    }
+});
+
+
+app.get('/obtenerEdificiosConPagos', async (req, res) => {
+    try {
+        const [resultados] = await pool.query(`
+            SELECT nombre_edificio, numero_apartamento, 
+                   YEAR(fecha_pago) AS year, MONTH(fecha_pago) AS month, 
+                   SUM(valor_pago) AS total_pago
+            FROM pagos_apartamentos
+            GROUP BY nombre_edificio, numero_apartamento, year, month
+            ORDER BY nombre_edificio, numero_apartamento, year, month
+        `);
+
+        // Organize data for the frontend, filling in missing months with 0
+        const edificios = {};
+
+        resultados.forEach(({ nombre_edificio, numero_apartamento, year, month, total_pago }) => {
+            if (!edificios[nombre_edificio]) {
+                edificios[nombre_edificio] = {};
+            }
+            if (!edificios[nombre_edificio][numero_apartamento]) {
+                edificios[nombre_edificio][numero_apartamento] = Array(12).fill(0); // Initialize 12 months with 0
+            }
+            edificios[nombre_edificio][numero_apartamento][month - 1] = total_pago; // Set the total for the specific month
+        });
+
+        res.json(edificios);
+    } catch (error) {
+        console.error("Error al obtener datos de pagos:", error);
+        res.status(500).json({ error: "Error al obtener datos de pagos" });
+    }
+});
+
+
+
+
+
+
+
+
+
+
 
 
 
