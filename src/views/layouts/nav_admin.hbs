@@ -389,15 +389,54 @@ height: 120px;
 <!-- Informes Operativos Section -->
 <li class="mb-2">
   <a class="flex items-center justify-between cursor-pointer" href="#" onclick="toggleSubmenu('submenu-Informes')">
-    <i class="fas fa-file-alt mr-2"></i> Informes operativos
+    <i class="fas fa-file-alt mr-2"></i> Bitacoras
     <i class="fas fa-chevron-down"></i>
   </a>
-  <ul id="submenu-Informes" class="hidden ml-4">
+
+
+ <ul id="submenu-Informes" class="hidden ml-4">
     <li class="mb-2">
-      <a class="flex items-center" href="" title="Crear Informe">
+      <a class="flex items-center justify-between cursor-pointer" href="#" onclick="toggleSubmenu('submenu-CrearInforme')">
         <i class="fas fa-file-signature mr-2"></i> Crear
+        <i class="fas fa-chevron-right ml-auto"></i>
       </a>
-    </li>
+  <!-- Submenú para "Crear" -->
+<ul id="submenu-CrearInforme" class="hidden ml-6">
+  <li class="mb-2">
+    <a class="flex items-center" href="/crear_informe_mantenimiento" title="Informe Mensual">
+      <i class="fas fa-tools mr-2"></i> Mantenimiento
+    </a>
+  </li>
+  <li class="mb-2">
+    <a class="flex items-center" href="/informe_anual" title="Informe Anual">
+      <i class="fas fa-seedling mr-2"></i> Jardinería
+    </a>
+  </li>
+  <li class="mb-2">
+    <a class="flex items-center" href="/informe_anual" title="Informe Anual">
+      <i class="fas fa-broom mr-2"></i> Aseo
+    </a>
+  </li>
+  <li class="mb-2">
+    <a class="flex items-center" href="/informe_anual" title="Informe Anual">
+      <i class="fas fa-bolt mr-2"></i> Eléctrico
+    </a>
+  </li>
+  <li class="mb-2">
+    <a class="flex items-center" href="/informe_anual" title="Informe Anual">
+      <i class="fas fa-water mr-2"></i> Hidráulica
+    </a>
+  </li>
+  <li class="mb-2">
+    <a class="flex items-center" href="/informe_anual" title="Informe Anual">
+      <i class="fas fa-house-damage mr-2"></i> Cubiertas
+    </a>
+  </li>
+</ul>
+
+
+
+
     <li class="mb-2">
       <a class="flex items-center" href="" title="Consultar Informes">
         <i class="fas fa-folder-open mr-2"></i> Consultar
@@ -435,7 +474,7 @@ height: 120px;
       </a>
     </li>
     <li class="mb-2">
-      <a class="flex items-center" href="/inmuebles/consult" title="Consultar Blog">
+      <a class="flex items-center" href="/seleccionar_edificio_blog" title="Consultar Blog">
         <i class="fas fa-search mr-2"></i> Consultar blog
       </a>
     </li>

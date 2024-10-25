@@ -1396,16 +1396,138 @@ app.get('/obtenerEdificiosConPagos', async (req, res) => {
 });
 
 
+app.get('/seleccionar_edificio_blog', (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        
+        pool.query('SELECT id, nombre FROM edificios')
+            .then(([resultados]) => {
+                res.render('blog/seleccionar_edificio.hbs', { name, edificios: resultados, layout: 'layouts/nav_admin.hbs' });
+            })
+            .catch(err => {
+                console.error(err);
+                res.status(500).send('Error al obtener edificios');
+            });
+    } else {
+        res.redirect('/login');
+    }
+});
+app.get('/ver_blog_admin', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        const edificioId = req.query.edificio_id;
+
+        try {
+            const [resultados] = await pool.query('SELECT * FROM publicaciones WHERE edificio_id = ? ORDER BY fecha DESC', [edificioId]);
+            
+            // Convertir los datos binarios a base64
+            const blogPosts = resultados.map((post) => {
+                return {
+                    ...post,
+                    imagen: post.imagen ? post.imagen.toString('base64') : null,
+                    pdf: post.pdf ? post.pdf.toString('base64') : null,
+                    word: post.word ? post.word.toString('base64') : null,
+                    excel: post.excel ? post.excel.toString('base64') : null
+                };
+            });
+
+            res.render('blog/consulta_admin.hbs', { name, blogPosts, layout: 'layouts/nav_admin.hbs' });
+        } catch (err) {
+            console.error(err);
+            res.status(500).send('Error al obtener las entradas del blog');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
 
 
 
 
 
+app.get('/informe_operativo', (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        res.render('administrativo/informes/crear_informe_operativo.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+app.get('/crear_informe_mantenimiento', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+
+        try {
+            // Consulta a la base de datos para obtener la lista de edificios
+            const [results] = await pool.query('SELECT id, nombre FROM edificios');
+            
+            // Renderiza la plantilla pasando la lista de edificios
+            res.render('administrativo/informes/crear/mantenimiento.hbs', { name, edificios: results, layout: 'layouts/nav_admin.hbs' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).send("Error al obtener edificios");
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
 
 
+app.post('/guardar_informe', upload.fields([
+    { name: 'imagen_antes', maxCount: 1 },
+    { name: 'imagen_durante', maxCount: 1 },
+    { name: 'imagen_despues', maxCount: 1 }
+]), async (req, res) => {
 
+    if (!req.body.fecha_informe) {
+        return res.status(400).send("La fecha del informe es obligatoria.");
+    }
 
+    const data = {
+        fecha_informe: req.body.fecha_informe,
+        realizado_por: req.body.realizado_por,
+        edificio_id: req.body.edificio,
+        transformador: req.body.transformador,
+        transformador_obs: req.body.transformador_obs,
+        planta_electrica: req.body.planta_electrica,
+        planta_electrica_obs: req.body.planta_electrica_obs,
+        motobomba_piscina: req.body.motobomba_piscina,
+        motobomba_piscina_obs: req.body.motobomba_piscina_obs,
+        bombas_sumergibles: req.body.bombas_sumergibles,
+        bombas_sumergibles_obs: req.body.bombas_sumergibles_obs,
+        tanque_reserva: req.body.tanque_reserva,
+        tanque_reserva_obs: req.body.tanque_reserva_obs,
+        equipo_gym: req.body.equipo_gym,
+        equipo_gym_obs: req.body.equipo_gym_obs,
+        sauna: req.body.sauna,
+        sauna_obs: req.body.sauna_obs,
+        turco: req.body.turco,
+        turco_obs: req.body.turco_obs,
+        piscina: req.body.piscina,
+        piscina_obs: req.body.piscina_obs,
+        cancha_tenis: req.body.cancha_tenis,
+        cancha_tenis_obs: req.body.cancha_tenis_obs,
+        juegos_infantiles: req.body.juegos_infantiles,
+        juegos_infantiles_obs: req.body.juegos_infantiles_obs,
+        salon_social: req.body.salon_social,
+        salon_social_obs: req.body.salon_social_obs,
+        otros: req.body.otros,
+        otros_obs: req.body.otros_obs,
+        imagen_antes: req.files['imagen_antes'] ? req.files['imagen_antes'][0].buffer : null,
+        imagen_durante: req.files['imagen_durante'] ? req.files['imagen_durante'][0].buffer : null,
+        imagen_despues: req.files['imagen_despues'] ? req.files['imagen_despues'][0].buffer : null
+    };
 
+    try {
+        const query = `INSERT INTO bitacora_mantenimiento_equipos SET ?`;
+        await pool.query(query, data);
+        res.send("Informe de mantenimiento guardado con éxito.");
+    } catch (error) {
+        console.error("Error al guardar el informe:", error);
+        res.status(500).send("Error al guardar el informe.");
+    }
+});
 
 // Iniciar el servidor
 app.listen(3000, () => {
