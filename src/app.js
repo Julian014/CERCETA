@@ -4,6 +4,7 @@ const hbs = require('hbs');
 const pool = require('./db'); // Importamos la configuración de la base de datos
 const path = require('path');
 const moment = require('moment');
+const fs = require('fs');
 
 const app = express();
 
@@ -1454,6 +1455,8 @@ app.get('/informe_operativo', (req, res) => {
     }
 });
 
+
+
 app.get('/crear_informe_mantenimiento', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
@@ -1473,17 +1476,35 @@ app.get('/crear_informe_mantenimiento', async (req, res) => {
     }
 });
 
-
 app.post('/guardar_informe', upload.fields([
     { name: 'imagen_antes', maxCount: 1 },
     { name: 'imagen_durante', maxCount: 1 },
-    { name: 'imagen_despues', maxCount: 1 }
+    { name: 'imagen_despues', maxCount: 1 },
+    { name: 'bitacoraPng', maxCount: 1 }
 ]), async (req, res) => {
-
     if (!req.body.fecha_informe) {
         return res.status(400).send("La fecha del informe es obligatoria.");
     }
 
+    // Definir la carpeta y archivo de la bitácora
+    const directoryPath = path.join(__dirname, 'public', 'bitacoras');
+    const fileName = `bitacora_${Date.now()}.png`;
+    const bitacoraFilePath = path.join(directoryPath, fileName); // Ruta completa para guardar el archivo
+
+    // Guardar solo la ruta relativa para la base de datos
+    const relativeFilePath = `bitacoras/${fileName}`;
+
+    // Verificar y crear la carpeta si no existe
+    if (!fs.existsSync(directoryPath)) {
+        fs.mkdirSync(directoryPath, { recursive: true });
+    }
+
+    // Guardar el archivo `bitacoraPng` en la carpeta
+    if (req.files['bitacoraPng']) {
+        fs.writeFileSync(bitacoraFilePath, req.files['bitacoraPng'][0].buffer);
+    }
+
+    // Datos para guardar en la base de datos
     const data = {
         fecha_informe: req.body.fecha_informe,
         realizado_por: req.body.realizado_por,
@@ -1516,18 +1537,53 @@ app.post('/guardar_informe', upload.fields([
         otros_obs: req.body.otros_obs,
         imagen_antes: req.files['imagen_antes'] ? req.files['imagen_antes'][0].buffer : null,
         imagen_durante: req.files['imagen_durante'] ? req.files['imagen_durante'][0].buffer : null,
-        imagen_despues: req.files['imagen_despues'] ? req.files['imagen_despues'][0].buffer : null
+        imagen_despues: req.files['imagen_despues'] ? req.files['imagen_despues'][0].buffer : null,
+        bitacoraFilePath: relativeFilePath // Guardar solo la ruta relativa en la base de datos
     };
 
     try {
         const query = `INSERT INTO bitacora_mantenimiento_equipos SET ?`;
         await pool.query(query, data);
-        res.send("Informe de mantenimiento guardado con éxito.");
+
+        // Verificar si se desea compartir el informe
+        if (req.body.compartirInforme === 'si') {
+            // Obtener correos del edificio
+            const emailsQuery = `SELECT correo FROM apartamentos WHERE edificio_id = ?`;
+            const [emails] = await pool.query(emailsQuery, [req.body.edificio]);
+            
+            // Enviar correos con el archivo adjunto
+            const transporter = nodemailer.createTransport({
+                service: 'gmail', // Cambia esto según tu proveedor de correo
+                auth: {
+                    user: 'nexus.innovationss@gmail.com',
+                    pass: 'dhmtnkcehxzfwzbd' // Cambia esto a una variable de entorno en producción
+                }
+            });
+
+            const mailOptions = {
+                from: 'nexus.innovationss@gmail.com',
+                to: emails.map(email => email.correo).join(','),
+                subject: 'Informe de Mantenimiento',
+                text: 'Adjunto el informe de mantenimiento correspondiente.',
+                attachments: [{
+                    path: bitacoraFilePath // Ruta del archivo que se guarda
+                }]
+            };
+
+            await transporter.sendMail(mailOptions);
+            res.send("Informe de mantenimiento guardado y notificaciones enviadas con éxito.");
+        } else {
+            res.send("Informe de mantenimiento guardado con éxito sin enviar notificaciones.");
+        }
     } catch (error) {
-        console.error("Error al guardar el informe:", error);
-        res.status(500).send("Error al guardar el informe.");
+        console.error("Error al guardar el informe o enviar el correo:", error);
+        res.status(500).send("Error al guardar el informe o enviar la notificación.");
     }
 });
+
+
+
+
 
 // Iniciar el servidor
 app.listen(3000, () => {

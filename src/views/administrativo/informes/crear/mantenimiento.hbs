@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Chequeo - Informe de Gestión</title>
@@ -120,11 +122,163 @@
                 padding: 8px;
             }
         }
+        .image-upload-section {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+    gap: 20px;
+}
+
+.image-upload {
+    text-align: center;
+    background-color: #f1f1f1;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 30%;
+    transition: transform 0.2s;
+}
+
+.image-upload:hover {
+    transform: scale(1.05);
+}
+
+.image-upload label {
+    display: block;
+    font-weight: bold;
+    color: #1E99D3;
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.image-upload input[type="file"] {
+    display: none;
+}
+
+.image-upload::before {
+    content: "Seleccionar Imagen";
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #7CB646;
+    color: #fff;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.image-upload input[type="file"]:focus + label::before,
+.image-upload:hover::before {
+    background-color: #5E8D34;
+}
+
+.info-section {
+    display: flex;
+    justify-content: space-between; /* Cambiar a space-between para que haya más espacio entre los elementos */
+    margin: 20px 0;
+}
+
+.info-section div {
+    flex: 1; /* Asegúrate de que cada div ocupe espacio proporcionalmente */
+    min-width: 150px; /* Añadir un ancho mínimo */
+    margin: 0 10px; /* Espaciado entre elementos */
+}
+
+.header img {
+    max-width: 100%; /* Asegúrate de que la imagen no se corte */
+    height: auto; /* Mantener la proporción de la imagen */
+}
+        .image-upload-section {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            gap: 20px;
+        }
+        .image-upload {
+            text-align: center;
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 30%;
+            transition: transform 0.2s;
+        }
+        .image-upload:hover {
+            transform: scale(1.05);
+        }
+        .image-upload label {
+            display: block;
+            font-weight: bold;
+            color: #1E99D3;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        .image-upload input[type="file"] {
+            display: none;
+        }
+        .image-upload::before {
+            content: "Seleccionar Imagen";
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #7CB646;
+            color: #fff;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        .image-upload input[type="file"]:focus + label::before,
+        .image-upload:hover::before {
+            background-color: #5E8D34;
+        }
+        .info-section {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping */
+    justify-content: space-between; /* Adjust space between items */
+    margin: 20px 0;
+}
+
+.info-section div {
+    flex: 1; /* Each div takes equal space */
+    min-width: 150px; /* Minimum width for each div */
+    max-width: 30%; /* Maximum width to prevent overflow */
+    margin: 0 10px; /* Margin between elements */
+    box-sizing: border-box; /* Ensure padding is included in the width */
+}
+
+.info-section input[type="text"],
+.info-section input[type="date"],
+.info-section select {
+    width: 100%; /* Full width within its flex container */
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .info-section {
+        flex-direction: column; /* Stack items on smaller screens */
+        align-items: center; /* Center align */
+    }
+    .info-section div {
+        max-width: 90%; /* Allow more width on smaller screens */
+    }
+    .submit-btn {
+        width: 80%;
+    }
+    th, td {
+        font-size: 12px;
+        padding: 8px;
+    }
+}
+
     </style>
 </head>
 <body>
 
-<div class="container">
+<div id="captura" class="container">
     <div class="header">
         <img src="imagenes/pixelcut-export__1_-removebg-preview.png" alt="Logo">
     </div>
@@ -148,7 +302,8 @@
             </select>
         </div>
     </div>
-
+<br>
+<br>
     <table>
         <tr>
             <th>Item No.</th>
@@ -225,53 +380,106 @@
 </tr>
 
     </table>
-
-   <div>
+</div>
+<div class="image-upload-section">
+    <div class="image-upload">
         <label for="imagen_antes">Imagen Antes:</label>
         <input type="file" id="imagen_antes" name="imagen_antes" accept="image/*" required>
     </div>
-    <div>
+    <div class="image-upload">
         <label for="imagen_durante">Imagen Durante:</label>
         <input type="file" id="imagen_durante" name="imagen_durante" accept="image/*" required>
     </div>
-    <div>
+    <div class="image-upload">
         <label for="imagen_despues">Imagen Después:</label>
         <input type="file" id="imagen_despues" name="imagen_despues" accept="image/*" required>
     </div>
+</div>
+<div>
+    <label>¿Deseas compartir el informe con el edificio?</label>
+    <select id="compartirInforme" name="compartirInforme">
+        <option value="no">No</option>
+        <option value="si">Sí</option>
+    </select>
+</div>
 
-    <input type="button" value="Generar Informe" class="submit-btn" onclick="guardarInforme()">
-    <div id="successMessage" class="success-message" style="display: none;">Guardado exitoso</div>
-    
-    
-    </div>
+
+ 
+        <input type="button" value="Generar Informe" class="submit-btn" onclick="guardarInforme()">
+        <div id="successMessage" class="success-message" style="display: none;">Guardado exitoso</div>
+  
 
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
 <script>
 async function guardarInforme() {
     const form = document.getElementById('informeForm');
     const formData = new FormData(form);
 
+    // Capturar la imagen PNG del contenido
     try {
+        // Ocultar bordes de inputs pero mostrar su contenido
+        const inputs = document.querySelectorAll('.info-section input, .info-section select');
+        inputs.forEach(input => {
+            input.style.border = 'none'; // Ocultar el borde
+            input.style.backgroundColor = 'transparent'; // Fondo transparente para los inputs
+            input.style.color = '#333'; // Asegurar que el texto sea visible
+        });
+        
+        const table = document.querySelector('table');
+        table.style.border = 'none'; // Ocultar el borde de la tabla
+        
+        // Usar setTimeout para esperar un momento antes de capturar
+        await new Promise(resolve => setTimeout(resolve, 100)); // Esperar un breve momento
+
+        // Ajustar opciones para html2canvas
+        const canvas = await html2canvas(document.getElementById("captura"), { 
+            scale: 3, // Aumentar la escala para mejorar la calidad
+            backgroundColor: "#ffffff" // Establecer un fondo blanco
+        });
+        const imageBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png", 1.0)); // Ajustar la calidad al máximo
+
+        // Restaurar los bordes de los inputs después de la captura
+        inputs.forEach(input => {
+            input.style.border = '1px solid #ccc'; // Restaurar el borde
+            input.style.backgroundColor = ''; // Restaurar el fondo original
+        });
+        table.style.border = '1px solid #ccc'; // Restaurar el borde de la tabla
+
+        // Verifica si se capturó la imagen correctamente
+        if (!imageBlob) {
+            throw new Error("Error al capturar la imagen.");
+        }
+
+        // Agregar la imagen capturada al FormData
+        formData.append("bitacoraPng", imageBlob, "bitacora.png");
+
+        console.log('Iniciando el envío del informe...');
+
         const response = await fetch('/guardar_informe', {
             method: 'POST',
             body: formData
         });
 
+        console.log(`Respuesta del servidor al guardar informe: ${response.status}`);
+        
         if (response.ok) {
             document.getElementById('successMessage').style.display = 'block';
+            console.log('Informe guardado exitosamente.');
+
+            // Ocultar el mensaje de éxito después de 3 segundos
             setTimeout(() => {
                 document.getElementById('successMessage').style.display = 'none';
-                location.reload(); // Recargar la página después de mostrar el mensaje
             }, 3000);
         } else {
-            alert("Hubo un problema al guardar el informe.");
+            const errorMessage = await response.text(); // Capturar el mensaje de error del servidor
+            alert(`Hubo un problema al guardar el informe: ${errorMessage}`);
         }
     } catch (error) {
-        console.error("Error al guardar:", error);
-        alert("Error en la conexión al servidor.");
+        console.error("Error al guardar:", error.message); // Muestra el mensaje de error
+        alert("Ocurrió un error al procesar la solicitud. Por favor, inténtalo de nuevo.");
     }
 }
-
-
 </script>
-</html>
