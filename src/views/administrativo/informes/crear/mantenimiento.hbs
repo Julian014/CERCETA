@@ -273,7 +273,18 @@
         padding: 8px;
     }
 }
-
+ #loadingIndicator {
+            display: none; /* Ocultar inicialmente */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 1000; /* Asegurarse de que esté por encima de otros elementos */
+        }
     </style>
 </head>
 <body>
@@ -408,6 +419,7 @@
         <input type="button" value="Generar Informe" class="submit-btn" onclick="guardarInforme()">
         <div id="successMessage" class="success-message" style="display: none;">Guardado exitoso</div>
   
+<div id="loadingIndicator">Cargando, por favor espere...</div>
 
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -417,69 +429,49 @@
 async function guardarInforme() {
     const form = document.getElementById('informeForm');
     const formData = new FormData(form);
+    
+    // Mostrar indicador de carga
+    document.getElementById('loadingIndicator').style.display = 'block';
+    const submitButton = document.querySelector('.submit-btn');
+    submitButton.disabled = true; // Deshabilitar botón mientras se procesa
 
-    // Capturar la imagen PNG del contenido
     try {
-        // Ocultar bordes de inputs pero mostrar su contenido
-        const inputs = document.querySelectorAll('.info-section input, .info-section select');
-        inputs.forEach(input => {
-            input.style.border = 'none'; // Ocultar el borde
-            input.style.backgroundColor = 'transparent'; // Fondo transparente para los inputs
-            input.style.color = '#333'; // Asegurar que el texto sea visible
-        });
-        
-        const table = document.querySelector('table');
-        table.style.border = 'none'; // Ocultar el borde de la tabla
-        
-        // Usar setTimeout para esperar un momento antes de capturar
-        await new Promise(resolve => setTimeout(resolve, 100)); // Esperar un breve momento
-
-        // Ajustar opciones para html2canvas
+        // Lógica para capturar la imagen y enviar el formulario
         const canvas = await html2canvas(document.getElementById("captura"), { 
-            scale: 3, // Aumentar la escala para mejorar la calidad
-            backgroundColor: "#ffffff" // Establecer un fondo blanco
+            scale: 3, 
+            backgroundColor: "#ffffff" 
         });
-        const imageBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png", 1.0)); // Ajustar la calidad al máximo
-
-        // Restaurar los bordes de los inputs después de la captura
-        inputs.forEach(input => {
-            input.style.border = '1px solid #ccc'; // Restaurar el borde
-            input.style.backgroundColor = ''; // Restaurar el fondo original
-        });
-        table.style.border = '1px solid #ccc'; // Restaurar el borde de la tabla
+        const imageBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png", 1.0));
 
         // Verifica si se capturó la imagen correctamente
         if (!imageBlob) {
             throw new Error("Error al capturar la imagen.");
         }
 
-        // Agregar la imagen capturada al FormData
         formData.append("bitacoraPng", imageBlob, "bitacora.png");
-
-        console.log('Iniciando el envío del informe...');
 
         const response = await fetch('/guardar_informe', {
             method: 'POST',
             body: formData
         });
 
-        console.log(`Respuesta del servidor al guardar informe: ${response.status}`);
-        
         if (response.ok) {
             document.getElementById('successMessage').style.display = 'block';
-            console.log('Informe guardado exitosamente.');
-
-            // Ocultar el mensaje de éxito después de 3 segundos
             setTimeout(() => {
                 document.getElementById('successMessage').style.display = 'none';
+                window.location.reload(); // Recargar la página
             }, 3000);
         } else {
-            const errorMessage = await response.text(); // Capturar el mensaje de error del servidor
+            const errorMessage = await response.text();
             alert(`Hubo un problema al guardar el informe: ${errorMessage}`);
         }
     } catch (error) {
-        console.error("Error al guardar:", error.message); // Muestra el mensaje de error
+        console.error("Error al guardar:", error.message);
         alert("Ocurrió un error al procesar la solicitud. Por favor, inténtalo de nuevo.");
+    } finally {
+        // Ocultar indicador de carga
+        document.getElementById('loadingIndicator').style.display = 'none';
+        submitButton.disabled = false; // Rehabilitar el botón
     }
 }
 </script>

@@ -1550,7 +1550,7 @@ app.post('/guardar_informe', upload.fields([
             // Obtener correos del edificio
             const emailsQuery = `SELECT correo FROM apartamentos WHERE edificio_id = ?`;
             const [emails] = await pool.query(emailsQuery, [req.body.edificio]);
-            
+
             // Enviar correos con el archivo adjunto
             const transporter = nodemailer.createTransport({
                 service: 'gmail', // Cambia esto según tu proveedor de correo
@@ -1560,14 +1560,33 @@ app.post('/guardar_informe', upload.fields([
                 }
             });
 
+            const attachments = [{
+                path: bitacoraFilePath // Ruta del archivo que se guarda
+            }];
+
+            // Agregar las imágenes a los adjuntos si están disponibles
+            if (req.files['imagen_antes']) {
+                const imagenAntesPath = path.join(directoryPath, `imagen_antes_${Date.now()}.png`);
+                fs.writeFileSync(imagenAntesPath, req.files['imagen_antes'][0].buffer);
+                attachments.push({ path: imagenAntesPath });
+            }
+            if (req.files['imagen_durante']) {
+                const imagenDurantePath = path.join(directoryPath, `imagen_durante_${Date.now()}.png`);
+                fs.writeFileSync(imagenDurantePath, req.files['imagen_durante'][0].buffer);
+                attachments.push({ path: imagenDurantePath });
+            }
+            if (req.files['imagen_despues']) {
+                const imagenDespuesPath = path.join(directoryPath, `imagen_despues_${Date.now()}.png`);
+                fs.writeFileSync(imagenDespuesPath, req.files['imagen_despues'][0].buffer);
+                attachments.push({ path: imagenDespuesPath });
+            }
+
             const mailOptions = {
                 from: 'nexus.innovationss@gmail.com',
                 to: emails.map(email => email.correo).join(','),
                 subject: 'Informe de Mantenimiento',
                 text: 'Adjunto el informe de mantenimiento correspondiente.',
-                attachments: [{
-                    path: bitacoraFilePath // Ruta del archivo que se guarda
-                }]
+                attachments: attachments // Usar el array de adjuntos
             };
 
             await transporter.sendMail(mailOptions);
@@ -1580,8 +1599,6 @@ app.post('/guardar_informe', upload.fields([
         res.status(500).send("Error al guardar el informe o enviar la notificación.");
     }
 });
-
-
 
 
 
