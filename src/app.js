@@ -1184,12 +1184,11 @@ app.get('/api/apartamentos-count', async (req, res) => {
 app.get('/agregar_usuarios', (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
-        res.render('administrativo/usuarios/crear_usuarios.hbs', { nombreUsuario });
+        res.render('administrativo/usuarios/crear_usuarios.hbs', { nombreUsuario, layout: 'layouts/nav_admin.hbs' });
     } else {
         res.redirect('/login');
     }
 });
-
 
 
 
@@ -1397,6 +1396,7 @@ app.get('/obtenerEdificiosConPagos', async (req, res) => {
 });
 
 
+
 app.get('/seleccionar_edificio_blog', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
@@ -1413,6 +1413,12 @@ app.get('/seleccionar_edificio_blog', (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
+
+
+
 app.get('/ver_blog_admin', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
@@ -1475,6 +1481,14 @@ app.get('/crear_informe_mantenimiento', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
+
+
+
+
+
 
 app.post('/guardar_informe', upload.fields([
     { name: 'imagen_antes', maxCount: 1 },
@@ -1601,6 +1615,29 @@ app.post('/guardar_informe', upload.fields([
 });
 
 
+app.post('/guardar_usuario', async (req, res) => {
+    const { nombre, user_email, user_password, role } = req.body;
+
+    try {
+        // Verificar si el nombre de usuario o el correo ya existen
+        const checkQuery = 'SELECT * FROM usuarios WHERE nombre = ? OR email = ?';
+        const [rows] = await pool.query(checkQuery, [nombre, user_email]);
+
+        if (rows.length > 0) {
+            // Si existe, mostrar una alerta y redirigir
+            res.send('<script>alert("El nombre de usuario o el correo ya están en uso. Por favor, elige otros."); window.location.href="/agregar_usuarios";</script>');
+        } else {
+            // Insertar el nuevo usuario si no hay conflictos
+            const insertQuery = 'INSERT INTO usuarios (nombre, email, password, role) VALUES (?, ?, ?, ?)';
+            await pool.query(insertQuery, [nombre, user_email, user_password, role]);
+
+            res.send('<script>alert("Usuario guardado exitosamente."); window.location.href="/agregar_usuarios";</script>');
+        }
+    } catch (error) {
+        console.error('Error al guardar el usuario:', error);
+        res.send('<script>alert("Hubo un error al guardar el usuario."); window.location.href="/agregar_usuarios";</script>');
+    }
+});
 
 // Iniciar el servidor
 app.listen(3000, () => {
