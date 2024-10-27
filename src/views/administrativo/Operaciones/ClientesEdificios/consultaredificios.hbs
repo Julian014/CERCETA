@@ -352,10 +352,50 @@
             </div>
         </div>
     </div>
+    
+</div>
+<div class="highlight">
+    <h3>MIEMBROS DEL COMITE <i class="fas fa-users"></i></h3>
+    <div class="info-container">
+        <!-- Miembro 1 -->
+        <div class="info-item">
+            <div class="member-card">
+                <h4>Miembro 1 <i class="fas fa-user"></i></h4>
+                <p><strong>Nombre:</strong> {{this.miembro_comite1_nombre}}</p>
+                <p><strong>Cédula:</strong> {{this.miembro_comite1_cedula}}</p>
+                <p><strong>Celular:</strong> {{this.miembro_comite1_celular}}</p>
+                <p><strong>Correo:</strong> <a href="mailto:{{this.miembro_comite1_correo}}">{{this.miembro_comite1_correo}}</a></p>
+            </div>
+        </div>
+
+        <!-- Miembro 2 -->
+        <div class="info-item">
+            <div class="member-card">
+                <h4>Miembro 2 <i class="fas fa-user"></i></h4>
+                <p><strong>Nombre:</strong> {{this.miembro_comite2_nombre}}</p>
+                <p><strong>Cédula:</strong> {{this.miembro_comite2_cedula}}</p>
+                <p><strong>Celular:</strong> {{this.miembro_comite2_celular}}</p>
+                <p><strong>Correo:</strong> <a href="mailto:{{this.miembro_comite2_correo}}">{{this.miembro_comite2_correo}}</a></p>
+            </div>
+        </div>
+
+        <!-- Miembro 3 -->
+        <div class="info-item">
+            <div class="member-card">
+                <h4>Miembro 3 <i class="fas fa-user"></i></h4>
+                <p><strong>Nombre:</strong> {{this.miembro_comite3_nombre}}</p>
+                <p><strong>Cédula:</strong> {{this.miembro_comite3_cedula}}</p>
+                <p><strong>Celular:</strong> {{this.miembro_comite3_celular}}</p>
+                <p><strong>Correo:</strong> <a href="mailto:{{this.miembro_comite3_correo}}">{{this.miembro_comite3_correo}}</a></p>
+            </div>
+        </div>
+    </div>
 </div>
 
                 <a href="/editar_edificio?edificioId={{this.id}}" class="edit-button">Editar Edificio <i class="fas fa-edit"></i></a>
                 <a href="/editar_miembros_consejo?edificioId={{this.id}}" class="edit-button">Editar Miembros del Consejo <i class="fas fa-edit"></i></a>
+           <a href="/editar_miembros_comite?edificioId={{this.id}}" class="edit-button">Editar Miembros del Comité <i class="fas fa-edit"></i></a>
+
             </div>
         </div>
         {{/each}}

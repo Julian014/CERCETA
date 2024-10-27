@@ -92,227 +92,105 @@
     </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 
-    <script>
-        $(document).ready(function() {
-            // Evento para cargar apartamentos al cambiar el edificio
-            $('#edificios').on('change', function() {
-                const edificioSeleccionado = $(this).val();
-                if (edificioSeleccionado) {
-                    $.ajax({
-                        url: '/getApartamentosss',
-                        method: 'POST',
-                        data: JSON.stringify({ edificioSeleccionado: edificioSeleccionado }),
-                        contentType: 'application/json',
-                        success: function(response) {
-                            const apartamentosSelect = $('#apartamentos');
-                            apartamentosSelect.empty(); // Limpiar el select de apartamentos
-                            response.forEach(apartamento => {
-                                // Mostrar el número del apartamento junto con el nombre del edificio
-                                apartamentosSelect.append(new Option(`${apartamento.numero} - ${apartamento.nombre_edificio}`, apartamento.id));
-                            });
-                        },
-                        error: function(error) {
-                            console.error('Error al obtener los apartamentos:', error);
-                        }
-                    });
-                } else {
-                    $('#apartamentos').empty(); // Limpiar el select si no hay edificio seleccionado
-                }
-            });
-
-            // Evento para manejar el envío del formulario
-            $('#validarPagosForm').on('submit', function(event) {
-                event.preventDefault();
-                $('#loadingIndicator').show(); // Mostrar indicador de carga
-
-                const formData = new FormData(this);
-
+  <script>
+    $(document).ready(function() {
+        // Evento para cargar apartamentos al cambiar el edificio
+        $('#edificios').on('change', function() {
+            const edificioSeleccionado = $(this).val();
+            if (edificioSeleccionado) {
                 $.ajax({
-                    url: '/validarPago',
+                    url: '/getApartamentosss',
                     method: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
+                    data: JSON.stringify({ edificioSeleccionado: edificioSeleccionado }),
+                    contentType: 'application/json',
                     success: function(response) {
-                        alert('Pago validado correctamente.');
-                        $('#loadingIndicator').hide();
-                        $('#validarPagosForm')[0].reset();
-                        $('#apartamentos').val(null).trigger('change');
+                        const apartamentosSelect = $('#apartamentos');
+                        apartamentosSelect.empty(); // Limpiar el select de apartamentos
+                        response.forEach(apartamento => {
+                            // Mostrar el número del apartamento junto con el nombre del edificio
+                            apartamentosSelect.append(new Option(`${apartamento.numero} - ${apartamento.nombre_edificio}`, apartamento.id));
+                        });
                     },
-                    error: function(xhr) {
-                        if (xhr.status === 400) {
-                            alert('Ya existe un pago registrado para este mes y año.');
-                        } else {
-                            alert('Error al validar el pago.');
-                        }
-                        $('#loadingIndicator').hide(); // Ocultar indicador de carga
+                    error: function(error) {
+                        console.error('Error al obtener los apartamentos:', error);
                     }
                 });
+            } else {
+                $('#apartamentos').empty(); // Limpiar el select si no hay edificio seleccionado
+            }
+        });
+
+        // Evento para manejar el envío del formulario
+        $('#validarPagosForm').on('submit', function(event) {
+            event.preventDefault();
+            $('#loadingIndicator').show(); // Mostrar indicador de carga
+
+            const formData = new FormData(this);
+
+            $.ajax({
+                url: '/validarPago',
+                method: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    alert('Pago validado correctamente.');
+                    $('#loadingIndicator').hide();
+                    $('#validarPagosForm')[0].reset();
+                    $('#apartamentos').val(null).trigger('change');
+                },
+                error: function(xhr) {
+                    if (xhr.status === 400) {
+                        alert('Ya existe un pago registrado para este mes y año.');
+                    } else {
+                        alert('Error al validar el pago.');
+                    }
+                    $('#loadingIndicator').hide(); // Ocultar indicador de carga
+                }
             });
         });
 
-        $(document).ready(function() {
-    $('#documento_pago').on('change', function() {
-        const file = this.files[0];
-        if (file && file.type !== 'image/png') {
-            alert('El archivo seleccionado no es un PNG. Solo se permiten archivos PNG.');
-            
-            // Llama a la función para convertir a PNG si deseas
-            convertirArchivoAPNG(file);
-            this.value = ''; // Reiniciar el campo de archivo
-        }
-    });
-    
-    function convertirArchivoAPNG(file) {
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = function(event) {
-            const img = new Image();
-            img.src = event.target.result;
-            
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                
-                // Convierte el contenido del canvas a PNG
-                canvas.toBlob(function(blob) {
-                    const newFile = new File([blob], "documento_pago.png", { type: "image/png" });
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(newFile);
-                    document.getElementById('documento_pago').files = dataTransfer.files;
-
-                    alert('El archivo ha sido convertido a PNG.');
-                }, 'image/png');
-            };
-        };
-    }
-
-    // Resto del código para el formulario
-    $('#validarPagosForm').on('submit', function(event) {
-        event.preventDefault();
-        $('#loadingIndicator').show(); // Mostrar indicador de carga
-
-        const formData = new FormData(this);
-
-        $.ajax({
-            url: '/validarPago',
-            method: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(response) {
-                alert('Pago validado correctamente.');
-                $('#loadingIndicator').hide();
-                $('#validarPagosForm')[0].reset();
-                $('#apartamentos').val(null).trigger('change');
-            },
-            error: function(xhr) {
-                if (xhr.status === 400) {
-                    alert('Ya existe un pago registrado para este mes y año.');
-                } else {
-                    alert('Error al validar el pago.');
-                }
-                $('#loadingIndicator').hide(); // Ocultar indicador de carga
-            }
-        });
-    });
-});
-
-    </script>
-    <script>
-    $(document).ready(function() {
+        // Validación del archivo de pago y conversión a PNG si es necesario
         $('#documento_pago').on('change', function() {
             const file = this.files[0];
-            if (file) {
-                const fileType = file.type;
-
-                if (fileType.startsWith('image/')) {
-                    convertirImagenAPNG(file);
-                } else if (fileType === 'application/pdf') {
-                    convertirPDFaPNG(file);
-                } else {
-                    alert('El archivo seleccionado no es una imagen o PDF. Se intentará convertir a PNG.');
-                    convertirOtroArchivoAPNG(file);
-                }
+            if (file && file.type !== 'image/png') {
+                alert('El archivo seleccionado no es un PNG. Solo se permiten archivos PNG.');
+                convertirArchivoAPNG(file);
+                this.value = ''; // Reiniciar el campo de archivo
             }
         });
 
-        // Función para convertir imágenes a PNG
-        function convertirImagenAPNG(file) {
+        function convertirArchivoAPNG(file) {
+            if (!file) return;
+
             const reader = new FileReader();
+            reader.readAsDataURL(file);
             reader.onload = function(event) {
                 const img = new Image();
                 img.src = event.target.result;
-                
+
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
                     canvas.width = img.width;
                     canvas.height = img.height;
+
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0);
 
-                    canvasToPNG(canvas);
+                    // Convierte el contenido del canvas a PNG
+                    canvas.toBlob(function(blob) {
+                        const newFile = new File([blob], "documento_pago.png", { type: "image/png" });
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(newFile);
+                        document.getElementById('documento_pago').files = dataTransfer.files;
+
+                        alert('El archivo ha sido convertido a PNG.');
+                    }, 'image/png');
                 };
             };
-            reader.readAsDataURL(file);
-        }
-
-        // Función para convertir PDF a PNG
-        async function convertirPDFaPNG(file) {
-            const pdfData = await file.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
-            const page = await pdf.getPage(1);
-            const viewport = page.getViewport({ scale: 1.5 });
-            
-            const canvas = document.createElement('canvas');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            const ctx = canvas.getContext('2d');
-            
-            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-            canvasToPNG(canvas);
-        }
-
-        // Función para manejar otros archivos y convertirlos a PNG
-        function convertirOtroArchivoAPNG(file) {
-            alert('Intentando convertir el archivo a PNG...');
-            // Intentamos cargarlo como una imagen genérica
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.src = event.target.result;
-                
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-
-                    canvasToPNG(canvas);
-                };
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // Función para convertir el contenido del canvas a PNG
-        function canvasToPNG(canvas) {
-            canvas.toBlob(function(blob) {
-                const pngFile = new File([blob], "documento_pago.png", { type: "image/png" });
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(pngFile);
-                document.getElementById('documento_pago').files = dataTransfer.files;
-
-                alert('Archivo convertido a PNG.');
-            }, 'image/png');
         }
     });
 </script>
+
 </body>
 </html>

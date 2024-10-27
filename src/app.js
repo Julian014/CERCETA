@@ -218,7 +218,6 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-
 app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
     const {
         fechaincio,
@@ -240,14 +239,26 @@ app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
         miembro3,
         direccion3,
         correo3,
-        telefono3
+        telefono3,
+        miembro_comite1_nombre,
+        miembro_comite1_cedula,
+        miembro_comite1_celular,
+        miembro_comite1_correo,
+        miembro_comite2_nombre,
+        miembro_comite2_cedula,
+        miembro_comite2_celular,
+        miembro_comite2_correo,
+        miembro_comite3_nombre,
+        miembro_comite3_cedula,
+        miembro_comite3_celular,
+        miembro_comite3_correo
     } = req.body;
 
     if (!req.file) {
         return res.status(400).json({ error: 'No se ha subido ninguna foto' });
     }
 
-    const foto = req.file.buffer; // La foto se almacena en el buffer
+    const foto = req.file.buffer;
 
     const sql = `INSERT INTO edificios (
         fechaincio, nombre, nit, cedula_representante_legal, nombre_representante_legal,
@@ -255,8 +266,11 @@ app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
         miembro1_nombre, miembro1_direccion, miembro1_correo, miembro1_telefono,
         miembro2_nombre, miembro2_direccion, miembro2_correo, miembro2_telefono,
         miembro3_nombre, miembro3_direccion, miembro3_correo, miembro3_telefono,
+        miembro_comite1_nombre, miembro_comite1_cedula, miembro_comite1_celular, miembro_comite1_correo,
+        miembro_comite2_nombre, miembro_comite2_cedula, miembro_comite2_celular, miembro_comite2_correo,
+        miembro_comite3_nombre, miembro_comite3_cedula, miembro_comite3_celular, miembro_comite3_correo,
         foto
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     const values = [
         fechaincio, nombre, nit, cedula_representante_legal, nombre_representante_legal,
@@ -264,6 +278,9 @@ app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
         miembro1, direccion1, correo1, telefono1,
         miembro2, direccion2, correo2, telefono2,
         miembro3, direccion3, correo3, telefono3,
+        miembro_comite1_nombre, miembro_comite1_cedula, miembro_comite1_celular, miembro_comite1_correo,
+        miembro_comite2_nombre, miembro_comite2_cedula, miembro_comite2_celular, miembro_comite2_correo,
+        miembro_comite3_nombre, miembro_comite3_cedula, miembro_comite3_celular, miembro_comite3_correo,
         foto
     ];
 
@@ -380,6 +397,62 @@ app.get('/consultar_edificios', async (req, res) => {
         }
     } else {
         res.redirect('/login');
+    }
+});
+
+app.get('/editar_miembros_comite', async (req, res) => {
+    const edificioId = req.query.edificioId;
+
+    try {
+        const [edificio] = await pool.query('SELECT * FROM edificios WHERE id = ?', [edificioId]);
+        if (edificio.length > 0) {
+            res.render('administrativo/Operaciones/ClientesEdificios/editar_miembros_comite.hbs', { edificio: edificio[0],layout: 'layouts/nav_admin.hbs' });
+        } else {
+            res.status(404).send('Edificio no encontrado');
+        }
+    } catch (error) {
+        console.error('Error fetching building:', error);
+        res.status(500).send('Error al obtener los detalles del edificio');
+    }
+});
+
+app.post('/guardar_miembros_comite', async (req, res) => {
+    const {
+        edificioId,
+        miembro_comite1_nombre,
+        miembro_comite1_cedula,
+        miembro_comite1_celular,
+        miembro_comite1_correo,
+        miembro_comite2_nombre,
+        miembro_comite2_cedula,
+        miembro_comite2_celular,
+        miembro_comite2_correo,
+        miembro_comite3_nombre,
+        miembro_comite3_cedula,
+        miembro_comite3_celular,
+        miembro_comite3_correo
+    } = req.body;
+
+    const sql = `
+        UPDATE edificios SET 
+            miembro_comite1_nombre = ?, miembro_comite1_cedula = ?, miembro_comite1_celular = ?, miembro_comite1_correo = ?,
+            miembro_comite2_nombre = ?, miembro_comite2_cedula = ?, miembro_comite2_celular = ?, miembro_comite2_correo = ?,
+            miembro_comite3_nombre = ?, miembro_comite3_cedula = ?, miembro_comite3_celular = ?, miembro_comite3_correo = ?
+        WHERE id = ?`;
+
+    const values = [
+        miembro_comite1_nombre, miembro_comite1_cedula, miembro_comite1_celular, miembro_comite1_correo,
+        miembro_comite2_nombre, miembro_comite2_cedula, miembro_comite2_celular, miembro_comite2_correo,
+        miembro_comite3_nombre, miembro_comite3_cedula, miembro_comite3_celular, miembro_comite3_correo,
+        edificioId
+    ];
+
+    try {
+        await pool.query(sql, values);
+        res.redirect(`/ver_edificio?edificioId=${edificioId}`);
+    } catch (error) {
+        console.error('Error updating committee members:', error);
+        res.status(500).send('Error al guardar los cambios de los miembros del comité');
     }
 });
 
@@ -944,9 +1017,6 @@ app.post('/getApartamentosss', async (req, res) => {
 
 
 
-
-
-
 // Ruta para validar el pago del apartamento con documento de pago
 app.post('/validarPago', upload.single('documento_pago'), async (req, res) => {
     const { apartamentoSeleccionado, fecha_pago, valor_pago } = req.body;
@@ -984,61 +1054,64 @@ app.post('/validarPago', upload.single('documento_pago'), async (req, res) => {
         const [results] = await pool.query(querySelect, [apartamentoSeleccionado, fecha_pago]);
         if (results.length > 0) {
             return res.status(400).send('Ya existe un pago registrado para esta fecha.');
-        } else {
-            // Obtener los detalles del apartamento seleccionado
-            const [apartamentoDetalles] = await pool.query(queryApartamentoDetalles, [apartamentoSeleccionado]);
-            if (apartamentoDetalles.length > 0) {
-                const { nombre_edificio, numero_apartamento } = apartamentoDetalles[0];
+        }
+        
+        // Obtener los detalles del apartamento seleccionado
+        const [apartamentoDetalles] = await pool.query(queryApartamentoDetalles, [apartamentoSeleccionado]);
+        if (apartamentoDetalles.length === 0) {
+            return res.status(404).send('No se encontró el apartamento seleccionado.');
+        }
 
-                // Insertar el pago en la base de datos con nombre de edificio y número de apartamento
-                await pool.query(queryInsert, [apartamentoSeleccionado, nombre_edificio, numero_apartamento, fecha_pago, valor_pago, documentoBuffer]);
+        const { nombre_edificio, numero_apartamento } = apartamentoDetalles[0];
 
-                // Consulta para obtener el correo electrónico del apartamento seleccionado
-                const queryCorreo = `
-                    SELECT correo 
-                    FROM apartamentos 
-                    WHERE id = ?
-                `;
-                const [correoResults] = await pool.query(queryCorreo, [apartamentoSeleccionado]);
-                if (correoResults.length > 0) {
-                    const correoDestinatario = correoResults[0].correo;
-                    
-                    // Configuración del mensaje de correo
-                    const mailOptions = {
-                        from: 'nexus.innovationss@gmail.com', // Reemplaza con tu correo
-                        to: correoDestinatario,
-                        subject: 'Confirmación de Pago - Cerceta',
-                        text: `Estimado propietario,
+        // Insertar el pago en la base de datos y obtener el ID del pago
+        const [insertResult] = await pool.query(queryInsert, [apartamentoSeleccionado, nombre_edificio, numero_apartamento, fecha_pago, valor_pago, documentoBuffer]);
+        const numeroSeguimiento = insertResult.insertId; // ID de pago generado
+
+        // Consulta para obtener el correo electrónico del apartamento seleccionado
+        const queryCorreo = `
+            SELECT correo 
+            FROM apartamentos 
+            WHERE id = ?
+        `;
+        const [correoResults] = await pool.query(queryCorreo, [apartamentoSeleccionado]);
+        if (correoResults.length === 0) {
+            return res.status(404).send('Pago validado, pero no se encontró un correo asociado al apartamento.');
+        }
+
+        const correoDestinatario = correoResults[0].correo;
+
+        // Configuración del mensaje de correo
+        const mailOptions = {
+            from: 'nexus.innovationss@gmail.com', // Reemplaza con tu correo
+            to: correoDestinatario,
+            subject: 'Confirmación de Pago - Cerceta',
+            text: `Estimado propietario,
 
 Hemos recibido su pago correspondiente al edificio ${nombre_edificio}, apartamento ${numero_apartamento}. Agradecemos su cumplimiento y esperamos seguir brindándole un excelente servicio.
 
+Con este número de seguimiento (${numeroSeguimiento}) puede realizar el respectivo seguimiento de su pago.
+
 Atentamente,
 Cerceta`
-                    };
+        };
 
-                    // Enviar el correo
-                    transporter.sendMail(mailOptions, function(error, info) {
-                        if (error) {
-                            console.error('Error al enviar el correo:', error);
-                            return res.status(500).send('Pago registrado, pero no se pudo enviar el correo de confirmación.');
-                        } else {
-                            console.log('Correo enviado: ' + info.response);
-                            return res.send('Pago validado correctamente y correo de confirmación enviado.');
-                        }
-                    });
-                } else {
-                    return res.status(404).send('Pago validado, pero no se encontró un correo asociado al apartamento.');
-                }
+        // Enviar el correo
+        transporter.sendMail(mailOptions, function(error, info) {
+            if (error) {
+                console.error('Error al enviar el correo:', error);
+                return res.status(500).send('Pago registrado, pero no se pudo enviar el correo de confirmación.');
             } else {
-                return res.status(404).send('No se encontró el apartamento seleccionado.');
+                console.log('Correo enviado: ' + info.response);
+                return res.send('Pago validado correctamente y correo de confirmación enviado.');
             }
-        }
+        });
+
     } catch (err) {
         console.error(err);
         return res.status(500).send('Error al validar el pago');
     }
 });
-
 
 
 
