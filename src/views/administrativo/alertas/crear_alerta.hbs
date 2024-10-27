@@ -1,0 +1,84 @@
+<div class="container mt-5">
+    <h2>Crear Alerta Operativa</h2>
+    <form action="/crear_alerta" method="POST">
+        <!-- Nombre de la actividad -->
+        <div class="form-group">
+            <label for="nombreActividad">Nombre de la Actividad</label>
+            <input type="text" class="form-control" id="nombreActividad" name="nombreActividad" required>
+        </div>
+
+        <!-- Fecha de Ejecución -->
+        <div class="form-group mt-3">
+            <label for="fechaEjecucion">Fecha de Ejecución</label>
+            <input type="date" class="form-control" id="fechaEjecucion" name="fechaEjecucion" required>
+        </div>
+
+        <!-- Frecuencia de Alerta -->
+        <div class="form-group mt-3">
+            <label for="frecuenciaAlerta">Frecuencia de Alerta</label>
+            <select class="form-control" id="frecuenciaAlerta" name="frecuenciaAlerta" required>
+                <option value="semanal">Semanal</option>
+                <option value="quincenal">Quincenal</option>
+                <option value="mensual">Mensual</option>
+                <option value="personalizada">Personalizada</option>
+            </select>
+        </div>
+
+        <!-- Días Antes de Ejecución (solo personalizada) -->
+        <div class="form-group mt-3" id="diasAntesAlertaContainer" style="display: none;">
+            <label for="diasAntesAlerta">Días Antes de la Ejecución</label>
+            <input type="number" class="form-control" id="diasAntesAlerta" name="diasAntesAlerta" min="1">
+        </div>
+
+        <!-- Método de Notificación -->
+        <div class="form-group mt-3">
+            <label for="metodoNotificacion">Método de Notificación</label>
+            <select class="form-control" id="metodoNotificacion" name="metodoNotificacion" required>
+                <option value="email">Email</option>
+                <option value="sms">SMS</option>
+                <option value="push">Notificación Push</option>
+                <option value="app">Notificación en App</option>
+            </select>
+        </div>
+
+        <!-- Prioridad de la Alerta -->
+        <div class="form-group mt-3">
+            <label for="prioridad">Prioridad de la Alerta</label>
+            <select class="form-control" id="prioridad" name="prioridad" required>
+                <option value="alta">Alta</option>
+                <option value="media">Media</option>
+                <option value="baja">Baja</option>
+            </select>
+        </div>
+
+        <!-- Tiempo de Recordatorio -->
+        <div class="form-group mt-3">
+            <label for="tiempoRecordatorio">Tiempo de Recordatorio (minutos antes)</label>
+            <input type="number" class="form-control" id="tiempoRecordatorio" name="tiempoRecordatorio" min="1">
+        </div>
+
+        <!-- Responsable -->
+        <div class="form-group mt-3">
+            <label for="responsable">Responsable</label>
+            <select class="form-control" id="responsable" name="responsable" required>
+                {{#each administradores}}
+                    <option value="{{id}}" data-email="{{email}}">{{nombre}}</option>
+                {{/each}}
+            </select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary mt-4">Crear Alerta</button>
+    </form>
+</div>
+
+<script>
+    // Mostrar el campo de días antes solo si se selecciona "Personalizada"
+    document.getElementById('frecuenciaAlerta').addEventListener('change', function() {
+        const diasAntesAlertaContainer = document.getElementById('diasAntesAlertaContainer');
+        if (this.value === 'personalizada') {
+            diasAntesAlertaContainer.style.display = 'block';
+        } else {
+            diasAntesAlertaContainer.style.display = 'none';
+        }
+    });
+</script>

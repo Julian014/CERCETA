@@ -5,6 +5,7 @@ const pool = require('./db'); // Importamos la configuración de la base de dato
 const path = require('path');
 const moment = require('moment');
 const fs = require('fs');
+const cron = require('node-cron');
 
 const app = express();
 
@@ -1729,6 +1730,171 @@ app.post('/guardar_usuario', async (req, res) => {
         res.send('<script>alert("Hubo un error al guardar el usuario."); window.location.href="/agregar_usuarios";</script>');
     }
 });
+
+
+
+
+
+
+
+
+app.get('/crear_alerta', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+
+        try {
+            // Consulta para obtener los administradores
+            const [administradores] = await pool.query(`SELECT id, nombre, email FROM usuarios WHERE role = 'admin'`);
+            
+            // Renderiza la vista y pasa los administradores
+            res.render('administrativo/alertas/crear_alerta.hbs', { name, administradores, layout: 'layouts/nav_admin.hbs' });
+        } catch (error) {
+            console.error("Error al obtener administradores:", error);
+            res.status(500).send("Hubo un problema al cargar los datos.");
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+app.post('/crear_alerta', async (req, res) => {
+    const {
+        nombreActividad,
+        fechaEjecucion,
+        frecuenciaAlerta,
+        diasAntesAlerta,
+        metodoNotificacion,
+        prioridad,
+        tiempoRecordatorio,
+        responsable
+    } = req.body;
+
+    try {
+        // Inserción en la tabla alertas con campos avanzados
+        const query = `INSERT INTO alertas (nombre_actividad, fecha_ejecucion, frecuencia_alerta, dias_antes_alerta, 
+                       metodo_notificacion, prioridad, tiempo_recordatorio, responsable_id) 
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+        await pool.query(query, [
+            nombreActividad,
+            fechaEjecucion,
+            frecuenciaAlerta,
+            diasAntesAlerta || null,
+            metodoNotificacion,
+            prioridad,
+            tiempoRecordatorio || null,
+            responsable
+        ]);
+
+        res.redirect('/crear_alerta'); // Redirige o muestra mensaje de éxito
+    } catch (error) {
+        console.error("Error al crear alerta:", error);
+        res.status(500).send("Hubo un problema al crear la alerta.");
+    }
+});
+
+
+async function verificarAlertasPendientes() {
+    try {
+        // Agrega log para verificar que la función se está ejecutando
+        console.log("Iniciando verificación de alertas...");
+
+        // Obtener alertas próximas según el tiempo de recordatorio
+        const query = `
+            SELECT 
+                a.id, a.nombre_actividad, a.fecha_ejecucion, a.frecuencia_alerta, a.dias_antes_alerta, 
+                a.metodo_notificacion, a.prioridad, a.tiempo_recordatorio, u.email, u.nombre 
+            FROM 
+                alertas a 
+            JOIN 
+                usuarios u ON a.responsable_id = u.id 
+            WHERE 
+                TIMESTAMPDIFF(MINUTE, NOW(), a.fecha_ejecucion) <= a.tiempo_recordatorio 
+                AND TIMESTAMPDIFF(MINUTE, NOW(), a.fecha_ejecucion) > 0
+        `;
+
+        const [alertas] = await pool.query(query);
+
+        console.log("Alertas encontradas:", alertas.length);
+
+        for (const alerta of alertas) {
+            console.log("Procesando alerta:", alerta);
+
+            switch (alerta.metodo_notificacion) {
+                case 'email':
+                    console.log("Enviando correo a:", alerta.email);
+                    await sendEmail(alerta.email, alerta.nombre_actividad, alerta.fecha_ejecucion);
+                    break;
+                case 'sms':
+                    console.log("Enviando SMS a:", alerta.email);
+                    await sendSMS(alerta.email, alerta.nombre_actividad);
+                    break;
+                case 'push':
+                    console.log("Enviando notificación push a:", alerta.email);
+                    await sendPushNotification(alerta.email, alerta.nombre_actividad);
+                    break;
+                case 'app':
+                    console.log("Enviando notificación en app al usuario con ID:", alerta.responsable_id);
+                    await sendAppNotification(alerta.responsable_id, alerta.nombre_actividad);
+                    break;
+                default:
+                    console.log(`Método de notificación no soportado: ${alerta.metodo_notificacion}`);
+            }
+        }
+    } catch (error) {
+        console.error("Error al verificar alertas:", error);
+    }
+}
+
+
+
+// Métodos de notificación
+async function sendEmail(to, actividad, fecha) {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: 'nexus.innovationss@gmail.com', // tu correo electrónico
+            pass: 'bqffoqklqfrlvxyt' // tu contraseña de aplicación
+        }
+    });
+
+    const mailOptions = {
+        from: 'nexus.innovationss@gmail.com',
+        to: to,
+        subject: `Recordatorio de Actividad: ${actividad}`,
+        text: `Hola, tienes la actividad "${actividad}" programada para el ${moment(fecha).format('DD/MM/YYYY')}. ¡No olvides realizarla!`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error(`Error al enviar el correo: ${error}`);
+        } else {
+            console.log(`Correo enviado: ${info.response}`);
+        }
+    });
+}
+
+async function sendSMS(to, actividad) {
+    console.log(`Enviando SMS a ${to} para la actividad ${actividad}`);
+    // Implementación del envío de SMS (puedes usar Twilio, por ejemplo)
+}
+
+async function sendPushNotification(to, actividad) {
+    console.log(`Enviando notificación push a ${to} para la actividad ${actividad}`);
+    // Implementación del envío de notificación push
+}
+
+async function sendAppNotification(userId, actividad) {
+    console.log(`Enviando notificación en app al usuario con ID ${userId} para la actividad ${actividad}`);
+    // Implementación de notificación en app
+}
+
+// Prueba del cron job
+cron.schedule('* * * * *', () => {
+    console.log("Cron job ejecutándose cada minuto...");
+    verificarAlertasPendientes();
+});
+
 
 
 
