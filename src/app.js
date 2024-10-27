@@ -38,40 +38,49 @@ hbs.registerHelper('formatDate', (date) => {
     return moment(date).format('DD/MM/YYYY');
 });
 
+
+
+
+
+
+
+
 // Ruta para manejar el login
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Query to check if user exists with the given email and password
+        // Consulta para verificar si el usuario existe con el correo y contraseña dados
         const [results] = await pool.query('SELECT * FROM usuarios WHERE email = ? AND password = ?', [email, password]);
 
         if (results.length > 0) {
-            // Store user data in session
-            req.session.user = results[0];  // Store the entire user object
-            req.session.name = results[0].nombre;  // Save the user name to session
-            req.session.loggedin = true;  // Set logged-in status
-            req.session.roles = results[0].role;  // Save roles in session
+            // Almacena los datos del usuario en la sesión
+            req.session.user = results[0];  // Almacena el objeto completo del usuario
+            req.session.name = results[0].nombre;  // Guarda el nombre del usuario en la sesión
+            req.session.loggedin = true;  // Establece el estado de sesión como conectado
+            req.session.roles = results[0].role;  // Guarda los roles en la sesión
+            req.session.cargo = results[0].cargo; // Almacena el cargo en la sesión correctamente
 
-            const role = results[0].role;  // Fetch user role
+            const role = results[0].role;  // Obtiene el rol del usuario
 
-            // Redirect based on the user's role
+            // Redirige basado en el rol del usuario
             if (role === 'admin') {
                 return res.redirect('/menuAdministrativo');
             } else if (role === 'tecnico') {
                 return res.redirect('/tecnico');
-            } else if (role === 'cliente') {
-                return res.redirect('/cliente');
+            } else if (role === 'residentes') {
+                return res.redirect('/Residentes/home_residentes.hbs');
             }
         } else {
-            // Render login page with error message if credentials are incorrect
+            // Muestra la página de login con mensaje de error si las credenciales son incorrectas
             res.render('login/login', { error: 'Correo o contraseña incorrectos' });
         }
     } catch (err) {
-        // Handle errors and send a 500 response in case of any database or server issues
+        // Maneja los errores y envía una respuesta 500 en caso de problemas con la base de datos o el servidor
         res.status(500).json({ error: err.message });
     }
 });
+
 
 
 
@@ -133,21 +142,25 @@ const transporter = nodemailer.createTransport({
 
 const crypto = require('crypto'); // Importa el módulo crypto
 
-
-
-
 app.get("/menuAdministrativo", async (req, res) => {
     if (req.session.loggedin === true) {
         try {
-            const nombreUsuario = req.session.name || req.session.user.name; // Usa el nombre de la sesión o una alternativa
+            const nombreUsuario = req.session.name || req.session.user.name;
             console.log(`El usuario ${nombreUsuario} está autenticado.`);
-            req.session.nombreGuardado = nombreUsuario; // Guarda el nombre en la sesión
+            req.session.nombreGuardado = nombreUsuario;
 
-            const rolesString = req.session.roles;
-            const roles = Array.isArray(rolesString) ? rolesString : [];
+            // Obtén el cargo del usuario desde la sesión y conviértelo en un array
+            const cargos = req.session.cargo.split(',').map(cargo => cargo.trim());
+            console.log(`Cargos del usuario: ${cargos}`);
 
-            const jefe = roles.includes('jefe');
-            const empleado = roles.includes('empleado');
+            // Define las variables de cargo en función de si están en el array
+            const esGerente = cargos.includes('Gerente');
+            const esAdministracionOperativa = cargos.includes('administracion_operativa');
+            const esContabilidad = cargos.includes('contabilidad');
+            const esOperativo = cargos.includes('operativo');
+
+            // Muestra en consola para verificar que los valores son correctos
+            console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
 
             // Realiza la consulta a la base de datos para contar los residentes con rol "clientes"
             const [clientesRows] = await pool.query('SELECT COUNT(*) AS totalClientes FROM user WHERE roles = "clientes"');
@@ -163,13 +176,15 @@ app.get("/menuAdministrativo", async (req, res) => {
 
             // Renderiza la vista y pasa los datos necesarios
             res.render("administrativo/menuadministrativo.hbs", {
-                layout: 'layouts/nav_admin.hbs', // Especifica el layout a usar
+                layout: 'layouts/nav_admin.hbs',
                 name: nombreUsuario,
-                jefe,
-                empleado,
-                totalClientes, // Pasa el valor a la vista
+                esGerente,
+                esAdministracionOperativa,
+                esContabilidad,
+                esOperativo,
+                totalClientes,
                 totalApartamentos,
-                totaledificios // Pasa el valor a la vista
+                totaledificios
             });
         } catch (error) {
             console.error('Error al obtener el conteo de datos:', error);
@@ -179,6 +194,7 @@ app.get("/menuAdministrativo", async (req, res) => {
         res.redirect("/login");
     }
 });
+
 
 
 
@@ -1613,10 +1629,11 @@ app.post('/guardar_informe', upload.fields([
         res.status(500).send("Error al guardar el informe o enviar la notificación.");
     }
 });
-
-
 app.post('/guardar_usuario', async (req, res) => {
     const { nombre, user_email, user_password, role } = req.body;
+    const cargos = req.body['cargo[]']; // Acceso correcto al array de cargos seleccionados
+
+    console.log("Cargos seleccionados:", cargos); // Verificar que cargos esté recibiendo datos
 
     try {
         // Verificar si el nombre de usuario o el correo ya existen
@@ -1624,12 +1641,13 @@ app.post('/guardar_usuario', async (req, res) => {
         const [rows] = await pool.query(checkQuery, [nombre, user_email]);
 
         if (rows.length > 0) {
-            // Si existe, mostrar una alerta y redirigir
             res.send('<script>alert("El nombre de usuario o el correo ya están en uso. Por favor, elige otros."); window.location.href="/agregar_usuarios";</script>');
         } else {
-            // Insertar el nuevo usuario si no hay conflictos
-            const insertQuery = 'INSERT INTO usuarios (nombre, email, password, role) VALUES (?, ?, ?, ?)';
-            await pool.query(insertQuery, [nombre, user_email, user_password, role]);
+            // Concatenar cargos seleccionados en un solo string separados por comas
+            const cargoString = cargos && cargos.length > 0 ? cargos.join(', ') : null;
+            // Insertar el nuevo usuario
+            const insertQuery = 'INSERT INTO usuarios (nombre, email, password, role, cargo) VALUES (?, ?, ?, ?, ?)';
+            await pool.query(insertQuery, [nombre, user_email, user_password, role, cargoString]);
 
             res.send('<script>alert("Usuario guardado exitosamente."); window.location.href="/agregar_usuarios";</script>');
         }
@@ -1638,6 +1656,9 @@ app.post('/guardar_usuario', async (req, res) => {
         res.send('<script>alert("Hubo un error al guardar el usuario."); window.location.href="/agregar_usuarios";</script>');
     }
 });
+
+
+
 
 // Iniciar el servidor
 app.listen(3000, () => {
