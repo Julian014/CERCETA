@@ -1899,8 +1899,9 @@ async function verificarAlertasPendientes() {
                             break;
                             case 'app':
                                 console.log("Enviando notificación en app al usuario con ID:", alerta.responsable_id);
-                                await sendAppNotification(alerta.responsable_id, alerta.nombre_actividad);
+                                await sendAppNotification(alerta.responsable_id, alerta.nombre_actividad, alerta.fecha_ejecucion);
                                 break;
+                            
                             
                         default:
                             console.log(`Método de notificación no soportado: ${metodo}`);
@@ -1952,7 +1953,7 @@ async function sendPushNotification(to, actividad) {
     // Implementación del envío de notificación push
 }
 
-async function sendAppNotification(userId, actividad) {
+async function sendAppNotification(userId, actividad, fechaEjecucion) {
     if (!userId) {
         console.error("El user_id es null o indefinido. No se puede enviar la notificación.");
         return;
@@ -1962,15 +1963,25 @@ async function sendAppNotification(userId, actividad) {
 
     const query = `
         INSERT INTO notificaciones (user_id, actividad, fecha, leido)
-        VALUES (?, ?, NOW(), 0)
+        VALUES (?, ?, ?, 0)
     `;
     
-    await pool.query(query, [userId, actividad]);
+    await pool.query(query, [userId, actividad, fechaEjecucion]); // Guardar fecha_ejecucion en la columna de fecha
 }
 
 
 
-cron.schedule('4 22 * * *', () => {
+
+
+
+
+
+
+
+
+
+
+cron.schedule('8 12 * * *', () => {
     console.log("Cron job ejecutándose cada día a las 8:00 AM...");
     verificarAlertasPendientes();
 });

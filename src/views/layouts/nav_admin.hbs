@@ -575,11 +575,14 @@ height: 120px;
 
    <div class="main-content">
     
-<div id="notificationPopup" class="hidden fixed top-16 right-16 bg-white p-4 shadow-lg rounded-lg z-50">
+<div id="notificationPopup" class="hidden fixed top-16 right-16 bg-white p-4 shadow-lg rounded-lg z-50 w-80">
     <h3 class="text-lg font-bold mb-2">Notificaciones</h3>
-    <ul id="notificationList" class="text-gray-700"></ul>
-<button onclick="markNotificationsAsRead({{userId}})" class="mt-3 text-blue-500">Marcar todas como leídas</button>
+    <ul id="notificationList" class="text-gray-700 space-y-2"></ul>
+    <button onclick="markNotificationsAsRead({{userId}})" class="mt-3 text-blue-500 w-full text-center py-2 rounded-lg bg-blue-100 hover:bg-blue-200">
+        Marcar todas como leídas
+    </button>
 </div>
+
 
 
     {{{body}}}
@@ -656,9 +659,7 @@ async function loadNotifications() {
     try {
         const response = await fetch('/notificaciones');
         const data = await response.json();
-
-        console.log("Datos recibidos:", data); // Log de los datos recibidos
-
+        
         const notificationCount = data.notificaciones.length;
         const notificationBadge = document.getElementById('notificationCount');
         const notificationList = document.getElementById('notificationList');
@@ -672,21 +673,26 @@ async function loadNotifications() {
             // Llena la lista de notificaciones
             data.notificaciones.forEach(notificacion => {
                 const listItem = document.createElement('li');
-                listItem.textContent = `${notificacion.actividad} - ${new Date(notificacion.fecha).toLocaleString()}`;
+                listItem.className = notificacion.leido ? 'bg-gray-200 p-2 rounded-lg' : 'bg-blue-100 p-2 rounded-lg font-bold';
+                
+                listItem.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span>${notificacion.actividad}</span>
+                        <span class="text-xs text-gray-500">${new Date(notificacion.fecha).toLocaleString()}</span>
+                    </div>
+                `;
                 notificationList.appendChild(listItem);
             });
 
-            // Si hay notificaciones, iniciar el sonido
-            startNotificationSound();
-
         } else {
             notificationBadge.classList.add('hidden');
-            notificationList.innerHTML = '<li>No hay notificaciones nuevas</li>';
+            notificationList.innerHTML = '<li class="text-center text-gray-500">No hay notificaciones nuevas</li>';
         }
     } catch (error) {
         console.error("Error al cargar notificaciones:", error);
     }
 }
+
 
 function markNotificationsAsRead(userId) {
     const notificationBadge = document.getElementById('notificationCount');
