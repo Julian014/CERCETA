@@ -87,24 +87,15 @@ app.post('/login', async (req, res) => {
 // Ruta para el menú administrativo
 app.get('/geolocalizacion', (req, res) => {
     if (req.session.loggedin === true) {
+        const userId = req.session.userId;
+
         const nombreUsuario = req.session.user.name; // Use user session data
-        res.render('administrativo/mapa/ver_mapa.hbs', { nombreUsuario });
+        res.render('administrativo/mapa/ver_mapa.hbs', { nombreUsuario ,userId });
     } else {
         res.redirect('/login');
     }
 });
 
-
-
-// Ruta para el menú administrativo
-app.get('/figma', (req, res) => {
-    if (req.session.loggedin === true) {
-        const nombreUsuario = req.session.user.name; // Use user session data
-        res.render('administrativo/figma.hbs', { nombreUsuario });
-    } else {
-        res.redirect('/login');
-    }
-});
 
 
 
@@ -145,6 +136,8 @@ const crypto = require('crypto'); // Importa el módulo crypto
 app.get("/menuAdministrativo", async (req, res) => {
     if (req.session.loggedin === true) {
         try {
+            const userId = req.session.userId;
+
             const nombreUsuario = req.session.name || req.session.user.name;
             console.log(`El usuario ${nombreUsuario} está autenticado.`);
             req.session.nombreGuardado = nombreUsuario;
@@ -182,6 +175,7 @@ app.get("/menuAdministrativo", async (req, res) => {
                 esAdministracionOperativa,
                 esContabilidad,
                 esOperativo,
+                userId ,
                 totalClientes,
                 totalApartamentos,
                 totaledificios
@@ -201,7 +195,9 @@ app.get("/menuAdministrativo", async (req, res) => {
 app.get('/agregar_edificio', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
-        res.render('administrativo/Operaciones/ClientesEdificios/agregaredificio.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+        const userId = req.session.userId;
+
+        res.render('administrativo/Operaciones/ClientesEdificios/agregaredificio.hbs', { name,userId ,layout: 'layouts/nav_admin.hbs' });
     } else {
         res.redirect('/login');
     }
@@ -301,9 +297,11 @@ app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
 app.get('/agregar_apartamento', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
+        const userId = req.session.userId;
+
         try {
             const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
-            res.render('administrativo/Operaciones/apartementos/agregarapartamento.hbs', { name, edificios ,layout: 'layouts/nav_admin.hbs'});
+            res.render('administrativo/Operaciones/apartementos/agregarapartamento.hbs', { name, edificios,userId  ,layout: 'layouts/nav_admin.hbs'});
         } catch (error) {
             console.error('Error al obtener edificios:', error);
             res.status(500).send('Error al obtener edificios');
@@ -379,6 +377,8 @@ app.post('/agregar_apartamento', upload.single('foto'), async (req, res) => {
 
 app.get('/consultar_edificios', async (req, res) => {
     if (req.session.loggedin === true) {
+        const userId = req.session.userId;
+
         const nombreUsuario = req.session.name;
         try {
             const [edificios] = await pool.query('SELECT * FROM edificios');
@@ -390,7 +390,7 @@ app.get('/consultar_edificios', async (req, res) => {
                 }
             });
 
-            res.render('administrativo/Operaciones/ClientesEdificios/consultaredificios.hbs', { nombreUsuario, edificios,layout: 'layouts/nav_admin.hbs' });
+            res.render('administrativo/Operaciones/ClientesEdificios/consultaredificios.hbs', { nombreUsuario, edificios,userId ,layout: 'layouts/nav_admin.hbs' });
         } catch (error) {
             console.error('Error al obtener edificios:', error);
             res.status(500).send('Error al obtener edificios');
@@ -485,8 +485,10 @@ app.post('/getApartamentos_envio', async (req, res) => {
 // Ruta para consultar apartamentos
 app.get('/Consulta_apartamentos', (req, res) => {
     if (req.session.loggedin === true) {
+        const userId = req.session.userId;
+
         const name = req.session.name;
-        res.render('administrativo/Operaciones/apartementos/consulta_apartamentos', { name ,layout: 'layouts/nav_admin.hbs'});
+        res.render('administrativo/Operaciones/apartementos/consulta_apartamentos', { name ,userId ,layout: 'layouts/nav_admin.hbs'});
     } else {
         res.redirect('/login');
     }
@@ -737,13 +739,16 @@ app.post('/update_miembros_consejo', async (req, res) => {
 // Ruta para mostrar la lista de edificios
 app.get('/ComunicadosGeneral', async (req, res) => {
     if (req.session.loggedin === true) {
+        const userId = req.session.userId;
+
         const nombreUsuario = req.session.name;
         const query = 'SELECT * FROM edificios';
 
         try {
             const [results] = await pool.query(query);
             res.render('administrativo/Operaciones/comunicadoGeneral/nuevocomunicadoGeneral.hbs', { 
-                name: nombreUsuario, 
+                name: nombreUsuario,
+                userId , 
                 layout: 'layouts/nav_admin.hbs', 
                 edificios: results 
             });
@@ -848,10 +853,13 @@ app.post('/enviarComunicado', upload.array('archivos'), async (req, res) => {
 app.get('/envio_apartamentos', async (req, res) => {
     if (req.session.loggedin === true) {
         const nombreUsuario = req.session.name;
+        const userId = req.session.userId;
+
         try {
             const [results] = await pool.query('SELECT * FROM edificios');
             res.render('administrativo/Operaciones/comunicadoApartmamentos/comunicado_individual.hbs', { 
                 name: nombreUsuario, 
+                userId ,
                 layout: 'layouts/nav_admin.hbs', 
                 edificios: results 
             });
@@ -898,6 +906,7 @@ app.post('/getApartamentos', async (req, res) => {
 // Ruta para enviar el comunicado
 app.post('/enviarComunicado_individual', upload.array('archivos'), async (req, res) => {
     const { apartamentosSeleccionados, mensaje } = req.body;
+    
     let archivos = req.files;
 
     const query = `
@@ -1120,8 +1129,10 @@ Cerceta`
 
 app.get('/Consulta_Comprobantes_de_Pago', (req, res) => {
     if (req.session.loggedin === true) {
+        const userId = req.session.userId;
+
         const name = req.session.name;
-        res.render('administrativo/CONTABILIDAD/validarPagos/consultar_pagos.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+        res.render('administrativo/CONTABILIDAD/validarPagos/consultar_pagos.hbs', { name,userId ,layout: 'layouts/nav_admin.hbs' });
     } else {
         res.redirect('/login');
     }
@@ -1272,8 +1283,10 @@ app.get('/api/apartamentos-count', async (req, res) => {
 
 app.get('/agregar_usuarios', (req, res) => {
     if (req.session.loggedin === true) {
+        const userId = req.session.userId;
+
         const nombreUsuario = req.session.name;
-        res.render('administrativo/usuarios/crear_usuarios.hbs', { nombreUsuario, layout: 'layouts/nav_admin.hbs' });
+        res.render('administrativo/usuarios/crear_usuarios.hbs', { nombreUsuario,userId , layout: 'layouts/nav_admin.hbs' });
     } else {
         res.redirect('/login');
     }
@@ -1283,8 +1296,10 @@ app.get('/agregar_usuarios', (req, res) => {
 
 app.get('/plantilla_blog', (req, res) => {
     if (req.session.loggedin === true) {
+        const userId = req.session.userId;
+
         const nombreUsuario = req.session.name;
-        res.render('blog/plantilla_simple.hbs', { nombreUsuario,layout: 'layouts/nav_admin.hbs' });
+        res.render('blog/plantilla_simple.hbs', { nombreUsuario,userId ,layout: 'layouts/nav_admin.hbs' });
     } else {
         res.redirect('/login');
     }
@@ -1293,9 +1308,12 @@ app.get('/plantilla_blog', (req, res) => {
 app.get('/subir_publicacion', async (req, res) => {
     if (req.session.loggedin === true) {
         try {
+            
             const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
+            const userId = req.session.userId;
+
             const name = req.session.name;
-            res.render('blog/agregar_blog.hbs', { name, edificios ,layout: 'layouts/nav_admin.hbs'});
+            res.render('blog/agregar_blog.hbs', { name, edificios ,userId ,layout: 'layouts/nav_admin.hbs'});
         } catch (error) {
             console.error('Error al obtener los edificios:', error);
             res.status(500).send('Error interno del servidor');
@@ -1421,7 +1439,9 @@ app.post('/subir_publicacion', upload.fields([
 app.get('/estados_cuenta', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
-        res.render('administrativo/CONTABILIDAD/validarPagos/estados_cuanta.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+        const userId = req.session.userId;
+
+        res.render('administrativo/CONTABILIDAD/validarPagos/estados_cuanta.hbs', { name,userId ,layout: 'layouts/nav_admin.hbs' });
     } else {
         res.redirect('/login');
     }
@@ -1489,10 +1509,11 @@ app.get('/obtenerEdificiosConPagos', async (req, res) => {
 app.get('/seleccionar_edificio_blog', (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
-        
+        const userId = req.session.userId;
+
         pool.query('SELECT id, nombre FROM edificios')
             .then(([resultados]) => {
-                res.render('blog/seleccionar_edificio.hbs', { name, edificios: resultados, layout: 'layouts/nav_admin.hbs' });
+                res.render('blog/seleccionar_edificio.hbs', { name,userId , edificios: resultados, layout: 'layouts/nav_admin.hbs' });
             })
             .catch(err => {
                 console.error(err);
@@ -1511,6 +1532,8 @@ app.get('/seleccionar_edificio_blog', (req, res) => {
 app.get('/ver_blog_admin', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
+        const userId = req.session.userId;
+
         const edificioId = req.query.edificio_id;
 
         try {
@@ -1527,7 +1550,7 @@ app.get('/ver_blog_admin', async (req, res) => {
                 };
             });
 
-            res.render('blog/consulta_admin.hbs', { name, blogPosts, layout: 'layouts/nav_admin.hbs' });
+            res.render('blog/consulta_admin.hbs', { name,userId ,blogPosts, layout: 'layouts/nav_admin.hbs' });
         } catch (err) {
             console.error(err);
             res.status(500).send('Error al obtener las entradas del blog');
@@ -1960,12 +1983,15 @@ app.get('/notificaciones', async (req, res) => {
             SELECT * FROM notificaciones WHERE user_id = ? AND leido = 0
         `, [userId]);
 
+        console.log("Notificaciones para el usuario:", notificaciones); // Asegúrate de que esto tenga datos
         res.json({ notificaciones });
     } catch (error) {
         console.error("Error al obtener notificaciones:", error);
         res.status(500).json({ error: "Error al obtener notificaciones" });
     }
 });
+
+
 
 
 
@@ -1985,6 +2011,32 @@ app.get('/notificaciones', async (req, res) => {
         res.status(500).json({ error: "Error al obtener notificaciones" });
     }
 });
+
+
+
+
+
+
+app.post('/marcarNotificacionesComoLeidas/:user_id', async (req, res) => {
+    const userId = req.params.user_id; // Se recibe correctamente el user_id
+    console.log("Intentando marcar como leídas las notificaciones para el user_id:", userId);
+
+    try {
+        const [result] = await pool.query('UPDATE notificaciones SET leido = 1 WHERE user_id = ? AND leido = 0', [userId]);
+
+        if (result.affectedRows > 0) {
+            console.log("Notificaciones marcadas como leídas para el user_id:", userId);
+            res.json({ success: true, message: 'Notificaciones marcadas como leídas', affectedRows: result.affectedRows });
+        } else {
+            console.log("No había notificaciones para marcar como leídas para el user_id:", userId);
+            res.json({ success: false, message: 'No había notificaciones para marcar como leídas' });
+        }
+    } catch (error) {
+        console.error('Error al marcar notificaciones como leídas:', error);
+        res.status(500).json({ success: false, message: 'Error al marcar notificaciones como leídas' });
+    }
+});
+
 
 
 // Iniciar el servidor

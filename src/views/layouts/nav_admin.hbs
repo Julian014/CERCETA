@@ -221,10 +221,18 @@ height: 120px;
           <span>{{name}}</span>
         </div>
       </div>
-<div class="relative">
-  <i class="fas fa-bell text-xl cursor-pointer" id="notificationBell"></i>
-  <span id="notificationCount" class="badge hidden">0</span>
+
+
+
+
+<div class="flex items-center justify-end p-4">
+    <div class="relative">
+      <i class="fas fa-bell text-xl cursor-pointer" id="notificationBell" onclick="toggleNotificationPopup()"></i>
+          <span id="notificationCount" class="badge hidden">0</span>
+    </div>
 </div>
+
+
 
       <!-- Search Bar -->
       <div class="search-bar">
@@ -395,6 +403,13 @@ height: 120px;
 <!-- Property Management Section -->
 <div class="section-title">--Alertas--</div>
 
+
+
+
+
+
+
+
 <!-- Pagos Section -->
 <!-- Blog para Residentes Section -->
 <li class="mb-2">
@@ -545,6 +560,7 @@ height: 120px;
         </ul>
       </nav>
 <br>
+
       <!-- Theme Toggle Button -->
       <div class="mt-auto">
         <button id="theme-toggle" class="w-full py-2 px-4 text-white bg-blue-500 hover:bg-blue-600 rounded-lg">
@@ -562,26 +578,55 @@ height: 120px;
 <div id="notificationPopup" class="hidden fixed top-16 right-16 bg-white p-4 shadow-lg rounded-lg z-50">
     <h3 class="text-lg font-bold mb-2">Notificaciones</h3>
     <ul id="notificationList" class="text-gray-700"></ul>
-<button onclick="markNotificationsAsRead()" class="mt-3 text-blue-500">Marcar todas como leídas</button>
+<button onclick="markNotificationsAsRead({{userId}})" class="mt-3 text-blue-500">Marcar todas como leídas</button>
 </div>
+
 
     {{{body}}}
 </div>
 
     </div>
   </div>
- 
+
+
+
+
+
+
 <script>
+// Function to toggle the notification popup
+function toggleNotificationPopup() {
+    const popup = document.getElementById('notificationPopup');
+    popup.classList.toggle('hidden'); // Solo mostrar o esconder el popup al hacer clic
+
+    // Si el popup está visible, agregamos un event listener para hacer clic fuera de él
+    if (!popup.classList.contains('hidden')) {
+        document.addEventListener('click', closePopupOnClickOutside);
+    } else {
+        document.removeEventListener('click', closePopupOnClickOutside);
+    }
+}
+
+// Function to close the popup when clicking outside
+function closePopupOnClickOutside(event) {
+    const popup = document.getElementById('notificationPopup');
+    const bell = document.getElementById('notificationBell');
+    
+    // Verificar si el clic ocurrió fuera del popup y de la campana de notificaciones
+    if (!popup.contains(event.target) && event.target !== bell) {
+        popup.classList.add('hidden'); // Ocultar el popup
+        document.removeEventListener('click', closePopupOnClickOutside); // Remover el listener
+    }
+}
+
+
 // Variable to control notification sound interval
 let notificationSoundInterval;
 let isUserInteracted = false;
 
-// Detects the first user interaction to allow sound playback
-document.addEventListener('click', () => {
-    if (!isUserInteracted) {
-        isUserInteracted = true;
-        startNotificationSound(); // Starts repetitive sound after interaction
-    }
+// Detect user interaction to allow sound playback
+window.addEventListener('click', () => {
+    isUserInteracted = true;
 });
 
 // Function to play the notification sound
@@ -599,179 +644,136 @@ function startNotificationSound() {
 }
 
 // Function to stop sound when notifications are marked as read
+// Function to stop sound when notifications are marked as read
 function stopNotificationSound() {
-    clearInterval(notificationSoundInterval);
+    if (notificationSoundInterval) {
+        clearInterval(notificationSoundInterval);
+        notificationSoundInterval = null; // Reiniciar el intervalo
+    }
 }
 
-// Load notifications and show popup with sound if there are new notifications
 async function loadNotifications() {
-  try {
-    const response = await fetch('/notificaciones');
-    const data = await response.json();
+    try {
+        const response = await fetch('/notificaciones');
+        const data = await response.json();
 
-    const notificationCount = data.notificaciones.length;
+        console.log("Datos recibidos:", data); // Log de los datos recibidos
+
+        const notificationCount = data.notificaciones.length;
+        const notificationBadge = document.getElementById('notificationCount');
+        const notificationList = document.getElementById('notificationList');
+
+        // Actualiza el conteo de notificaciones
+        if (notificationCount > 0) {
+            notificationBadge.classList.remove('hidden');
+            notificationBadge.textContent = notificationCount;
+            notificationList.innerHTML = '';
+
+            // Llena la lista de notificaciones
+            data.notificaciones.forEach(notificacion => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${notificacion.actividad} - ${new Date(notificacion.fecha).toLocaleString()}`;
+                notificationList.appendChild(listItem);
+            });
+
+            // Si hay notificaciones, iniciar el sonido
+            startNotificationSound();
+
+        } else {
+            notificationBadge.classList.add('hidden');
+            notificationList.innerHTML = '<li>No hay notificaciones nuevas</li>';
+        }
+    } catch (error) {
+        console.error("Error al cargar notificaciones:", error);
+    }
+}
+
+function markNotificationsAsRead(userId) {
     const notificationBadge = document.getElementById('notificationCount');
     const notificationList = document.getElementById('notificationList');
     const popup = document.getElementById('notificationPopup');
 
-    if (notificationCount > 0) {
-      notificationBadge.classList.remove('hidden');
-      notificationBadge.textContent = notificationCount;
-      notificationList.innerHTML = '';
+    // Ocultar la notificación visualmente
+    notificationBadge.classList.add('hidden');
+    notificationBadge.textContent = '0';
+    notificationList.innerHTML = '<li>No hay notificaciones nuevas</li>';
+    popup.classList.add('hidden'); // Ocultar el popup después de marcar como leídas
 
-      // Populate notification list
-      data.notificaciones.forEach(notificacion => {
-        const listItem = document.createElement('li');
-        listItem.textContent = `${notificacion.actividad} - ${new Date(notificacion.fecha).toLocaleString()}`;
-        notificationList.appendChild(listItem);
-      });
-
-      // Show popup and start sound if there are notifications
-      popup.classList.remove('hidden');
-      if (isUserInteracted) startNotificationSound(); // Only start sound if user has interacted
-    } else {
-      notificationBadge.classList.add('hidden');
-      notificationList.innerHTML = '<li>No hay notificaciones nuevas</li>';
-      popup.classList.add('hidden');  // Ensure popup is hidden if no notifications
+    // Verificar si el userId está definidotoggleNotificationPopup
+    if (!userId) {
+        console.error('El user_id no está definido.');
+        return;
     }
-  } catch (error) {
-    console.error("Error al cargar notificaciones:", error);
-  }
+
+    // Llamar a la API para marcar como leídas
+    fetch(`/marcarNotificacionesComoLeidas/${userId}`, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log("Notificaciones marcadas como leídas:", data);
+            } else {
+                console.error("No se pudo marcar como leído:", data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error al marcar notificaciones como leídas:", error);
+        });
 }
 
-// Function to mark all notifications as read and stop sound
-function markNotificationsAsRead() {
-  const notificationBadge = document.getElementById('notificationCount');
-  const notificationList = document.getElementById('notificationList');
 
-  notificationBadge.classList.add('hidden');
-  notificationBadge.textContent = '0';
-  notificationList.innerHTML = '<li>No hay notificaciones nuevas</li>';
-  stopNotificationSound();
 
-  fetch('/marcarNotificacionesComoLeidas', { method: 'POST' })
-      .then(response => response.json())
-      .then(data => console.log("Notificaciones marcadas como leídas:", data))
-      .catch(error => console.error("Error al marcar notificaciones como leídas:", error));
-}
+// Cargar las notificaciones automáticamente al cargar la página y cada 30 segundos
+window.onload = function() {
+    loadNotifications(); // Cargar notificaciones automáticamente al cargar la página
+    setInterval(loadNotifications, 30000); // Cargar notificaciones cada 30 segundos
+};
 
-// Close the popup when clicking outside of it
-document.addEventListener('click', (event) => {
-  const popup = document.getElementById('notificationPopup');
-  if (!popup.contains(event.target) && !popup.classList.contains('hidden')) {
-    popup.classList.add('hidden');
-  }
+// Hamburger menu toggle
+const hamburger = document.getElementById('hamburger-menu');
+const sidebar = document.getElementById('sidebar');
+
+hamburger.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
 });
 
-// Load notifications on page load
-document.addEventListener('DOMContentLoaded', () => {
-  loadNotifications(); // Load notifications on initial page load
-  setInterval(loadNotifications, 60000); // Reload notifications every minute
-});
+// Theme toggle logic
+const themeToggle = document.getElementById('theme-toggle');
+const htmlElement = document.documentElement;
 
-
-
-
-
-
-    // Hamburger menu toggle
-    const hamburger = document.getElementById('hamburger-menu');
-    const sidebar = document.getElementById('sidebar');
-
-    hamburger.addEventListener('click', () => {
-      sidebar.classList.toggle('open');
-    });
-
-    // Theme toggle logic
-    const themeToggle = document.getElementById('theme-toggle');
-    const htmlElement = document.documentElement;
-
-    themeToggle.addEventListener('click', () => {
-      htmlElement.classList.toggle('dark');
-      if (htmlElement.classList.contains('dark')) {
+themeToggle.addEventListener('click', () => {
+    htmlElement.classList.toggle('dark');
+    if (htmlElement.classList.contains('dark')) {
         localStorage.setItem('theme', 'dark');
-      } else {
+    } else {
         localStorage.setItem('theme', 'light');
-      }
-    });
-
-    // Load theme from localStorage
-    const storedTheme = localStorage.getItem('theme');
-    if (storedTheme === 'dark') {
-      htmlElement.classList.add('dark');
     }
-  </script>
-  <script>
-  // Obtener la ruta actual
-  const currentPath = window.location.pathname;
+});
 
-  // Obtener todos los enlaces del menú
-  const menuLinks = document.querySelectorAll('.sidebar ul li a');
-
-  // Iterar sobre los enlaces y añadir la clase 'active' al enlace cuya ruta coincida
-  menuLinks.forEach(link => {
-    if (link.dataset.link === currentPath) {
-      link.classList.add('active');
-    }
-  });
-  function toggleSubmenu(id) {
-  const submenu = document.getElementById(id);
-  submenu.classList.toggle('hidden');
+// Load theme from localStorage
+const storedTheme = localStorage.getItem('theme');
+if (storedTheme === 'dark') {
+    htmlElement.classList.add('dark');
 }
 
+// Mark the active link in the sidebar
+const currentPath = window.location.pathname;
+const menuLinks = document.querySelectorAll('.sidebar ul li a');
 
+menuLinks.forEach(link => {
+    if (link.dataset.link === currentPath) {
+        link.classList.add('active');
+    }
+});
 
-
-
-
+// Submenu toggle
+function toggleSubmenu(id) {
+    const submenu = document.getElementById(id);
+    submenu.classList.toggle('hidden');
+}
 
 
 </script>
 
 <script>
-  // Load notifications and show popup if there are new notifications
-  async function loadNotifications() {
-    try {
-      const response = await fetch('/notificaciones');
-      const data = await response.json();
 
-      const notificationCount = data.notificaciones.length;
-      const notificationBadge = document.getElementById('notificationCount');
-      const notificationList = document.getElementById('notificationList');
-
-      if (notificationCount > 0) {
-        notificationBadge.classList.remove('hidden');
-        notificationBadge.textContent = notificationCount;
-        notificationList.innerHTML = '';
-
-        // Populate notification list
-        data.notificaciones.forEach(notificacion => {
-          const listItem = document.createElement('li');
-          listItem.textContent = `${notificacion.actividad} - ${new Date(notificacion.fecha).toLocaleString()}`;
-          notificationList.appendChild(listItem);
-        });
-
-        // Show popup automatically if notifications exist
-        document.getElementById('notificationPopup').classList.remove('hidden');
-      } else {
-        notificationBadge.classList.add('hidden');
-        notificationList.innerHTML = '<li>No hay notificaciones nuevas</li>';
-      }
-    } catch (error) {
-      console.error("Error al cargar notificaciones:", error);
-    }
-  }
-
-  // Initialize and hide popup when clicking outside
-  document.addEventListener('DOMContentLoaded', () => {
-    document.addEventListener('click', (event) => {
-      const popup = document.getElementById('notificationPopup');
-      if (!popup.contains(event.target)) {
-        popup.classList.add('hidden');  // Hide popup when clicking outside
-      }
-    });
-
-    loadNotifications(); // Load notifications on page load
-    setInterval(loadNotifications, 60000); // Reload notifications every minute
-  });
 </script>
