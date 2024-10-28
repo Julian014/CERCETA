@@ -1981,7 +1981,7 @@ async function sendAppNotification(userId, actividad, fechaEjecucion) {
 
 
 
-cron.schedule('8 12 * * *', () => {
+cron.schedule('1 12 * * *', () => {
     console.log("Cron job ejecutándose cada día a las 8:00 AM...");
     verificarAlertasPendientes();
 });
@@ -2048,6 +2048,23 @@ app.post('/marcarNotificacionesComoLeidas/:user_id', async (req, res) => {
     }
 });
 
+
+app.get('/consultar_alertas', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        const userId = req.session.userId;
+
+        try {
+            const [alertas] = await pool.query('SELECT * FROM alertas ORDER BY fecha_creacion DESC');
+            res.render('administrativo/alertas/consultar_todas.hbs', { name, userId, alertas, layout: 'layouts/nav_admin.hbs' });
+        } catch (error) {
+            console.error('Error al obtener alertas:', error);
+            res.status(500).send('Error al obtener alertas');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
 
 
 // Iniciar el servidor

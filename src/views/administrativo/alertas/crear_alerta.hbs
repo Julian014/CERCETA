@@ -9,10 +9,11 @@
         </div>
 
         <!-- Fecha de Ejecución -->
-        <div class="form-group">
-            <label for="fechaEjecucion" class="block text-sm font-medium text-gray-700">Fecha de Ejecución</label>
-            <input type="date" class="form-control block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" id="fechaEjecucion" name="fechaEjecucion" required>
-        </div>
+       <!-- Fecha de Ejecución -->
+            <div class="form-group">
+                <label for="fechaEjecucion" class="block text-sm font-medium text-gray-700">Fecha de Ejecución</label>
+                <input type="date" class="form-control block w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400" id="fechaEjecucion" name="fechaEjecucion" required>
+            </div>
 
         <!-- Frecuencia de Alerta -->
         <div class="form-group">
@@ -89,4 +90,10 @@
             diasAntesAlertaContainer.style.display = 'none';
         }
     });
+        // Configurar la fecha mínima en el campo de Fecha de Ejecución para que sea hoy
+        const fechaEjecucionInput = document.getElementById('fechaEjecucion');
+        const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        fechaEjecucionInput.min = today;
+
+  
 </script>

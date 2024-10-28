@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Consultar Alertas</title>
+    <style>
+        /* Estilos globales */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #5a7d9a;
+            text-align: center;
+        }
+        
+        p {
+            font-size: 1.1em;
+            color: #555;
+            text-align: center;
+        }
+
+        /* Estilos para los filtros */
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px auto;
+            padding: 15px;
+            max-width: 90%;
+            background-color: #e6ebed;
+            border-radius: 10px;
+        }
+        
+        .filter-container select, .filter-container input {
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        /* Estilos de la tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #5a7d9a;
+            color: #fff;
+            font-weight: bold;
+        }
+        
+        td {
+            border-bottom: 1px solid #ddd;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        /* Estilos para botones */
+        button {
+            background-color: #5a7d9a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        button:hover {
+            background-color: #476b89;
+        }
+    </style>
+</head>
+<body>
+    <h1>Consultar Alertas</h1>
+    <p>Bienvenido, {{name}}</p>
+
+    <!-- Filtros -->
+    <div class="filter-container">
+        <input type="text" placeholder="Buscar por Actividad" id="filterActivity">
+        <select id="filterFrequency">
+            <option value="">Frecuencia</option>
+            <option value="diaria">Diaria</option>
+            <option value="semanal">Semanal</option>
+            <option value="quincenal">Quincenal</option>
+            <option value="mensual">Mensual</option>
+        </select>
+        <select id="filterPriority">
+            <option value="">Prioridad</option>
+            <option value="alta">Alta</option>
+            <option value="media">Media</option>
+            <option value="baja">Baja</option>
+        </select>
+        <input type="date" id="filterStartDate" placeholder="Fecha Inicio">
+        <input type="date" id="filterEndDate" placeholder="Fecha Fin">
+        <button onclick="applyFilters()">Aplicar Filtros</button>
+    </div>
+
+    <!-- Tabla de alertas -->
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Actividad</th>
+                <th>Fecha de Ejecución</th>
+                <th>Frecuencia</th>
+                <th>Días Antes</th>
+                <th>Método de Notificación</th>
+                <th>Prioridad</th>
+                <th>Tiempo de Recordatorio</th>
+                <th>Responsable</th>
+                <th>Fecha de Creación</th>
+            </tr>
+        </thead>
+        <tbody id="alertTableBody">
+            {{#each alertas}}
+            <tr>
+                <td>{{this.id}}</td>
+                <td>{{this.nombre_actividad}}</td>
+                <td>{{formatDate this.fecha_ejecucion}}</td>
+                <td>{{this.frecuencia_alerta}}</td>
+                <td>{{this.dias_antes_alerta}}</td>
+                <td>{{this.metodo_notificacion}}</td>
+                <td>{{this.prioridad}}</td>
+                <td>{{this.tiempo_recordatorio}}</td>
+                <td>{{this.responsable_id}}</td>
+                <td>{{formatDate this.fecha_creacion}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    <script>
+        // Convierte una fecha en formato DD/MM/YYYY a YYYY-MM-DD para comparaciones
+        function parseDate(dmy) {
+            const [day, month, year] = dmy.split('/');
+            return new Date(`${year}-${month}-${day}`);
+        }
+
+        function applyFilters() {
+            const activityFilter = document.getElementById('filterActivity').value.toLowerCase();
+            const frequencyFilter = document.getElementById('filterFrequency').value;
+            const priorityFilter = document.getElementById('filterPriority').value;
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+
+            const rows = document.querySelectorAll('#alertTableBody tr');
+
+            rows.forEach(row => {
+                const activity = row.cells[1].textContent.toLowerCase();
+                const frequency = row.cells[3].textContent;
+                const priority = row.cells[6].textContent;
+                const executionDate = parseDate(row.cells[2].textContent);
+
+                let isMatch = true;
+
+                if (activityFilter && !activity.includes(activityFilter)) {
+                    isMatch = false;
+                }
+
+                if (frequencyFilter && frequency !== frequencyFilter) {
+                    isMatch = false;
+                }
+
+                if (priorityFilter && priority !== priorityFilter) {
+                    isMatch = false;
+                }
+
+                // Comparación de fechas
+                if (startDate && executionDate < new Date(startDate)) {
+                    isMatch = false;
+                }
+                if (endDate && executionDate > new Date(endDate)) {
+                    isMatch = false;
+                }
+
+                row.style.display = isMatch ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>
