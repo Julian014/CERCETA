@@ -185,9 +185,24 @@
 width: 120px;
 height: 120px;
 
-    }
+    }   /* Popup de Notificaciones */
+#notificationPopup {
+    position: fixed;
+    top: 80px;
+    right: 20%;
+    background-color: rgba(255, 255, 255, 0.98); /* Fondo semitransparente */
+    padding: 1.2rem 1.5rem;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 0.75rem;
+    z-index: 9999;
+    border: 1px solid #00796b; /* Borde más delgado */
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
   </style>
 </head>
+<div class="overlay" id="overlay"></div>
+
 <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
   <div class="flex h-screen">
     <!-- Hamburger Icon -->
@@ -206,6 +221,10 @@ height: 120px;
           <span>{{name}}</span>
         </div>
       </div>
+<div class="relative">
+  <i class="fas fa-bell text-xl cursor-pointer" id="notificationBell"></i>
+  <span id="notificationCount" class="badge hidden">0</span>
+</div>
 
       <!-- Search Bar -->
       <div class="search-bar">
@@ -539,12 +558,122 @@ height: 120px;
       <!-- Placeholder for dynamic body content -->
 
    <div class="main-content">
+    
+<div id="notificationPopup" class="hidden fixed top-16 right-16 bg-white p-4 shadow-lg rounded-lg z-50">
+    <h3 class="text-lg font-bold mb-2">Notificaciones</h3>
+    <ul id="notificationList" class="text-gray-700"></ul>
+<button onclick="markNotificationsAsRead()" class="mt-3 text-blue-500">Marcar todas como leídas</button>
+</div>
+
     {{{body}}}
 </div>
 
     </div>
   </div>
-  <script>
+ 
+<script>
+// Variable to control notification sound interval
+let notificationSoundInterval;
+let isUserInteracted = false;
+
+// Detects the first user interaction to allow sound playback
+document.addEventListener('click', () => {
+    if (!isUserInteracted) {
+        isUserInteracted = true;
+        startNotificationSound(); // Starts repetitive sound after interaction
+    }
+});
+
+// Function to play the notification sound
+function playNotificationSound() {
+    const audio = new Audio('sonidos/level-up-2-199574.mp3');
+    audio.play().catch(error => console.error("Error al reproducir sonido:", error));
+}
+
+// Function to start sound at 5-second intervals
+function startNotificationSound() {
+    if (isUserInteracted) {
+        playNotificationSound();
+        notificationSoundInterval = setInterval(playNotificationSound, 5000);
+    }
+}
+
+// Function to stop sound when notifications are marked as read
+function stopNotificationSound() {
+    clearInterval(notificationSoundInterval);
+}
+
+// Load notifications and show popup with sound if there are new notifications
+async function loadNotifications() {
+  try {
+    const response = await fetch('/notificaciones');
+    const data = await response.json();
+
+    const notificationCount = data.notificaciones.length;
+    const notificationBadge = document.getElementById('notificationCount');
+    const notificationList = document.getElementById('notificationList');
+    const popup = document.getElementById('notificationPopup');
+
+    if (notificationCount > 0) {
+      notificationBadge.classList.remove('hidden');
+      notificationBadge.textContent = notificationCount;
+      notificationList.innerHTML = '';
+
+      // Populate notification list
+      data.notificaciones.forEach(notificacion => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${notificacion.actividad} - ${new Date(notificacion.fecha).toLocaleString()}`;
+        notificationList.appendChild(listItem);
+      });
+
+      // Show popup and start sound if there are notifications
+      popup.classList.remove('hidden');
+      if (isUserInteracted) startNotificationSound(); // Only start sound if user has interacted
+    } else {
+      notificationBadge.classList.add('hidden');
+      notificationList.innerHTML = '<li>No hay notificaciones nuevas</li>';
+      popup.classList.add('hidden');  // Ensure popup is hidden if no notifications
+    }
+  } catch (error) {
+    console.error("Error al cargar notificaciones:", error);
+  }
+}
+
+// Function to mark all notifications as read and stop sound
+function markNotificationsAsRead() {
+  const notificationBadge = document.getElementById('notificationCount');
+  const notificationList = document.getElementById('notificationList');
+
+  notificationBadge.classList.add('hidden');
+  notificationBadge.textContent = '0';
+  notificationList.innerHTML = '<li>No hay notificaciones nuevas</li>';
+  stopNotificationSound();
+
+  fetch('/marcarNotificacionesComoLeidas', { method: 'POST' })
+      .then(response => response.json())
+      .then(data => console.log("Notificaciones marcadas como leídas:", data))
+      .catch(error => console.error("Error al marcar notificaciones como leídas:", error));
+}
+
+// Close the popup when clicking outside of it
+document.addEventListener('click', (event) => {
+  const popup = document.getElementById('notificationPopup');
+  if (!popup.contains(event.target) && !popup.classList.contains('hidden')) {
+    popup.classList.add('hidden');
+  }
+});
+
+// Load notifications on page load
+document.addEventListener('DOMContentLoaded', () => {
+  loadNotifications(); // Load notifications on initial page load
+  setInterval(loadNotifications, 60000); // Reload notifications every minute
+});
+
+
+
+
+
+
     // Hamburger menu toggle
     const hamburger = document.getElementById('hamburger-menu');
     const sidebar = document.getElementById('sidebar');
@@ -590,5 +719,59 @@ height: 120px;
   submenu.classList.toggle('hidden');
 }
 
+
+
+
+
+
+
+
 </script>
 
+<script>
+  // Load notifications and show popup if there are new notifications
+  async function loadNotifications() {
+    try {
+      const response = await fetch('/notificaciones');
+      const data = await response.json();
+
+      const notificationCount = data.notificaciones.length;
+      const notificationBadge = document.getElementById('notificationCount');
+      const notificationList = document.getElementById('notificationList');
+
+      if (notificationCount > 0) {
+        notificationBadge.classList.remove('hidden');
+        notificationBadge.textContent = notificationCount;
+        notificationList.innerHTML = '';
+
+        // Populate notification list
+        data.notificaciones.forEach(notificacion => {
+          const listItem = document.createElement('li');
+          listItem.textContent = `${notificacion.actividad} - ${new Date(notificacion.fecha).toLocaleString()}`;
+          notificationList.appendChild(listItem);
+        });
+
+        // Show popup automatically if notifications exist
+        document.getElementById('notificationPopup').classList.remove('hidden');
+      } else {
+        notificationBadge.classList.add('hidden');
+        notificationList.innerHTML = '<li>No hay notificaciones nuevas</li>';
+      }
+    } catch (error) {
+      console.error("Error al cargar notificaciones:", error);
+    }
+  }
+
+  // Initialize and hide popup when clicking outside
+  document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('click', (event) => {
+      const popup = document.getElementById('notificationPopup');
+      if (!popup.contains(event.target)) {
+        popup.classList.add('hidden');  // Hide popup when clicking outside
+      }
+    });
+
+    loadNotifications(); // Load notifications on page load
+    setInterval(loadNotifications, 60000); // Reload notifications every minute
+  });
+</script>

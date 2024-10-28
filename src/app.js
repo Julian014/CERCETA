@@ -45,7 +45,6 @@ hbs.registerHelper('formatDate', (date) => {
 
 
 
-
 // Ruta para manejar el login
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -57,10 +56,11 @@ app.post('/login', async (req, res) => {
         if (results.length > 0) {
             // Almacena los datos del usuario en la sesión
             req.session.user = results[0];  // Almacena el objeto completo del usuario
+            req.session.userId = results[0].id; // Guarda el `userId` en la sesión correctamente
             req.session.name = results[0].nombre;  // Guarda el nombre del usuario en la sesión
             req.session.loggedin = true;  // Establece el estado de sesión como conectado
             req.session.roles = results[0].role;  // Guarda los roles en la sesión
-            req.session.cargo = results[0].cargo; // Almacena el cargo en la sesión correctamente
+            req.session.cargo = results[0].cargo; // Almacena el cargo en la sesión
 
             const role = results[0].role;  // Obtiene el rol del usuario
 
@@ -81,7 +81,6 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
-
 
 
 
@@ -1758,35 +1757,50 @@ app.get('/crear_alerta', async (req, res) => {
 });
 
 
+
+
 app.post('/crear_alerta', async (req, res) => {
+    console.log(req.body); // Verificar qué datos están llegando
+
     const {
         nombreActividad,
         fechaEjecucion,
         frecuenciaAlerta,
         diasAntesAlerta,
-        metodoNotificacion,
         prioridad,
         tiempoRecordatorio,
         responsable
     } = req.body;
 
+    // Acceder a los métodos de notificación seleccionados
+    const metodoNotificacion = req.body['metodoNotificacion[]'];
+
     try {
-        // Inserción en la tabla alertas con campos avanzados
-        const query = `INSERT INTO alertas (nombre_actividad, fecha_ejecucion, frecuencia_alerta, dias_antes_alerta, 
-                       metodo_notificacion, prioridad, tiempo_recordatorio, responsable_id) 
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+        // Convertir el array de métodos de notificación en una cadena separada por comas
+        const metodosNotificacion = Array.isArray(metodoNotificacion)
+            ? metodoNotificacion.join(',') // Convierte a "email,sms" por ejemplo
+            : '';
+
+        console.log("Métodos de Notificación antes de la consulta:", metodosNotificacion); // Verificar el valor final
+
+        // Inserción en la tabla alertas
+        const query = `INSERT INTO alertas 
+            (nombre_actividad, fecha_ejecucion, frecuencia_alerta, dias_antes_alerta, metodo_notificacion, prioridad, tiempo_recordatorio, responsable_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
         await pool.query(query, [
             nombreActividad,
             fechaEjecucion,
             frecuenciaAlerta,
-            diasAntesAlerta || null,
-            metodoNotificacion,
+            diasAntesAlerta !== "" ? diasAntesAlerta : null,
+            metodosNotificacion, 
             prioridad,
-            tiempoRecordatorio || null,
+            tiempoRecordatorio !== "" ? tiempoRecordatorio : null,
             responsable
         ]);
 
-        res.redirect('/crear_alerta'); // Redirige o muestra mensaje de éxito
+        console.log("Alerta creada exitosamente con métodos de notificación:", metodosNotificacion);
+
+        res.redirect('/crear_alerta'); 
     } catch (error) {
         console.error("Error al crear alerta:", error);
         res.status(500).send("Hubo un problema al crear la alerta.");
@@ -1796,55 +1810,86 @@ app.post('/crear_alerta', async (req, res) => {
 
 async function verificarAlertasPendientes() {
     try {
-        // Agrega log para verificar que la función se está ejecutando
         console.log("Iniciando verificación de alertas...");
 
-        // Obtener alertas próximas según el tiempo de recordatorio
         const query = `
-            SELECT 
-                a.id, a.nombre_actividad, a.fecha_ejecucion, a.frecuencia_alerta, a.dias_antes_alerta, 
-                a.metodo_notificacion, a.prioridad, a.tiempo_recordatorio, u.email, u.nombre 
-            FROM 
-                alertas a 
-            JOIN 
-                usuarios u ON a.responsable_id = u.id 
-            WHERE 
-                TIMESTAMPDIFF(MINUTE, NOW(), a.fecha_ejecucion) <= a.tiempo_recordatorio 
-                AND TIMESTAMPDIFF(MINUTE, NOW(), a.fecha_ejecucion) > 0
-        `;
-
+        SELECT 
+            a.id, a.nombre_actividad, a.fecha_ejecucion, a.frecuencia_alerta, a.dias_antes_alerta, 
+            a.metodo_notificacion, a.prioridad, a.tiempo_recordatorio, u.email, u.nombre, u.id AS responsable_id
+        FROM 
+            alertas a 
+        JOIN 
+            usuarios u ON a.responsable_id = u.id 
+        WHERE 
+            NOW() <= a.fecha_ejecucion
+    `;
+    
         const [alertas] = await pool.query(query);
 
         console.log("Alertas encontradas:", alertas.length);
 
         for (const alerta of alertas) {
-            console.log("Procesando alerta:", alerta);
+            const hoy = moment();
+            const fechaEjecucion = moment(alerta.fecha_ejecucion);
 
-            switch (alerta.metodo_notificacion) {
-                case 'email':
-                    console.log("Enviando correo a:", alerta.email);
-                    await sendEmail(alerta.email, alerta.nombre_actividad, alerta.fecha_ejecucion);
+            // Determina si la notificación debe enviarse según la frecuencia
+            let enviarNotificacion = false;
+            switch (alerta.frecuencia_alerta) {
+                case 'diaria':
+                    enviarNotificacion = true; // Notificar todos los días hasta la fecha de ejecución
                     break;
-                case 'sms':
-                    console.log("Enviando SMS a:", alerta.email);
-                    await sendSMS(alerta.email, alerta.nombre_actividad);
+                case 'semanal':
+                    enviarNotificacion = hoy.diff(fechaEjecucion, 'days') % 7 === 0;
                     break;
-                case 'push':
-                    console.log("Enviando notificación push a:", alerta.email);
-                    await sendPushNotification(alerta.email, alerta.nombre_actividad);
+                case 'quincenal':
+                    enviarNotificacion = hoy.diff(fechaEjecucion, 'days') % 14 === 0;
                     break;
-                case 'app':
-                    console.log("Enviando notificación en app al usuario con ID:", alerta.responsable_id);
-                    await sendAppNotification(alerta.responsable_id, alerta.nombre_actividad);
+                case 'mensual':
+                    enviarNotificacion = hoy.isSame(fechaEjecucion, 'day'); // Notificar una vez al mes en el día de ejecución
                     break;
-                default:
-                    console.log(`Método de notificación no soportado: ${alerta.metodo_notificacion}`);
+                case 'personalizada':
+                    if (alerta.dias_antes_alerta) {
+                        const diasDiferencia = fechaEjecucion.diff(hoy, 'days');
+                        enviarNotificacion = diasDiferencia === alerta.dias_antes_alerta;
+                    }
+                    break;
+            }
+
+            if (enviarNotificacion) {
+                console.log("Procesando alerta:", alerta);
+
+                // Procesar cada método de notificación seleccionado
+                const metodos = alerta.metodo_notificacion.split(',');
+                for (const metodo of metodos) {
+                    switch (metodo.trim()) {
+                        case 'email':
+                            console.log("Enviando correo a:", alerta.email);
+                            await sendEmail(alerta.email, alerta.nombre_actividad, alerta.fecha_ejecucion);
+                            break;
+                        case 'sms':
+                            console.log("Enviando SMS a:", alerta.email);
+                            await sendSMS(alerta.email, alerta.nombre_actividad);
+                            break;
+                        case 'push':
+                            console.log("Enviando notificación push a:", alerta.email);
+                            await sendPushNotification(alerta.email, alerta.nombre_actividad);
+                            break;
+                            case 'app':
+                                console.log("Enviando notificación en app al usuario con ID:", alerta.responsable_id);
+                                await sendAppNotification(alerta.responsable_id, alerta.nombre_actividad);
+                                break;
+                            
+                        default:
+                            console.log(`Método de notificación no soportado: ${metodo}`);
+                    }
+                }
             }
         }
     } catch (error) {
         console.error("Error al verificar alertas:", error);
     }
 }
+
 
 
 
@@ -1885,18 +1930,61 @@ async function sendPushNotification(to, actividad) {
 }
 
 async function sendAppNotification(userId, actividad) {
-    console.log(`Enviando notificación en app al usuario con ID ${userId} para la actividad ${actividad}`);
-    // Implementación de notificación en app
+    if (!userId) {
+        console.error("El user_id es null o indefinido. No se puede enviar la notificación.");
+        return;
+    }
+
+    console.log(`Registrando notificación en app para el usuario con ID ${userId} sobre la actividad ${actividad}`);
+
+    const query = `
+        INSERT INTO notificaciones (user_id, actividad, fecha, leido)
+        VALUES (?, ?, NOW(), 0)
+    `;
+    
+    await pool.query(query, [userId, actividad]);
 }
 
-// Prueba del cron job
-cron.schedule('* * * * *', () => {
-    console.log("Cron job ejecutándose cada minuto...");
+
+
+cron.schedule('4 22 * * *', () => {
+    console.log("Cron job ejecutándose cada día a las 8:00 AM...");
     verificarAlertasPendientes();
+});
+
+app.get('/notificaciones', async (req, res) => {
+    const userId = req.session.userId; // Asegúrate de que el ID de usuario esté en la sesión
+
+    try {
+        const [notificaciones] = await pool.query(`
+            SELECT * FROM notificaciones WHERE user_id = ? AND leido = 0
+        `, [userId]);
+
+        res.json({ notificaciones });
+    } catch (error) {
+        console.error("Error al obtener notificaciones:", error);
+        res.status(500).json({ error: "Error al obtener notificaciones" });
+    }
 });
 
 
 
+app.get('/notificaciones', async (req, res) => {
+    const userId = req.session.userId; // Asegúrate de que el ID de usuario esté en la sesión
+    console.log("User ID de la sesión:", userId); // Verifica el ID del usuario
+
+    try {
+        const [notificaciones] = await pool.query(`
+            SELECT * FROM notificaciones WHERE user_id = ? AND leido = 0
+        `, [userId]);
+
+        console.log("Notificaciones encontradas:", notificaciones); // Verifica si hay notificaciones
+        res.json({ notificaciones });
+    } catch (error) {
+        console.error("Error al obtener notificaciones:", error);
+        res.status(500).json({ error: "Error al obtener notificaciones" });
+    }
+});
 
 
 // Iniciar el servidor
