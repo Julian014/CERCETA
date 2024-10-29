@@ -97,6 +97,18 @@
                 margin-top: 20px;
             }
         }
+.platilla {
+    width: 850px; /* Mantén el ancho constante */
+    height: 2100px; /* Aumenta el alto para capturar las firmas */
+    border: 1px solid black;
+    margin: auto;
+    overflow: hidden;
+    padding-bottom: 20px;
+    box-sizing: border-box;
+    transform-origin: top left;
+}
+
+
     </style>
 </head>
 <body class="p-4 sm:p-8">
@@ -521,10 +533,6 @@
 <button onclick="downloadTemplate(event)">Descargar Plantilla</button>
 <br>
 <div class="mt-4">
-    <h3 class="text-lg font-bold mb-2">Previsualización de la Plantilla</h3>
-    <div id="previewContainer" class="border p-4 bg-gray-100">
-        <p class="text-gray-500">No hay imagen generada aún.</p>
-    </div>
     <button onclick="sendImageToEmail(event)" class="mt-4 btn btn-primary">Enviar al Correo del Representante</button>
 </div>
 
@@ -557,35 +565,48 @@ function downloadTemplate(event) {
         previewContainer.appendChild(img);
     });
 }
+
+
+
 function sendImageToEmail(event) {
     event.preventDefault();
 
-    const formData = new FormData();
-    const edificioId = document.getElementById('edificio').value;
+    const element = document.querySelector('.platilla');
 
-    // Convierte la imagen base64 a Blob para Multer
-    fetch(imageDataURL)
-        .then(res => res.blob())
-        .then(blob => {
-            formData.append('image', blob, 'plantilla.png'); // Envía la imagen como archivo
-            formData.append('edificioId', edificioId); // Agrega el ID del edificio
+    html2canvas(element, {
+        width: 850, // Ajusta al ancho de la plantilla
+        height: 2100, // Ajusta al nuevo alto de la plantilla
+        scale: 2, // Aumenta la escala para capturar con mejor resolución
+        windowWidth: 800,
+        windowHeight: 2400
+    }).then(canvas => {
+        const imageDataURL = canvas.toDataURL('image/png');
+        const formData = new FormData();
+        const edificioId = document.getElementById('edificio').value;
 
-            fetch('/enviar-png', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('PNG enviado exitosamente al correo del representante.');
-                } else {
-                    alert('Hubo un error al enviar el correo.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+        fetch(imageDataURL)
+            .then(res => res.blob())
+            .then(blob => {
+                formData.append('image', blob, 'plantilla.png');
+                formData.append('edificioId', edificioId);
+
+                fetch('/enviar-png', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('PNG enviado exitosamente al correo del representante.');
+                    } else {
+                        alert('Hubo un error al enviar el correo.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
             });
-        });
+    });
 }
 
 
