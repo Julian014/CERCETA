@@ -100,7 +100,7 @@
     </style>
 </head>
 <body class="p-4 sm:p-8">
-<form action="/guardar-supervision" method="post" onsubmit="guardarFirmas()">
+<form id="formEnvio" action="/guardar-supervision" method="post" onsubmit="guardarFirmas()">
 
     <div class="platilla">
         <div class="header-container mb-4">
@@ -519,25 +519,77 @@
 
 <br>
 <button onclick="downloadTemplate(event)">Descargar Plantilla</button>
+<br>
+<div class="mt-4">
+    <h3 class="text-lg font-bold mb-2">Previsualización de la Plantilla</h3>
+    <div id="previewContainer" class="border p-4 bg-gray-100">
+        <p class="text-gray-500">No hay imagen generada aún.</p>
+    </div>
+    <button onclick="sendImageToEmail(event)" class="mt-4 btn btn-primary">Enviar al Correo del Representante</button>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 </Form>
   <script>
+let imageDataURL = ''; // Variable para almacenar la URL de la imagen PNG generada
+
 function downloadTemplate(event) {
-    event.preventDefault(); // Evita el envío del formulario
-    const element = document.querySelector('.platilla'); // Selecciona el contenedor de la plantilla
+    event.preventDefault();
+    const element = document.querySelector('.platilla');
     
     html2canvas(element).then(canvas => {
-        // Convierte el canvas en un archivo PNG y crea un enlace de descarga
-        const imageData = canvas.toDataURL('image/png');
+        // Genera el archivo PNG
+        imageDataURL = canvas.toDataURL('image/png');
         
+        // Descarga la imagen
         const downloadLink = document.createElement('a');
-        downloadLink.href = imageData;
-        downloadLink.download = 'plantilla.png'; // Nombre del archivo a descargar
-        downloadLink.click(); // Simula el clic para descargar
+        downloadLink.href = imageDataURL;
+        downloadLink.download = 'plantilla.png';
+        downloadLink.click();
+        
+        // Muestra la imagen en el contenedor de previsualización
+        const previewContainer = document.getElementById('previewContainer');
+        previewContainer.innerHTML = ''; // Limpia cualquier contenido previo
+        const img = document.createElement('img');
+        img.src = imageDataURL;
+        img.classList.add('w-full', 'h-auto'); // Ajuste de imagen en el contenedor
+        previewContainer.appendChild(img);
     });
 }
+function sendImageToEmail(event) {
+    event.preventDefault();
+
+    const formData = new FormData();
+    const edificioId = document.getElementById('edificio').value;
+
+    // Convierte la imagen base64 a Blob para Multer
+    fetch(imageDataURL)
+        .then(res => res.blob())
+        .then(blob => {
+            formData.append('image', blob, 'plantilla.png'); // Envía la imagen como archivo
+            formData.append('edificioId', edificioId); // Agrega el ID del edificio
+
+            fetch('/enviar-png', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('PNG enviado exitosamente al correo del representante.');
+                } else {
+                    alert('Hubo un error al enviar el correo.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+}
+
+
+
 
     function guardarFirmas() {
     // Obtener los datos del lienzo del supervisor

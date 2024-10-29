@@ -2740,56 +2740,56 @@ app.get('/download-template', (req, res) => {
     });
 });
 
-// Endpoint to handle the uploaded PDF and send it via email
-app.post('/enviar-supervision-pdf', async (req, res) => {
-    const { edificio } = req.body;
-    const file = req.files.fileUpload;
 
-    if (!file || file.mimetype !== 'application/pdf') {
-        return res.status(400).send('Please upload a PDF file');
+
+
+
+app.post('/enviar-png', upload.single('image'), async (req, res) => {
+    const { edificioId } = req.body;
+    const image = req.file;
+
+    if (!image) {
+        return res.status(400).json({ success: false, message: 'Por favor, suba una imagen en formato PNG' });
     }
 
     try {
-        // Fetch recipient email from database based on edificio ID
-        const [rows] = await pool.query('SELECT correorepresentante FROM edificios WHERE id = ?', [edificio]);
+        // Obtener el correo del representante usando `edificioId`
+        const [rows] = await pool.query('SELECT correorepresentante FROM edificios WHERE id = ?', [edificioId]);
         const email = rows[0]?.correorepresentante;
-        if (!email) return res.status(404).send('No se encontró el correo del edificio seleccionado');
+        if (!email) return res.status(404).json({ success: false, message: 'No se encontró el correo del edificio seleccionado' });
 
-        // Configure Nodemailer
+        // Configurar nodemailer para enviar el correo con la imagen adjunta
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'nexus.innovationss@gmail.com', // Coloca tu correo electrónico
-                pass: 'dhmtnkcehxzfwzbd' // Coloca tu contraseña de correo electrónico
+                user: 'nexus.innovationss@gmail.com',
+                pass: 'dhmtnkcehxzfwzbd'
             }
         });
 
-        // Configure email
+        // Opciones de correo, incluyendo el archivo de imagen como adjunto
         const mailOptions = {
             from: 'nexus.innovationss@gmail.com',
             to: email,
-            subject: 'Supervisión - Informe en PDF',
-            text: 'Adjuntamos el informe de supervisión en formato PDF.',
+            subject: 'Supervisión - Informe en Imagen',
+            text: 'Adjuntamos el informe de supervisión en formato PNG.',
             attachments: [
                 {
-                    filename: file.name,
-                    content: file.data,
-                    contentType: 'application/pdf'
+                    filename: 'plantilla.png',
+                    content: image.buffer,
+                    contentType: 'image/png'
                 }
             ]
         };
 
-        // Send email
+        // Enviar el correo
         await transporter.sendMail(mailOptions);
-        res.send('Correo enviado exitosamente con la plantilla adjunta');
+        res.json({ success: true, message: 'Correo enviado exitosamente con la plantilla en formato PNG adjunta' });
     } catch (error) {
         console.error(error);
-        res.status(500).send('Error al enviar el correo.');
+        res.status(500).json({ success: false, message: 'Error al enviar el correo.' });
     }
 });
-
-
-
 
 
 // Iniciar el servidor
