@@ -107,12 +107,27 @@
     box-sizing: border-box;
     transform-origin: top left;
 }
+  /* Estilos de botón con Tailwind y personalizaciones */
+    .btn-primary {
+        @apply px-6 py-2 text-white font-semibold rounded-md transition duration-300 ease-in-out transform bg-blue-600 hover:bg-blue-700 focus:ring focus:ring-blue-300 focus:ring-opacity-50 shadow-lg;
+    }
 
+    /* Botones para dispositivos móviles */
+    @media (max-width: 640px) {
+        .btn-primary {
+            @apply px-4 py-2 text-sm w-full;
+        }
+    }
+
+    /* Efectos adicionales */
+    .btn-primary:hover {
+        @apply scale-105; /* Efecto de agrandamiento al pasar el ratón */
+    }
 
     </style>
 </head>
 <body class="p-4 sm:p-8">
-<form id="formEnvio" action="/guardar-supervision" method="post" onsubmit="guardarFirmas()">
+<form id="formEnvio" onsubmit="guardarSupervision(event)">
 
     <div class="platilla">
         <div class="header-container mb-4">
@@ -527,17 +542,53 @@
 
     </div>
 </body>
-    <button type="submit" class="btn btn-primary">Guardar</button>
+<button type="submit" class="px-6 py-2 text-white font-semibold rounded-md transition duration-300 ease-in-out transform bg-blue-600 hover:bg-blue-700 focus:ring focus:ring-blue-300 focus:ring-opacity-50 shadow-lg">Guardar</button>
 <br>
 <div class="mt-4">
-    <button onclick="downloadAndSend(event)" class="mt-4 btn btn-primary">Enviar y Descargar</button>
+    <button onclick="downloadAndSend(event)" class="px-6 py-2 text-white font-semibold rounded-md transition duration-300 ease-in-out transform bg-blue-600 hover:bg-blue-700 focus:ring focus:ring-blue-300 focus:ring-opacity-50 shadow-lg">Enviar y Descargar</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 </Form>
   <script>
+
+
+
 let imageDataURL = ''; // Variable para almacenar la URL de la imagen PNG generada
+
+
+
+function guardarSupervision(event) {
+    event.preventDefault();
+    
+    // Capture signatures before submitting the form
+    guardarFirmas();
+
+    const formData = new FormData(document.getElementById("formEnvio"));
+    
+    // Debugging: Check what formData contains
+    for (let [key, value] of formData.entries()) { 
+        console.log(`${key}: ${value}`); 
+    }
+
+    fetch('/guardar-supervision', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message);
+        } else {
+            alert('Hubo un problema al guardar la supervisión.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
 
 function downloadTemplate(event) {
     event.preventDefault();
@@ -652,13 +703,11 @@ function sendImageToEmail(event) {
 
 
 
-    function guardarFirmas() {
-    // Obtener los datos del lienzo del supervisor
+function guardarFirmas() {
     const supervisorCanvas = document.getElementById('supervisor-signature');
     const supervisorDataURL = supervisorCanvas.toDataURL('image/png');
     document.getElementById('firmaSupervisor').value = supervisorDataURL;
 
-    // Obtener los datos del lienzo del encargado
     const managerCanvas = document.getElementById('manager-signature');
     const managerDataURL = managerCanvas.toDataURL('image/png');
     document.getElementById('firmaEncargado').value = managerDataURL;
@@ -745,6 +794,9 @@ initCanvas('manager-signature');
         });
     });
 }
+
+
+
 
     </script>
 

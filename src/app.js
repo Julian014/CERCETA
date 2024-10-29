@@ -2093,9 +2093,20 @@ app.use(cors());
 
 
 // Ruta para guardar inspección
-app.post('/guardar-supervision', async (req, res) => {
-    const firmaSupervisorBinaria = Buffer.from(req.body.firma_supervisor.split(',')[1], 'base64');
-const firmaEncargadoBinaria = Buffer.from(req.body.firma_encargado.split(',')[1], 'base64');
+app.post('/guardar-supervision', upload.none(), async (req, res) => {
+    try {
+        console.log(req.body); // Check the parsed data
+
+        // Parse the signature data
+        const firmaSupervisorBinaria = req.body.firma_supervisor
+            ? Buffer.from(req.body.firma_supervisor.split(',')[1], 'base64')
+            : null;
+        const firmaEncargadoBinaria = req.body.firma_encargado
+            ? Buffer.from(req.body.firma_encargado.split(',')[1], 'base64')
+            : null;
+
+
+
     const {
         edificio,       
         cumple_area1,
@@ -2716,18 +2727,14 @@ const firmaEncargadoBinaria = Buffer.from(req.body.firma_encargado.split(',')[1]
 `;
 
 
-    try {
-        await pool.query(query, values);
+      await pool.query(query, values);
+
         res.status(200).json({ message: 'Inspección guardada exitosamente.' });
     } catch (error) {
-        console.error(error);
+        console.error('Error:', error);
         res.status(500).json({ message: 'Error al guardar la inspección.' });
     }
 });
-
-
-
-
 
 // Endpoint to download the template
 app.get('/download-template', (req, res) => {
@@ -2790,6 +2797,14 @@ app.post('/enviar-png', upload.single('image'), async (req, res) => {
         res.status(500).json({ success: false, message: 'Error al enviar el correo.' });
     }
 });
+
+
+
+
+
+
+
+
 
 
 // Iniciar el servidor
