@@ -8,6 +8,7 @@ const fs = require('fs');
 const cron = require('node-cron');
 
 const app = express();
+const fileUpload = require('express-fileupload');
 
 // Configurar la sesión
 app.use(session({
@@ -38,10 +39,6 @@ app.use(express.json());
 hbs.registerHelper('formatDate', (date) => {
     return moment(date).format('DD/MM/YYYY');
 });
-
-
-
-
 
 
 
@@ -2088,13 +2085,15 @@ app.get('/Informe_supervisor', async (req, res) => {
 
 
 
+const cors = require('cors');
+app.use(cors());
 
 
 
 
 
 // Ruta para guardar inspección
-app.post('/guardar-supeorvicion', async (req, res) => {
+app.post('/guardar-supervision', async (req, res) => {
     const firmaSupervisorBinaria = Buffer.from(req.body.firma_supervisor.split(',')[1], 'base64');
 const firmaEncargadoBinaria = Buffer.from(req.body.firma_encargado.split(',')[1], 'base64');
     const {
@@ -2727,62 +2726,67 @@ const firmaEncargadoBinaria = Buffer.from(req.body.firma_encargado.split(',')[1]
 });
 
 
-app.post('/guardar-imagen_supervicion', async (req, res) => {
+
+
+
+// Endpoint to download the template
+app.get('/download-template', (req, res) => {
+    const filePath = path.join(__dirname, 'template.pdf'); // Path to your PDF template
+    res.download(filePath, 'supervision_template.pdf', err => {
+        if (err) {
+            console.error('Error downloading the file:', err);
+            res.status(500).send('Error downloading the template');
+        }
+    });
+});
+
+// Endpoint to handle the uploaded PDF and send it via email
+app.post('/enviar-supervision-pdf', async (req, res) => {
+    const { edificio } = req.body;
+    const file = req.files.fileUpload;
+
+    if (!file || file.mimetype !== 'application/pdf') {
+        return res.status(400).send('Please upload a PDF file');
+    }
+
     try {
-        const edificioId = req.body.edificioId;
+        // Fetch recipient email from database based on edificio ID
+        const [rows] = await pool.query('SELECT correorepresentante FROM edificios WHERE id = ?', [edificio]);
+        const email = rows[0]?.correorepresentante;
+        if (!email) return res.status(404).send('No se encontró el correo del edificio seleccionado');
 
-        // Obtiene el correo del representante usando el edificioId
-        const [result] = await pool.query('SELECT correorepresentante FROM edificios WHERE id = ?', [edificioId]);
-        const correoRepresentante = result[0]?.correorepresentante;
-
-        if (!correoRepresentante) {
-            return res.status(404).json({ message: 'No se encontró el correo del representante.' });
-        }
-
-        // Guarda la imagen en el servidor
-        const imagen = req.files?.imagen;
-        if (!imagen) {
-            return res.status(400).json({ message: 'No se envió ninguna imagen.' });
-        }
-
-        const path = `src/public/informes_supervicion${imagen.name}`;
-        await imagen.mv(path);
-
-        // Configura el transporte de correo
+        // Configure Nodemailer
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
                 user: 'nexus.innovationss@gmail.com', // Coloca tu correo electrónico
-                pass: 'dhmtnkcehxzfwzbd' // Coloca tu contraseña de correo electrónico (verifica que sea correcta)
+                pass: 'dhmtnkcehxzfwzbd' // Coloca tu contraseña de correo electrónico
             }
         });
 
-        // Configura el correo
+        // Configure email
         const mailOptions = {
             from: 'nexus.innovationss@gmail.com',
-            to: correoRepresentante,
-            subject: 'Supervisión - Imagen capturada',
-            text: 'Adjuntamos la imagen de la supervisión.',
+            to: email,
+            subject: 'Supervisión - Informe en PDF',
+            text: 'Adjuntamos el informe de supervisión en formato PDF.',
             attachments: [
-                { filename: 'captura.png', path }
+                {
+                    filename: file.name,
+                    content: file.data,
+                    contentType: 'application/pdf'
+                }
             ]
         };
 
-        // Envía el correo
+        // Send email
         await transporter.sendMail(mailOptions);
-        console.log('Correo enviado exitosamente');
-        res.status(200).json({ message: 'Imagen enviada exitosamente al representante.' });
-
+        res.send('Correo enviado exitosamente con la plantilla adjunta');
     } catch (error) {
-        console.error('Error en /guardar-imagen_supervicion:', error);
-        res.status(500).json({ message: 'Error al enviar la imagen.' });
+        console.error(error);
+        res.status(500).send('Error al enviar el correo.');
     }
 });
-
-
-
-
-
 
 
 

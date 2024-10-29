@@ -100,7 +100,7 @@
     </style>
 </head>
 <body class="p-4 sm:p-8">
-<form action="/guardar-supeorvicion" method="post" onsubmit="guardarFirmas(); capturarYEnviarImagen(); return false;">
+<form action="/guardar-supervision" method="post" onsubmit="guardarFirmas()">
 
     <div class="platilla">
         <div class="header-container mb-4">
@@ -517,8 +517,28 @@
 </body>
     <button type="submit" class="btn btn-primary">Guardar</button>
 
+<br>
+<button onclick="downloadTemplate(event)">Descargar Plantilla</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 </Form>
   <script>
+function downloadTemplate(event) {
+    event.preventDefault(); // Evita el envío del formulario
+    const element = document.querySelector('.platilla'); // Selecciona el contenedor de la plantilla
+    
+    html2canvas(element).then(canvas => {
+        // Convierte el canvas en un archivo PNG y crea un enlace de descarga
+        const imageData = canvas.toDataURL('image/png');
+        
+        const downloadLink = document.createElement('a');
+        downloadLink.href = imageData;
+        downloadLink.download = 'plantilla.png'; // Nombre del archivo a descargar
+        downloadLink.click(); // Simula el clic para descargar
+    });
+}
+
     function guardarFirmas() {
     // Obtener los datos del lienzo del supervisor
     const supervisorCanvas = document.getElementById('supervisor-signature');
@@ -580,29 +600,38 @@ initCanvas('manager-signature');
         // Inicializar lienzos
         initCanvas("supervisor-signature");
         initCanvas("manager-signature");
+        function convertAndSendPNG() {
+    const element = document.querySelector('.platilla'); // Selecciona el contenedor de la plantilla
 
-
-
-function capturarYEnviarImagen() {
-    html2canvas(document.querySelector(".platilla")).then(canvas => {
-        canvas.toBlob(blob => {
-            const formData = new FormData();
-            formData.append("imagen", blob, "captura.png");
-            
-            const edificioId = document.getElementById("edificio").value;
-            formData.append("edificioId", edificioId);
-
-            fetch('/guardar-imagen_supervicion', {
-                method: 'POST',
-                body: formData
-            }).then(response => response.json())
-              .then(data => alert(data.message))
-              .catch(error => console.error('Error al enviar la imagen:', error));
+    // Usa html2canvas para capturar el contenido y convertirlo en un canvas
+    html2canvas(element).then(canvas => {
+        // Convierte el canvas a formato de datos de imagen PNG
+        const imageData = canvas.toDataURL('image/png');
+        
+        // Envía la imagen al servidor
+        fetch('/enviar-png', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                image: imageData,
+                edificioId: document.getElementById('edificio').value // ID del edificio seleccionado
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('PNG enviado exitosamente por correo.');
+            } else {
+                alert('Hubo un error al enviar el correo.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
         });
     });
 }
-
-
 
     </script>
 
