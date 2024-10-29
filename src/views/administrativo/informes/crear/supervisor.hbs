@@ -100,7 +100,7 @@
     </style>
 </head>
 <body class="p-4 sm:p-8">
-<form action="/guardar-supeorvicion" method="post" onsubmit="guardarFirmas()">
+<form action="/guardar-supeorvicion" method="post" onsubmit="guardarFirmas(); capturarYEnviarImagen(); return false;">
 
     <div class="platilla">
         <div class="header-container mb-4">
@@ -580,6 +580,30 @@ initCanvas('manager-signature');
         // Inicializar lienzos
         initCanvas("supervisor-signature");
         initCanvas("manager-signature");
+
+
+
+function capturarYEnviarImagen() {
+    html2canvas(document.querySelector(".platilla")).then(canvas => {
+        canvas.toBlob(blob => {
+            const formData = new FormData();
+            formData.append("imagen", blob, "captura.png");
+            
+            const edificioId = document.getElementById("edificio").value;
+            formData.append("edificioId", edificioId);
+
+            fetch('/guardar-imagen_supervicion', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+              .then(data => alert(data.message))
+              .catch(error => console.error('Error al enviar la imagen:', error));
+        });
+    });
+}
+
+
+
     </script>
 
 

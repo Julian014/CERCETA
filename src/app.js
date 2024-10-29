@@ -2727,9 +2727,57 @@ const firmaEncargadoBinaria = Buffer.from(req.body.firma_encargado.split(',')[1]
 });
 
 
+app.post('/guardar-imagen_supervicion', async (req, res) => {
+    try {
+        const edificioId = req.body.edificioId;
 
+        // Obtiene el correo del representante usando el edificioId
+        const [result] = await pool.query('SELECT correorepresentante FROM edificios WHERE id = ?', [edificioId]);
+        const correoRepresentante = result[0]?.correorepresentante;
 
+        if (!correoRepresentante) {
+            return res.status(404).json({ message: 'No se encontró el correo del representante.' });
+        }
 
+        // Guarda la imagen en el servidor
+        const imagen = req.files?.imagen;
+        if (!imagen) {
+            return res.status(400).json({ message: 'No se envió ninguna imagen.' });
+        }
+
+        const path = `src/public/informes_supervicion${imagen.name}`;
+        await imagen.mv(path);
+
+        // Configura el transporte de correo
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'nexus.innovationss@gmail.com', // Coloca tu correo electrónico
+                pass: 'dhmtnkcehxzfwzbd' // Coloca tu contraseña de correo electrónico (verifica que sea correcta)
+            }
+        });
+
+        // Configura el correo
+        const mailOptions = {
+            from: 'nexus.innovationss@gmail.com',
+            to: correoRepresentante,
+            subject: 'Supervisión - Imagen capturada',
+            text: 'Adjuntamos la imagen de la supervisión.',
+            attachments: [
+                { filename: 'captura.png', path }
+            ]
+        };
+
+        // Envía el correo
+        await transporter.sendMail(mailOptions);
+        console.log('Correo enviado exitosamente');
+        res.status(200).json({ message: 'Imagen enviada exitosamente al representante.' });
+
+    } catch (error) {
+        console.error('Error en /guardar-imagen_supervicion:', error);
+        res.status(500).json({ message: 'Error al enviar la imagen.' });
+    }
+});
 
 
 
