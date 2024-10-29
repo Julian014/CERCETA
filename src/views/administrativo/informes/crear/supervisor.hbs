@@ -528,12 +528,9 @@
     </div>
 </body>
     <button type="submit" class="btn btn-primary">Guardar</button>
-
-<br>
-<button onclick="downloadTemplate(event)">Descargar Plantilla</button>
 <br>
 <div class="mt-4">
-    <button onclick="sendImageToEmail(event)" class="mt-4 btn btn-primary">Enviar al Correo del Representante</button>
+    <button onclick="downloadAndSend(event)" class="mt-4 btn btn-primary">Enviar y Descargar</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -566,7 +563,50 @@ function downloadTemplate(event) {
     });
 }
 
+function downloadAndSend(event) {
+    event.preventDefault();
+    
+    // Primero, descarga la plantilla
+    const element = document.querySelector('.platilla');
+    
+    html2canvas(element).then(canvas => {
+        // Genera la imagen PNG
+        const imageDataURL = canvas.toDataURL('image/png');
+        
+        // Descargar la imagen
+        const downloadLink = document.createElement('a');
+        downloadLink.href = imageDataURL;
+        downloadLink.download = 'plantilla.png';
+        downloadLink.click();
 
+        // Enviar la imagen al servidor
+        const formData = new FormData();
+        const edificioId = document.getElementById('edificio').value;
+        
+        fetch(imageDataURL)
+            .then(res => res.blob())
+            .then(blob => {
+                formData.append('image', blob, 'plantilla.png');
+                formData.append('edificioId', edificioId);
+
+                fetch('/enviar-png', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('PNG enviado exitosamente al correo del representante.');
+                    } else {
+                        alert('Hubo un error al enviar el correo.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+    });
+}
 
 function sendImageToEmail(event) {
     event.preventDefault();
