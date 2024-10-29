@@ -204,12 +204,9 @@ app.get('/agregar_edificio', (req, res) => {
 });
 
 
+
+
 const multer = require('multer');
-
-
-
-
-
 // Configuración de multer para manejar la subida de archivos
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -2066,6 +2063,16 @@ app.get('/consultar_alertas', async (req, res) => {
     }
 });
 
+app.get('/Informe_supervisor', (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        const userId = req.session.userId;
+
+        res.render('administrativo/informes/crear/supervisor.hbs', { name,userId ,layout: 'layouts/nav_admin.hbs' });
+    } else {
+        res.redirect('/login');
+    }
+});
 
 // Iniciar el servidor
 app.listen(3000, () => {

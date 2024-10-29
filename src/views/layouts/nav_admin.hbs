@@ -446,15 +446,48 @@ height: 120px;
 
 
 <!-- Property Management Section -->
-<div class="section-title">--Informes--</div>
+<div class="section-title">--Documental--</div>
 
 
 <!-- Pagos Section -->
 <!-- Blog para Residentes Section -->
 <!-- Informes Operativos Section -->
 <li class="mb-2">
-  <a class="flex items-center justify-between cursor-pointer" href="#" onclick="toggleSubmenu('submenu-Informes')">
+  <a class="flex items-center justify-between cursor-pointer" href="#" onclick="toggleSubmenu('submenu-Bitacoras')">
     <i class="fas fa-file-alt mr-2"></i> Bitacoras
+    <i class="fas fa-chevron-down"></i>
+  </a>
+
+
+ <ul id="submenu-Bitacoras" class="hidden ml-4">
+    <li class="mb-2">
+      <a class="flex items-center justify-between cursor-pointer" href="#" onclick="toggleSubmenu('submenu-CrearBitacoras')">
+        <i class="fas fa-file-signature mr-2"></i> Crear
+        <i class="fas fa-chevron-right ml-auto"></i>
+      </a>
+  <!-- Submenú para "Crear" -->
+<ul id="submenu-CrearBitacoras" class="hidden ml-6">
+  <li class="mb-2">
+    <a class="flex items-center" href="/crear_informe_mantenimiento" title="Informe Mensual">
+      <i class="fas fa-tools mr-2"></i> Bitacora Administrativa
+    </a>
+  </li>
+
+
+</ul>
+
+    <li class="mb-2">
+      <a class="flex items-center" href="" title="Consultar Informes">
+        <i class="fas fa-folder-open mr-2"></i> Consultar
+      </a>
+    </li>
+  </ul>
+</li>
+
+
+<li class="mb-2">
+  <a class="flex items-center justify-between cursor-pointer" href="#" onclick="toggleSubmenu('submenu-Informes')">
+    <i class="fas fa-file-alt mr-2"></i> Informes
     <i class="fas fa-chevron-down"></i>
   </a>
 
@@ -468,39 +501,11 @@ height: 120px;
   <!-- Submenú para "Crear" -->
 <ul id="submenu-CrearInforme" class="hidden ml-6">
   <li class="mb-2">
-    <a class="flex items-center" href="/crear_informe_mantenimiento" title="Informe Mensual">
-      <i class="fas fa-tools mr-2"></i> Mantenimiento
-    </a>
-  </li>
-  <li class="mb-2">
-    <a class="flex items-center" href="/informe_anual" title="Informe Anual">
-      <i class="fas fa-seedling mr-2"></i> Jardinería
-    </a>
-  </li>
-  <li class="mb-2">
-    <a class="flex items-center" href="/informe_anual" title="Informe Anual">
-      <i class="fas fa-broom mr-2"></i> Aseo
-    </a>
-  </li>
-  <li class="mb-2">
-    <a class="flex items-center" href="/informe_anual" title="Informe Anual">
-      <i class="fas fa-bolt mr-2"></i> Eléctrico
-    </a>
-  </li>
-  <li class="mb-2">
-    <a class="flex items-center" href="/informe_anual" title="Informe Anual">
-      <i class="fas fa-water mr-2"></i> Hidráulica
-    </a>
-  </li>
-  <li class="mb-2">
-    <a class="flex items-center" href="/informe_anual" title="Informe Anual">
-      <i class="fas fa-house-damage mr-2"></i> Cubiertas
+    <a class="flex items-center" href="/Informe_supervisor" title="Informe Mensual">
+      <i class="fas fa-tools mr-2"></i> Informe  supervisor
     </a>
   </li>
 </ul>
-
-
-
 
     <li class="mb-2">
       <a class="flex items-center" href="" title="Consultar Informes">
@@ -509,10 +514,6 @@ height: 120px;
     </li>
   </ul>
 </li>
-
-
-
-
 
 
 
