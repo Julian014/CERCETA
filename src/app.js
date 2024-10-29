@@ -1719,6 +1719,21 @@ app.post('/guardar_informe', upload.fields([
         res.status(500).send("Error al guardar el informe o enviar la notificación.");
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.post('/guardar_usuario', async (req, res) => {
     const { nombre, user_email, user_password, role } = req.body;
     const cargos = req.body['cargo[]']; // Acceso correcto al array de cargos seleccionados
@@ -2725,8 +2740,6 @@ app.post('/guardar-supervision', upload.none(), async (req, res) => {
      
     ) VALUES (${Array(values.length).fill('?').join(', ')});
 `;
-
-
       await pool.query(query, values);
 
         res.status(200).json({ message: 'Inspección guardada exitosamente.' });
@@ -2735,6 +2748,24 @@ app.post('/guardar-supervision', upload.none(), async (req, res) => {
         res.status(500).json({ message: 'Error al guardar la inspección.' });
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Endpoint to download the template
 app.get('/download-template', (req, res) => {
@@ -2799,12 +2830,56 @@ app.post('/enviar-png', upload.single('image'), async (req, res) => {
 });
 
 
+app.get('/consultar_informe_supervisor', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const nombreUsuario = req.session.user.name;
+        const fecha = req.query.fecha;
+        const idInspeccion = req.query.id_inspeccion;
+
+        // Selecciona todos los campos de inspecciones_supervisor
+        const query = 'SELECT * FROM inspecciones_supervisor WHERE DATE_FORMAT(created_at, "%Y-%m-%d") = ? AND id = ?';
+        
+        try {
+            const [results] = await pool.query(query, [fecha, idInspeccion]);
+
+            // Transforma las firmas a Base64
+            results.forEach(result => {
+                if (result.firma_supervisor) {
+                    result.firmaSupervisorBase64 = result.firma_supervisor.toString('base64');
+                }
+                if (result.firma_encargado) {
+                    result.firmaEncargadoBase64 = result.firma_encargado.toString('base64');
+                }
+            });
+
+            res.render('administrativo/informes/consultar/supervisor_consulta.hbs', {
+                name: nombreUsuario,
+                results: results,
+                layout: 'layouts/nav_admin.hbs'
+            });
+        } catch (err) {
+            console.error('Error al obtener la lista de inspecciones:', err);
+            res.status(500).send('Error en el servidor');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
 
 
 
+app.get('/obtener_ids_inspeccion', async (req, res) => {
+    const fecha = req.query.fecha;
 
-
-
+    try {
+        const query = 'SELECT id FROM inspecciones_supervisor WHERE DATE_FORMAT(created_at, "%Y-%m-%d") = ?';
+        const [ids] = await pool.query(query, [fecha]);
+        res.json(ids); // Devolver los IDs en formato JSON para que el frontend los reciba
+    } catch (err) {
+        console.error('Error al obtener los IDs de inspección:', err);
+        res.status(500).send('Error en el servidor');
+    }
+});
 
 
 // Iniciar el servidor

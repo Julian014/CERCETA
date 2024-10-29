@@ -1,0 +1,656 @@
+
+  <style>
+   @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            padding: 0;
+            margin: 0;
+        }
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f3f4f6;
+        }
+        .platilla {
+            width: 90%;
+            border: 1px solid black;
+            margin: auto;
+            overflow: hidden;
+            padding-bottom: 20px;
+        }
+        .header-container {
+            max-width: 100%;
+            display: flex;
+            align-items: center;
+            text-align: left;
+        }
+        .header-content {
+            padding-left: 10px;
+        }
+        .header-container img {
+            width: 120px;
+            height: 120px;
+        }
+        h1 {
+            font-size: 20px;
+        }
+        .header-content p {
+            font-size: 14px;
+            margin: 2px 0;
+        }
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 30px;
+        }
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+        .signature-line {
+            border-top: 1px solid black;
+            margin-top: 50px;
+        }
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            th, td {
+                padding: 4px;
+                font-size: 12px;
+            }
+            .header-container img {
+                width: 100px;
+                height: 100px;
+            }
+            h1 {
+                font-size: 16px;
+                line-height: 1.2;
+            }
+            h2 {
+                font-size: 14px;
+                margin: 0;
+            }
+            .header-content p {
+                font-size: 12px;
+                margin: 0;
+            }
+            .signature-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            .signature-box {
+                width: 100%;
+                margin-top: 20px;
+            }
+        }
+.platilla {
+    width: 850px; /* Mantén el ancho constante */
+    height: 2100px; /* Aumenta el alto para capturar las firmas */
+    border: 1px solid black;
+    margin: auto;
+    overflow: hidden;
+    padding-bottom: 20px;
+    box-sizing: border-box;
+    transform-origin: top left;
+}
+  /* Estilos de botón con Tailwind y personalizaciones */
+    .btn-primary {
+        @apply px-6 py-2 text-white font-semibold rounded-md transition duration-300 ease-in-out transform bg-blue-600 hover:bg-blue-700 focus:ring focus:ring-blue-300 focus:ring-opacity-50 shadow-lg;
+    }
+
+    /* Botones para dispositivos móviles */
+    @media (max-width: 640px) {
+        .btn-primary {
+            @apply px-4 py-2 text-sm w-full;
+        }
+    }
+
+    /* Efectos adicionales */
+    .btn-primary:hover {
+        @apply scale-105; /* Efecto de agrandamiento al pasar el ratón */
+    }
+
+    </style>
+
+<form action="/consultar_informe_supervisor" method="GET">
+    <label for="fecha">Seleccione una fecha:</label>
+    <input type="date" id="fecha" name="fecha" required onchange="cargarIds()">
+    
+    <label for="id_inspeccion">Seleccione un ID de inspección:</label>
+    <select id="id_inspeccion" name="id_inspeccion" required>
+        <option value="">Seleccione un ID</option>
+        <!-- Opciones se agregarán dinámicamente con JavaScript -->
+    </select>
+    
+    <button type="submit">Consultar</button>
+</form>
+
+
+
+
+
+
+
+
+
+
+ {{#each results}}
+
+
+    <div class="platilla">
+        <div class="header-container mb-4">
+            <img alt="Company Logo" class="mb-2" src="imagenes/2022cercetafinal-impresion_Mesa de trabajo 1.png"/>
+            <div class="header-content">
+                <h1 class="text-xl font-bold">CERCETA SOLUCIONES EMPRESARIALES SAS</h1>
+                <p>NIT 901.148.865-9</p>
+                <p>TEL: 3006257756 - 3118952249</p>
+                <p class="text-blue-600">COMERCIAL@CERCETASOLUCIONESEMPRESARIALES.COM</p>
+            </div>
+        </div>
+           <div class="mb-4">
+            <label for="edificio" class="font-bold">Edificio: {{this.edificio}}</label>
+        
+        
+    <h2 class="text-center text-lg font-bold mb-4">SUPERVICION</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>AREA</th>
+                    <th>CANTIDAD</th>
+                    <th>CUMPLE</th>
+                    <th>NO CUMPLE</th>
+                    <th>OBSERVACIONES</th>
+                    <th>DIA</th>
+                    <th>MES</th>
+                    <th>AÑO</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+
+                
+    <tr>
+    <td></td>
+    <td>AREA 1</td>
+<td>{{this.cumple_area1}}</td>
+<td>{{this.no_cumple_area1}}</td>
+<td>{{this.observaciones_area1}}</td>
+<td>{{this.dia_area1}}</td>
+<td>{{this.mes_area1}}</td>
+<td>{{this.año_area1}}</td>
+
+</tr>
+
+   <tr>
+    <td>AREAS COMUNES</td>
+    <td>AREA 2</td>
+<td>{{this.cumple_area2}}</td>
+<td>{{this.no_cumple_area2}}</td>
+<td>{{this.observaciones_area2}}</td>
+<td>{{this.dia_area2}}</td>
+<td>{{this.mes_area2}}</td>
+<td>{{this.año_area2}}</td>
+
+</tr>
+
+      <tr>
+    <td></td>
+    <td>AREA 3</td>
+<td>{{this.cumple_area3}}</td>
+<td>{{this.no_cumple_area3}}</td>
+<td>{{this.observaciones_area3}}</td>
+<td>{{this.dia_area3}}</td>
+<td>{{this.mes_area3}}</td>
+<td>{{this.año_area3}}</td>
+
+</tr>
+
+ <tr>
+    <td></td>
+    <td>AREA 4</td>
+<td>{{this.cumple_area4}}</td>
+<td>{{this.no_cumple_area4}}</td>
+<td>{{this.observaciones_area4}}</td>
+<td>{{this.dia_area4}}</td>
+<td>{{this.mes_area4}}</td>
+<td>{{this.año_area4}}</td>
+
+</tr>
+
+           <tr>
+    <td>RECEPCION</td>
+    <td>RECEPCION 1</td>
+<td>{{this.cumple_recepcion1}}</td>
+<td>{{this.no_cumple_recepcion1}}</td>
+<td>{{this.observaciones_recepcion1}}</td>
+<td>{{this.dia_recepcion1}}</td>
+<td>{{this.mes_recepcion1}}</td>
+<td>{{this.año_recepcion1}}</td>
+
+</tr>
+
+          <tr>
+    <td>PISOS</td>
+    <td>PISO 1</td>
+<td>{{this.cumple_piso1}}</td>
+<td>{{this.no_cumple_piso1}}</td>
+<td>{{this.observaciones_piso1}}</td>
+<td>{{this.dia_piso1}}</td>
+<td>{{this.mes_piso1}}</td>
+<td>{{this.año_piso1}}</td>
+
+</tr>
+
+        <tr>
+    <td></td>
+    <td>PISO 2</td>
+<td>{{this.cumple_piso2}}</td>
+<td>{{this.no_cumple_piso2}}</td>
+<td>{{this.observaciones_piso2}}</td>
+<td>{{this.dia_piso2}}</td>
+<td>{{this.mes_piso2}}</td>
+<td>{{this.año_piso2}}</td>
+
+</tr>
+
+           <tr>
+    <td></td>
+    <td>PISO 3</td>
+<td>{{this.cumple_piso3}}</td>
+<td>{{this.no_cumple_piso3}}</td>
+<td>{{this.observaciones_piso3}}</td>
+<td>{{this.dia_piso3}}</td>
+<td>{{this.mes_piso3}}</td>
+<td>{{this.año_piso3}}</td>
+
+</tr>
+
+             <tr>
+    <td></td>
+    <td>PISO 4</td>
+<td>{{this.cumple_piso4}}</td>
+<td>{{this.no_cumple_piso4}}</td>
+<td>{{this.observaciones_piso4}}</td>
+<td>{{this.dia_piso4}}</td>
+<td>{{this.mes_piso4}}</td>
+<td>{{this.año_piso4}}</td>
+
+</tr>
+
+          <tr>
+    <td></td>
+    <td>PISO 5</td>
+<td>{{this.cumple_piso5}}</td>
+<td>{{this.no_cumple_piso5}}</td>
+<td>{{this.observaciones_piso5}}</td>
+<td>{{this.dia_piso5}}</td>
+<td>{{this.mes_piso5}}</td>
+<td>{{this.año_piso5}}</td>
+
+</tr>
+
+         <tr>
+    <td></td>
+    <td>PISO 6</td>
+<td>{{this.cumple_piso6}}</td>
+<td>{{this.no_cumple_piso6}}</td>
+<td>{{this.observaciones_piso6}}</td>
+<td>{{this.dia_piso6}}</td>
+<td>{{this.mes_piso6}}</td>
+<td>{{this.año_piso6}}</td>
+
+</tr>
+
+           <tr>
+    <td>PASAMANOS</td>
+<td>{{this.cantidad_pasamanos}}</td>
+<td>{{this.cumple_pasamanos}}</td>
+<td>{{this.no_cumple_pasamanos}}</td>
+<td>{{this.observaciones_pasamanos}}</td>
+<td>{{this.dia_pasamanos}}</td>
+<td>{{this.mes_pasamanos}}</td>
+<td>{{this.año_pasamanos}}</td>
+
+</tr>
+
+          <tr>
+    <td>BAÑOS</td>
+    <td>BAÑO 1</td>
+<td>{{this.cumple_bano_1}}</td>
+<td>{{this.no_cumple_bano_1}}</td>
+<td>{{this.observaciones_bano_1}}</td>
+<td>{{this.dia_bano_1}}</td>
+<td>{{this.mes_bano_1}}</td>
+<td>{{this.año_bano_1}}</td>
+
+</tr>
+
+           <tr>
+    <td></td>
+    <td>BAÑO 2</td>
+<td>{{this.cumple_bano_2}}</td>
+<td>{{this.no_cumple_bano_2}}</td>
+<td>{{this.observaciones_bano_2}}</td>
+<td>{{this.dia_bano_2}}</td>
+<td>{{this.mes_bano_2}}</td>
+<td>{{this.año_bano_2}}</td>
+
+</tr>
+<tr>
+    <td></td>
+    <td>BAÑO 3</td>
+<td>{{this.cumple_bano_3}}</td>
+<td>{{this.no_cumple_bano_3}}</td>
+<td>{{this.observaciones_bano_3}}</td>
+<td>{{this.dia_bano_3}}</td>
+<td>{{this.mes_bano_3}}</td>
+<td>{{this.año_bano_3}}</td>
+
+</tr>
+
+              <tr>
+    <td></td>
+    <td>BAÑO 4</td>
+<td>{{this.cumple_bano_4}}</td>
+<td>{{this.no_cumple_bano_4}}</td>
+<td>{{this.observaciones_bano_4}}</td>
+<td>{{this.dia_bano_4}}</td>
+<td>{{this.mes_bano_4}}</td>
+<td>{{this.año_bano_4}}</td>
+
+</tr>
+<tr>
+    <td></td>
+    <td>BAÑO 5</td>
+<td>{{this.cumple_bano_5}}</td>
+<td>{{this.no_cumple_bano_5}}</td>
+<td>{{this.observaciones_bano_5}}</td>
+<td>{{this.dia_bano_5}}</td>
+<td>{{this.mes_bano_5}}</td>
+<td>{{this.año_bano_5}}</td>
+
+</tr>
+
+            <tr>
+    <td>VENTANAS</td>
+    <td></td>
+<td>{{this.cumple_ventanas}}</td>
+<td>{{this.no_cumple_ventanas}}</td>
+<td>{{this.observaciones_ventanas}}</td>
+<td>{{this.dia_ventanas}}</td>
+<td>{{this.mes_ventanas}}</td>
+<td>{{this.año_ventanas}}</td>
+
+</tr>
+<tr>
+    <td>PARQUEADEROS</td>
+    <td>PARQUEADERO 1</td>
+<td>{{this.cumple_parqueadero_1}}</td>
+<td>{{this.no_cumple_parqueadero_1}}</td>
+<td>{{this.observaciones_parqueadero_1}}</td>
+<td>{{this.dia_parqueadero_1}}</td>
+<td>{{this.mes_parqueadero_1}}</td>
+<td>{{this.año_parqueadero_1}}</td>
+
+</tr>
+
+              <tr>
+    <td></td>
+    <td>PARQUEADERO 2</td>
+<td>{{this.cumple_parqueadero_2}}</td>
+<td>{{this.no_cumple_parqueadero_2}}</td>
+<td>{{this.observaciones_parqueadero_2}}</td>
+<td>{{this.dia_parqueadero_2}}</td>
+<td>{{this.mes_parqueadero_2}}</td>
+<td>{{this.año_parqueadero_2}}</td>
+
+</tr>
+<tr>
+    <td></td>
+    <td>PARQUEADERO 3</td>
+<td>{{this.cumple_parqueadero_3}}</td>
+<td>{{this.no_cumple_parqueadero_3}}</td>
+<td>{{this.observaciones_parqueadero_3}}</td>
+<td>{{this.dia_parqueadero_3}}</td>
+<td>{{this.mes_parqueadero_3}}</td>
+<td>{{this.año_parqueadero_3}}</td>
+
+</tr>
+
+              <tr>
+    <td></td>
+    <td>PARQUEADERO 4</td>
+<td>{{this.cumple_parqueadero_4}}</td>
+<td>{{this.no_cumple_parqueadero_4}}</td>
+<td>{{this.observaciones_parqueadero_4}}</td>
+<td>{{this.dia_parqueadero_4}}</td>
+<td>{{this.mes_parqueadero_4}}</td>
+<td>{{this.año_parqueadero_4}}</td>
+
+</tr>
+<tr>
+    <td>ASCENSOR</td>
+    <td></td>
+<td>{{this.cumple_ascensor}}</td>
+<td>{{this.no_cumple_ascensor}}</td>
+<td>{{this.observaciones_ascensor}}</td>
+<td>{{this.dia_ascensor}}</td>
+<td>{{this.mes_ascensor}}</td>
+<td>{{this.año_ascensor}}</td>
+
+</tr>
+
+             <tr>
+    <td>SHUT</td>
+    <td></td>
+<td>{{this.cumple_shut}}</td>
+<td>{{this.no_cumple_shut}}</td>
+<td>{{this.observaciones_shut}}</td>
+<td>{{this.dia_shut}}</td>
+<td>{{this.mes_shut}}</td>
+<td>{{this.año_shut}}</td>
+
+</tr>
+<tr>
+    <td>CUARTO DE SHUT</td>
+    <td></td>
+ <td>{{this.cumple_cuarto_shut}}</td>
+<td>{{this.no_cumple_cuarto_shut}}</td>
+<td>{{this.observaciones_cuarto_shut}}</td>
+<td>{{this.dia_cuarto_shut}}</td>
+<td>{{this.mes_cuarto_shut}}</td>
+<td>{{this.año_cuarto_shut}}</td>
+
+</tr>
+
+               <tr>
+    <td>COCINA</td>
+    <td></td>
+<td>{{this.cumple_cocina}}</td>
+<td>{{this.no_cumple_cocina}}</td>
+<td>{{this.observaciones_cocina}}</td>
+<td>{{this.dia_cocina}}</td>
+<td>{{this.mes_cocina}}</td>
+<td>{{this.año_cocina}}</td>
+
+</tr>
+<tr>
+    <td>TERRAZA</td>
+    <td></td>
+<td>{{this.cumple_terraza}}</td>
+<td>{{this.no_cumple_terraza}}</td>
+<td>{{this.observaciones_terraza}}</td>
+<td>{{this.dia_terraza}}</td>
+<td>{{this.mes_terraza}}</td>
+<td>{{this.año_terraza}}</td>
+
+</tr>
+
+               <tr>
+    <td>MONTA COCHES</td>
+    <td></td>
+<td>{{this.cumple_monta_coches}}</td>
+<td>{{this.no_cumple_monta_coches}}</td>
+<td>{{this.observaciones_monta_coches}}</td>
+<td>{{this.dia_monta_coches}}</td>
+<td>{{this.mes_monta_coches}}</td>
+<td>{{this.año_monta_coches}}</td>
+
+</tr>
+<tr>
+    <td>JARDIN</td>
+    <td></td>
+<td>{{this.cumple_jardin}}</td>
+<td>{{this.no_cumple_jardin}}</td>
+<td>{{this.observaciones_jardin}}</td>
+<td>{{this.dia_jardin}}</td>
+<td>{{this.mes_jardin}}</td>
+<td>{{this.año_jardin}}</td>
+
+</tr>
+
+              <tr>
+    <td>CARGO</td>
+    <td></td>
+<td>{{this.cumple_cargo}}</td>
+<td>{{this.no_cumple_cargo}}</td>
+<td>{{this.observaciones_cargo}}</td>
+<td>{{this.dia_cargo}}</td>
+<td>{{this.mes_cargo}}</td>
+<td>{{this.año_cargo}}</td>
+
+</tr>
+<tr>
+    <td>PRESENTACION</td>
+    <td></td>
+<td>{{this.cumple_presentacion}}</td>
+<td>{{this.no_cumple_presentacion}}</td>
+<td>{{this.observaciones_presentacion}}</td>
+<td>{{this.dia_presentacion}}</td>
+<td>{{this.mes_presentacion}}</td>
+<td>{{this.año_presentacion}}</td>
+
+</tr>
+
+              <tr>
+    <td>PRESENTACION PERSONAL</td>
+    <td></td>
+<td>{{this.cumple_presentacion_personal}}</td>
+<td>{{this.no_cumple_presentacion_personal}}</td>
+<td>{{this.observaciones_presentacion_personal}}</td>
+<td>{{this.dia_presentacion_personal}}</td>
+<td>{{this.mes_presentacion_personal}}</td>
+<td>{{this.año_presentacion_personal}}</td>
+
+</tr>
+<tr>
+    <td>DISPOSICION PARA EL SERVICIO</td>
+    <td></td>
+<td>{{this.cumple_disposicion_servicio}}</td>
+<td>{{this.no_cumple_disposicion_servicio}}</td>
+<td>{{this.observaciones_disposicion_servicio}}</td>
+<td>{{this.dia_disposicion_servicio}}</td>
+<td>{{this.mes_disposicion_servicio}}</td>
+<td>{{this.año_disposicion_servicio}}</td>
+
+</tr>
+
+            </tbody>
+        </table>
+    </div>
+     <!-- Sección de firmas -->
+<div class="signature-section">
+    <div class="signature-box">
+        <p>Firma del Supervisor</p>
+        <img src="data:image/png;base64,{{this.firmaSupervisorBase64}}" alt="Firma del Supervisor">
+    </div>
+    <div class="signature-box">
+        <p>Firma del Encargado</p>
+        <img src="data:image/png;base64,{{this.firmaEncargadoBase64}}" alt="Firma del Encargado">
+    </div>
+</div>
+
+    </div>
+</body>
+
+
+
+
+
+
+ {{/each}}
+
+
+
+<script>
+    async function cargarIds() {
+        const fecha = document.getElementById("fecha").value;
+        const idSelect = document.getElementById("id_inspeccion");
+
+        // Limpia las opciones existentes
+        idSelect.innerHTML = '<option value="">Seleccione un ID</option>';
+
+        // Asegura que la fecha esté seleccionada antes de hacer la solicitud
+        if (fecha) {
+            try {
+                const response = await fetch(`/obtener_ids_inspeccion?fecha=${fecha}`);
+                const ids = await response.json();
+
+                // Llenar el select con los IDs de inspección
+                ids.forEach(idData => {
+                    const option = document.createElement("option");
+                    option.value = idData.id;
+                    option.textContent = `Inspección ID: ${idData.id}`;
+                    idSelect.appendChild(option);
+                });
+            } catch (err) {
+                console.error("Error al cargar los IDs:", err);
+            }
+        }
+    }
+</script>
+
+
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const firmaSupervisorBase64 = "{{this.firmaSupervisorBase64}}";
+        const firmaEncargadoBase64 = "{{this.firmaEncargadoBase64}}";
+
+        // Función para dibujar la imagen en el canvas
+        function dibujarFirmaEnCanvas(canvasId, base64String) {
+            if (base64String) {
+                const canvas = document.getElementById(canvasId);
+                const ctx = canvas.getContext("2d");
+                const img = new Image();
+
+                img.onload = function () {
+                    // Ajustar la imagen al tamaño del canvas
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                };
+
+                // Asigna la URL de la imagen usando el string base64
+                img.src = `data:image/png;base64,${base64String}`;
+            }
+        }
+
+        // Dibujar las firmas en los canvas correspondientes
+        dibujarFirmaEnCanvas("supervisor-signature", firmaSupervisorBase64);
+        dibujarFirmaEnCanvas("manager-signature", firmaEncargadoBase64);
+    });
+</script>
