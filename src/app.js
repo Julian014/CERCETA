@@ -106,19 +106,6 @@ app.get('/geolocalizacion', (req, res) => {
 
 
 
-// Ruta para el menú administrativo
-app.get('/menu_residentes', (req, res) => {
-    if (req.session.loggedin === true) {
-        const userId = req.session.userId;
-
-        const nombreUsuario = req.session.user.name; // Use user session data
-        res.render('Residentes/home_residentes.hbs', { nombreUsuario ,userId ,layout: 'layouts/nav_residentes.hbs' });
-    } else {
-        res.redirect('/login');
-    }
-});
-
-
 
 
 app.get('/menu_residentes', async (req, res) => {
@@ -134,9 +121,11 @@ app.get('/menu_residentes', async (req, res) => {
             }
             
             const edificioId = userResult[0].edificio;
+            console.log("Edificio ID del usuario:", edificioId);
 
             // Consulta para obtener las publicaciones del edificio
             const [resultados] = await pool.query('SELECT * FROM publicaciones WHERE edificio_id = ? ORDER BY fecha DESC', [edificioId]);
+            console.log("Resultados de publicaciones:", resultados);
 
             // Convertir los datos binarios a base64
             const blogPosts = resultados.map((post) => ({
