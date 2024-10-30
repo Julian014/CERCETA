@@ -145,6 +145,49 @@ app.get('/menu_residentes', async (req, res) => {
         res.redirect('/login');
     }
 });
+// En tu configuración de Handlebars
+hbs.registerHelper('ifCond', function (v1, v2, options) {
+    return (v1 === v2) ? options.fn(this) : options.inverse(this);
+});
+
+
+
+
+
+app.get('/subir_pago_residentes', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const userId = req.session.userId;
+
+        try {
+            // Consulta para obtener edificio y apartamento del usuario
+            const query = 'SELECT edificio, apartamento FROM usuarios WHERE id = ?';
+            const [rows] = await pool.query(query, [userId]);
+
+            if (rows.length > 0) {
+                const { edificio, apartamento } = rows[0];
+                console.log('Edificio:', edificio, 'Apartamento:', apartamento); // Verifica los valores obtenidos
+                
+                // Pasa solo el edificio y apartamento específicos
+                res.render('Residentes/pagos/subir_mi_pago.hbs', { 
+                    nombreUsuario: req.session.user.name, 
+                    userId, 
+                    edificioSeleccionado: edificio, 
+                    layout: 'layouts/nav_residentes.hbs',
+                    apartamentoSeleccionado: apartamento
+                });
+            } else {
+                res.redirect('/login'); // Redirige si no se encuentra el usuario
+            }
+        } catch (error) {
+            console.error('Error al obtener edificio y apartamento:', error);
+            res.status(500).send('Error interno del servidor');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
 
 
 

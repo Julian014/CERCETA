@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validar Pagos de Apartamentos</title>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1a252f;
+            margin-bottom: 30px;
+        }
+        .form-group label {
+            color: #1a252f;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        .form-group label i {
+            margin-right: 8px;
+            color: #1E99D3;
+        }
+        .form-control, .form-control-file {
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+        .btn-primary {
+            background-color: #1a252f;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #163144;
+        }
+        .loading-icon {
+            margin-left: 10px;
+            display: none;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+
+
+    <div class="container">
+        <h1><i class="fas fa-check-circle"></i> Validar Pagos de Apartamentos</h1>
+        <form id="validarPagosForm" enctype="multipart/form-data">
+ <div class="form-group">
+    <label for="edificios"><i class="fas fa-building"></i> Seleccione el edificio:</label>
+    <select id="edificios" name="edificioSeleccionado" class="form-control" style="width: 100%;">
+        <option value="{{edificioSeleccionado}}" selected>{{edificioSeleccionado}}</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="apartamentos"><i class="fas fa-door-closed"></i> Seleccione el apartamento:</label>
+    <select id="apartamentos" name="apartamentoSeleccionado" class="form-control" style="width: 100%;">
+        <option value="{{apartamentoSeleccionado}}" selected>{{apartamentoSeleccionado}}</option>
+    </select>
+</div>
+
+
+
+            <div class="form-group">
+                <label for="fecha_pago"><i class="fas fa-calendar-alt"></i> Fecha de Pago:</label>
+                <input type="date" id="fecha_pago" name="fecha_pago" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="valor_pago"><i class="fas fa-dollar-sign"></i> Valor del Pago:</label>
+                <input type="number" id="valor_pago" name="valor_pago" class="form-control" required>
+            </div>
+         <div class="form-group">
+    <label for="documento_pago"><i class="fas fa-file-alt"></i> Documento de Pago:</label>
+    <input type="file" id="documento_pago" name="documento_pago" class="form-control-file" accept="image/png" required>
+</div>
+
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Validar Pago
+                <i class="fas fa-spinner fa-spin loading-icon" id="loadingIndicator"></i>
+            </button>
+        </form>
+    </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+
+  <script>
+    $(document).ready(function() {
+        // Evento para cargar apartamentos al cambiar el edificio
+        $('#edificios').on('change', function() {
+            const edificioSeleccionado = $(this).val();
+            if (edificioSeleccionado) {
+                $.ajax({
+                    url: '/getApartamentosss',
+                    method: 'POST',
+                    data: JSON.stringify({ edificioSeleccionado: edificioSeleccionado }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        const apartamentosSelect = $('#apartamentos');
+                        apartamentosSelect.empty(); // Limpiar el select de apartamentos
+                        response.forEach(apartamento => {
+                            // Mostrar el número del apartamento junto con el nombre del edificio
+                            apartamentosSelect.append(new Option(`${apartamento.numero} - ${apartamento.nombre_edificio}`, apartamento.id));
+                        });
+                    },
+                    error: function(error) {
+                        console.error('Error al obtener los apartamentos:', error);
+                    }
+                });
+            } else {
+                $('#apartamentos').empty(); // Limpiar el select si no hay edificio seleccionado
+            }
+        });
+
+        // Evento para manejar el envío del formulario
+        $('#validarPagosForm').on('submit', function(event) {
+            event.preventDefault();
+            $('#loadingIndicator').show(); // Mostrar indicador de carga
+
+            const formData = new FormData(this);
+
+            $.ajax({
+                url: '/validarPago',
+                method: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    alert('Pago validado correctamente.');
+                    $('#loadingIndicator').hide();
+                    $('#validarPagosForm')[0].reset();
+                    $('#apartamentos').val(null).trigger('change');
+                },
+                error: function(xhr) {
+                    if (xhr.status === 400) {
+                        alert('Ya existe un pago registrado para este mes y año.');
+                    } else {
+                        alert('Error al validar el pago.');
+                    }
+                    $('#loadingIndicator').hide(); // Ocultar indicador de carga
+                }
+            });
+        });
+
+        // Validación del archivo de pago y conversión a PNG si es necesario
+        $('#documento_pago').on('change', function() {
+            const file = this.files[0];
+            if (file && file.type !== 'image/png') {
+                alert('El archivo seleccionado no es un PNG. Solo se permiten archivos PNG.');
+                convertirArchivoAPNG(file);
+                this.value = ''; // Reiniciar el campo de archivo
+            }
+        });
+
+        function convertirArchivoAPNG(file) {
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(event) {
+                const img = new Image();
+                img.src = event.target.result;
+
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+
+                    // Convierte el contenido del canvas a PNG
+                    canvas.toBlob(function(blob) {
+                        const newFile = new File([blob], "documento_pago.png", { type: "image/png" });
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(newFile);
+                        document.getElementById('documento_pago').files = dataTransfer.files;
+
+                        alert('El archivo ha sido convertido a PNG.');
+                    }, 'image/png');
+                };
+            };
+        }
+    });
+</script>
+
+</body>
+</html>
