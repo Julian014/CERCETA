@@ -3464,9 +3464,23 @@ app.get('/crear_bitacora_administrativa', async (req, res) => {
 
 
 
+app.post('/guardarBitacora', upload.single('contenidoPng'), async (req, res) => {
+    const { edificioId, tipoMantenimiento, fecha } = req.body;
+    const contenidoBuffer = req.file.buffer;
 
+    try {
+        const query = `
+            INSERT INTO bitacora_mantenimientos (edificio_id, tipo_mantenimiento, fecha, contenido_png)
+            VALUES (?, ?, ?, ?)
+        `;
+        await pool.query(query, [edificioId, tipoMantenimiento, fecha, contenidoBuffer]);
 
-
+        res.json({ success: true, message: 'Bitácora guardada correctamente' });
+    } catch (error) {
+        console.error('Error al guardar la bitácora:', error);
+        res.json({ success: false, message: 'Error al guardar la bitácora' });
+    }
+});
 
 
 

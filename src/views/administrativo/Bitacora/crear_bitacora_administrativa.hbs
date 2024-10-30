@@ -259,13 +259,15 @@ body.body-bg {
         <div class="text-section">
           <textarea class="textarea-content" placeholder="Agrega tod la informacion de lo que se realizo"></textarea>
         </div>
+
 <div class="image-section">
-  <div class="upload-section" id="uploadSection1">
-    <input type="file" id="fileInput1" accept="image/*">
+  <div class="upload-section" id="uploadSection3">
+    <input type="file" id="fileInput3" accept="image/*">
     <p>Arrastra y suelta una imagen o haz clic para subir</p>
-    <img id="previewImage1" class="image" alt="Vista previa de imagen" style="display: none;">
+    <img id="previewImage3" class="image" alt="Vista previa de imagen" style="display: none;">
   </div>
 </div>
+
       </div>
     </div>
     <div class="footer-section">
@@ -281,7 +283,9 @@ body.body-bg {
       <input class="footer-signature" placeholder="Nombre del autor del boletín">
     </div>
   </div>
-  <button id="downloadBtn" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded">Descargar como PNG</button>
+
+  <button id="saveBtn" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded">Guardar Bitácora</button>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
    <script>
@@ -377,18 +381,105 @@ body.body-bg {
     });
 
     uploadSection2.addEventListener('click', () => fileInput2.click());
+
+
+
+// Para la tercera imagen
+const uploadSection3 = document.getElementById('uploadSection3');
+const fileInput3 = document.getElementById('fileInput3');
+const previewImage3 = document.getElementById('previewImage3');
+
+// Función para manejar subida de imagen específica para la sección 3
+function handleImageUpload3(event) {
+    const file = event.target.files[0] || event.dataTransfer.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImage3.src = e.target.result;
+            previewImage3.style.display = 'block';
+            // Ocultar el texto y cambiar el estilo del cuadro de subida
+            uploadSection3.querySelector('p').style.display = 'none';
+            uploadSection3.style.border = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// Manejador para clic y subir en el tercer input
+fileInput3.addEventListener('change', handleImageUpload3);
+
+// Manejador para arrastrar y soltar en el tercer contenedor
+uploadSection3.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    uploadSection3.style.borderColor = "#4A90E2";
+});
+
+uploadSection3.addEventListener('dragleave', () => {
+    uploadSection3.style.borderColor = "#ccc";
+});
+
+uploadSection3.addEventListener('drop', (event) => {
+    event.preventDefault();
+    uploadSection3.style.borderColor = "#ccc";
+    handleImageUpload3(event);
+});
+
+// Activar el input de archivo cuando se haga clic en la sección
+uploadSection3.addEventListener('click', () => fileInput3.click());
+
+
+
+
+
+
 </script>
 
 
 <script>
-    document.getElementById('downloadBtn').addEventListener('click', function () {
-        html2canvas(document.getElementById('contenido')).then(function (canvas) {
-            // Convertir el canvas a una imagen PNG
-            var imgData = canvas.toDataURL("image/png");
-            var link = document.createElement('a');
-            link.href = imgData;
-            link.download = 'boletin_informativo.png'; // Nombre del archivo
-            link.click();
-        });
+
+document.getElementById('saveBtn').addEventListener('click', function () {
+    console.log("Botón de guardar clicado");
+    html2canvas(document.getElementById('contenido')).then(function (canvas) {
+        console.log("Canvas generado");
+        // Convierte el contenido a un Blob en formato PNG
+        canvas.toBlob(function(blob) {
+            const formData = new FormData();
+            const edificioId = document.getElementById('edificio').value;
+            const tipoMantenimiento = document.getElementById('tipoMantenimiento').value;
+            const fecha = new Date().toISOString().slice(0, 10); // Fecha actual
+
+            console.log("Blob creado, agregando datos al formulario");
+            
+            // Agrega los datos y el archivo blob al formulario
+            formData.append('edificioId', edificioId);
+            formData.append('tipoMantenimiento', tipoMantenimiento);
+            formData.append('fecha', fecha);
+            formData.append('contenidoPng', blob, 'boletin_informativo.png');
+
+            // Envía el formulario al servidor
+            fetch('/guardarBitacora', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+              .then(data => {
+                  console.log("Respuesta del servidor:", data);
+                  if (data.success) {
+                      alert('Bitácora guardada correctamente');
+                      // Si se guarda exitosamente, descarga el PNG localmente
+                      const link = document.createElement('a');
+                      link.href = URL.createObjectURL(blob);
+                      link.download = 'boletin_informativo.png';
+                      link.click();
+                      URL.revokeObjectURL(link.href); // Limpia la URL después de descargar
+                  } else {
+                      alert('Hubo un error al guardar la bitácora');
+                  }
+              }).catch(error => console.error('Error en la solicitud fetch:', error));
+        }, 'image/png'); // Convierte el canvas a un archivo PNG
     });
+});
+
+
+
+
 </script>
