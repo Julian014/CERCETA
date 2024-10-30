@@ -121,6 +121,48 @@ table tbody tr:hover {
 }
 
 </style>
+<style>
+    /* Estilos para el modal */
+    #editModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+        position: relative;
+    }
+
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+    .modal-content label {
+        font-weight: bold;
+    }
+
+    .modal-content input, .modal-content select {
+        width: 100%;
+        padding: 8px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+</style>
 
 <h1>Lista de Usuarios</h1>
 
@@ -141,6 +183,7 @@ table tbody tr:hover {
 </form>
 
 <!-- Tabla de Usuarios -->
+<!-- Tabla de Usuarios -->
 <table id="usuariosTable">
     <thead>
         <tr>
@@ -152,6 +195,7 @@ table tbody tr:hover {
             <th>Fecha de Cumpleaños</th>
             <th>Edificio</th>
             <th>Apartamento</th>
+            <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
@@ -165,10 +209,51 @@ table tbody tr:hover {
             <td>{{formatDate this.fecha_cumpleaños}}</td>
             <td>{{this.edificio}}</td>
             <td>{{this.apartamento}}</td>
+            <td><button onclick="openEditModal({{this.id}}, '{{this.nombre}}', '{{this.email}}', '{{this.role}}', '{{this.cargo}}', '{{this.fecha_cumpleaños}}', '{{this.edificio}}', '{{this.apartamento}}')">Editar</button></td>
         </tr>
         {{/each}}
     </tbody>
 </table>
+<!-- Modal para editar usuario -->
+<div id="editModal" style="display: none;">
+    <div class="modal-content">
+        <span onclick="closeEditModal()" class="close">&times;</span>
+        <h2>Editar Usuario</h2>
+        <form id="editForm" onsubmit="submitEditForm(event)">
+            <input type="hidden" id="editId">
+            <label for="editNombre">Nombre:</label>
+            <input type="text" id="editNombre" required>
+
+            <label for="editEmail">Email:</label>
+            <input type="email" id="editEmail" required>
+
+            <label for="editRole">Role:</label>
+            <select id="editRole" required>
+                <option value="admin">Admin</option>
+                <option value="residentes">Residente</option>
+            </select>
+
+            <label for="editCargo">Cargo:</label>
+            <input type="text" id="editCargo">
+
+            <label for="editFechaCumpleaños">Fecha de Cumpleaños:</label>
+            <input type="date" id="editFechaCumpleaños">
+
+<label for="editEdificio">Edificio:</label>
+<select id="editEdificio" onchange="cargarApartamentos(this.value)">
+    <option value="">Seleccione un edificio</option>
+    {{#each edificios}}
+    <option value="{{this.id}}">{{this.nombre}}</option>
+    {{/each}}
+</select>
+          <label for="editApartamento">Apartamento:</label>
+<select id="editApartamento">
+    <option value="">Seleccione un apartamento</option>
+</select>
+            <button type="submit">Guardar Cambios</button>
+        </form>
+    </div>
+</div>
 
 <script>
     function filterUsers() {
@@ -196,4 +281,77 @@ table tbody tr:hover {
             }
         }
     }
+</script>
+<script>
+    function openEditModal(id, nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento) {
+        // Llenar los campos de edición con los datos del usuario seleccionado
+        document.getElementById('editId').value = id;
+        document.getElementById('editNombre').value = nombre;
+        document.getElementById('editEmail').value = email;
+        document.getElementById('editRole').value = role;
+        document.getElementById('editCargo').value = cargo;
+        document.getElementById('editFechaCumpleaños').value = fechaCumpleaños;
+        document.getElementById('editEdificio').value = edificio;
+        document.getElementById('editApartamento').value = apartamento;
+
+        // Mostrar el modal
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    async function submitEditForm(event) {
+        event.preventDefault();
+
+        // Obtener los datos del formulario
+        const id = document.getElementById('editId').value;
+        const nombre = document.getElementById('editNombre').value;
+        const email = document.getElementById('editEmail').value;
+        const role = document.getElementById('editRole').value;
+        const cargo = document.getElementById('editCargo').value;
+        const fechaCumpleaños = document.getElementById('editFechaCumpleaños').value;
+        const edificio = document.getElementById('editEdificio').value;
+        const apartamento = document.getElementById('editApartamento').value;
+
+        try {
+            const response = await fetch(`/editar_usuario/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento })
+            });
+
+            if (response.ok) {
+                alert('Usuario actualizado correctamente');
+                closeEditModal();
+                location.reload(); // Recargar la página para ver los cambios
+            } else {
+                alert('Error al actualizar el usuario');
+            }
+        } catch (error) {
+            console.error('Error al enviar datos de edición:', error);
+        }
+    }
+    function cargarApartamentos(edificioId) {
+    const apartamentoSelect = document.getElementById('editApartamento');
+    apartamentoSelect.innerHTML = '<option value="">Seleccione un apartamento</option>';
+
+    if (edificioId) {
+        fetch(`/obtener_apartamentos_usuarios/${edificioId}`)
+            .then(response => response.json())
+            .then(apartamentos => {
+                apartamentos.forEach(apartamento => {
+                    const option = document.createElement('option');
+                    option.value = apartamento.id;
+                    option.text = apartamento.numero;
+                    apartamentoSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error al obtener apartamentos:', error));
+    }
+}
+
 </script>

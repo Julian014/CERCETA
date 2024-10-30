@@ -3001,19 +3001,31 @@ app.get('/FOTO', (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
+
+
 app.get('/consultar_usuarios', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
 
         try {
+            // Obtener todos los usuarios
             const [usuarios] = await pool.query(`
                 SELECT id, nombre, email, role, cargo, fecha_cumpleaños, edificio, apartamento
                 FROM usuarios
             `);
 
+            // Obtener todos los edificios
+            const [edificios] = await pool.query(`
+                SELECT id, nombre FROM edificios
+            `);
+
             res.render('administrativo/usuarios/consultar_usuarios.hbs', { 
                 name, 
                 usuarios,
+                edificios, // Pasar los edificios a la vista
                 layout: 'layouts/nav_admin.hbs' 
             });
         } catch (error) {
@@ -3025,6 +3037,18 @@ app.get('/consultar_usuarios', async (req, res) => {
     }
 });
 
+app.get('/obtener_apartamentos_usuarios/:edificioId', async (req, res) => {
+    const { edificioId } = req.params;
+    try {
+        const [apartamentos] = await pool.query(
+            'SELECT id, numero FROM apartamentos WHERE edificio_id = ?', [edificioId]
+        );
+        res.json(apartamentos);
+    } catch (error) {
+        console.error('Error al obtener apartamentos:', error);
+        res.status(500).send('Error al obtener los apartamentos');
+    }
+});
 
 
 
@@ -3053,6 +3077,25 @@ app.get('/buscar_usuarios', async (req, res) => {
         res.status(500).send('Error al buscar usuarios');
     }
 });
+
+
+
+app.post('/editar_usuario/:id', async (req, res) => {
+    const { id } = req.params;
+    const { nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento } = req.body;
+
+    try {
+        await pool.query(
+            'UPDATE usuarios SET nombre = ?, email = ?, role = ?, cargo = ?, fecha_cumpleaños = ?, edificio = ?, apartamento = ? WHERE id = ?',
+            [nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento, id]
+        );
+        res.sendStatus(200); // Respuesta exitosa
+    } catch (error) {
+        console.error('Error al actualizar el usuario:', error);
+        res.sendStatus(500); // Error en el servidor
+    }
+});
+
 
 
 
