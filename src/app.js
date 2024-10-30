@@ -41,7 +41,10 @@ hbs.registerHelper('formatDate', (date) => {
 });
 
 
-
+// Registrar el helper 'eq' para comparar dos valores
+hbs.registerHelper('eq', (a, b) => {
+    return a === b;
+});
 // Ruta para manejar el login
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -1335,17 +1338,45 @@ app.get('/api/apartamentos-count', async (req, res) => {
 
 
 
-app.get('/agregar_usuarios', (req, res) => {
+app.get('/agregar_usuarios', async (req, res) => {
     if (req.session.loggedin === true) {
         const userId = req.session.userId;
-
         const nombreUsuario = req.session.name;
-        res.render('administrativo/usuarios/crear_usuarios.hbs', { nombreUsuario,userId , layout: 'layouts/nav_admin.hbs' });
+
+        try {
+            // Consulta para obtener la lista de edificios
+            const [edificios] = await pool.query('SELECT id, nombre FROM edificios'); // Ajusta la tabla si es necesario
+
+            // Renderizar la vista con la lista de edificios
+            res.render('administrativo/usuarios/crear_usuarios.hbs', { 
+                nombreUsuario, 
+                userId, 
+                edificios, // Pasar los edificios a la vista
+                layout: 'layouts/nav_admin.hbs' 
+            });
+        } catch (error) {
+            console.error('Error al obtener edificios:', error);
+            res.status(500).send('Error al cargar los edificios');
+        }
     } else {
         res.redirect('/login');
     }
 });
 
+// Ruta para obtener apartamentos según el edificio seleccionado
+app.get('/api/apartamentosss/:edificioId', async (req, res) => {
+    const { edificioId } = req.params;
+    try {
+        const [apartamentos] = await pool.query(
+            'SELECT id, numero FROM apartamentos WHERE edificio_id = ?',
+            [edificioId]
+        );
+        res.json(apartamentos); // Devolver los apartamentos como JSON
+    } catch (error) {
+        console.error('Error al obtener apartamentos:', error);
+        res.status(500).json({ message: 'Error al obtener apartamentos' });
+    }
+});
 
 
 app.get('/plantilla_blog', (req, res) => {
@@ -1792,12 +1823,15 @@ app.post('/guardar_informe', upload.fields([
 
 
 
-
 app.post('/guardar_usuario', async (req, res) => {
     const { nombre, user_email, user_password, role, fecha_cumpleaños } = req.body;
     const cargos = req.body['cargo[]'];
+    const edificio = req.body.edificio || null; // Obtener el edificio si existe
+    const apartamento = req.body.apartamento || null; // Obtener el apartamento si existe
 
     console.log("Cargos seleccionados:", cargos);
+    console.log("Edificio:", edificio);
+    console.log("Apartamento:", apartamento);
 
     try {
         const checkQuery = 'SELECT * FROM usuarios WHERE nombre = ? OR email = ?';
@@ -1806,9 +1840,26 @@ app.post('/guardar_usuario', async (req, res) => {
         if (rows.length > 0) {
             res.send('<script>alert("El nombre de usuario o el correo ya están en uso. Por favor, elige otros."); window.location.href="/agregar_usuarios";</script>');
         } else {
+            // Convertir los cargos seleccionados en una cadena separada por comas
             const cargoString = cargos && cargos.length > 0 ? cargos.join(', ') : null;
-            const insertQuery = 'INSERT INTO usuarios (nombre, email, password, role, cargo, fecha_cumpleaños) VALUES (?, ?, ?, ?, ?, ?)';
-            await pool.query(insertQuery, [nombre, user_email, user_password, role, cargoString, fecha_cumpleaños]);
+
+            // Crear la consulta de inserción, incluyendo edificio y apartamento si el rol es "residente"
+            const insertQuery = `
+                INSERT INTO usuarios 
+                    (nombre, email, password, role, cargo, fecha_cumpleaños, edificio, apartamento) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
+            // Ejecutar la consulta con los datos correspondientes
+            await pool.query(insertQuery, [
+                nombre,
+                user_email,
+                user_password,
+                role,
+                cargoString,
+                fecha_cumpleaños,
+                role === "residentes" ? edificio : null,
+                role === "residentes" ? apartamento : null
+            ]);
 
             res.send('<script>alert("Usuario guardado exitosamente."); window.location.href="/agregar_usuarios";</script>');
         }
@@ -1817,8 +1868,6 @@ app.post('/guardar_usuario', async (req, res) => {
         res.send('<script>alert("Hubo un error al guardar el usuario."); window.location.href="/agregar_usuarios";</script>');
     }
 });
-
-
 
 
 
@@ -2954,6 +3003,78 @@ app.get('/FOTO', (req, res) => {
 });
 
 
+
+
+app.get('/consultar_usuarios', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        
+        // Obtener filtros del query string
+        const { nombre, email, cargo, role } = req.query;
+
+        // Construir la consulta con filtros
+        let query = 'SELECT id, nombre, email, role, cargo, fecha_cumpleaños FROM usuarios WHERE 1=1';
+        const params = [];
+
+        if (nombre) {
+            query += ' AND nombre LIKE ?';
+            params.push(`%${nombre}%`);
+        }
+        if (email) {
+            query += ' AND email LIKE ?';
+            params.push(`%${email}%`);
+        }
+        if (cargo) {
+            query += ' AND cargo LIKE ?';
+            params.push(`%${cargo}%`);
+        }
+        if (role) {
+            query += ' AND role LIKE ?';
+            params.push(`%${role}%`);
+        }
+
+        try {
+            const [results] = await pool.query(query, params);
+            res.render('administrativo/usuarios/consultar_usuarios.hbs', { 
+                name, 
+                usuarios: results, 
+                nombre, 
+                email, 
+                cargo, 
+                role,
+                layout: 'layouts/nav_admin.hbs' 
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).send('Error al obtener los usuarios');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+app.get('/buscar_usuarios', async (req, res) => {
+    const { nombre, email } = req.query;
+    
+    let query = 'SELECT id, nombre, email, role, cargo, fecha_cumpleaños FROM usuarios WHERE 1=1';
+    const params = [];
+
+    if (nombre) {
+        query += ' AND nombre LIKE ?';
+        params.push(`%${nombre}%`);
+    }
+    if (email) {
+        query += ' AND email LIKE ?';
+        params.push(`%${email}%`);
+    }
+
+    try {
+        const [results] = await pool.query(query, params);
+        res.json(results); // Enviar los resultados como JSON
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error al buscar usuarios');
+    }
+});
 
 
 

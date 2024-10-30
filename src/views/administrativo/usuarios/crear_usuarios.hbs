@@ -89,6 +89,11 @@
         #cargo-group input[type="checkbox"] {
             margin-right: 8px;
         }
+                /* Ocultar el campo de cargo, edificio y apartamento inicialmente */
+        #cargo-group, #edificio-group, #apartamento-group {
+            display: none;
+            flex-direction: column;
+        }
     </style>
     <script>
         function toggleCargoField() {
@@ -138,8 +143,93 @@
                 <label><input type="checkbox" name="cargo[]" value="contabilidad"> Contabilidad</label>
                 <label><input type="checkbox" name="cargo[]" value="operativo"> Operativo</label>
             </div>
+
+
+
+
+        <!-- Campo de Edificio (solo visible si el rol es residente) -->
+  <!-- Campo de Edificio (solo visible si el rol es residente) -->
+<div class="form-group" id="edificio-group">
+    <label for="edificio"><i class="fas fa-building icon"></i> Edificio:</label>
+    <select id="edificio" name="edificio" onchange="cargarApartamentos()">
+        <option value="">Selecciona un edificio</option>
+        {{#each edificios}}
+            <option value="{{this.id}}">{{this.nombre}}</option>
+        {{/each}}
+    </select>
+</div>
+
+
+<!-- Campo de Apartamento (solo visible si el rol es residente) -->
+<div class="form-group" id="apartamento-group">
+    <label for="apartamento"><i class="fas fa-door-closed icon"></i> Apartamento:</label>
+    <select id="apartamento" name="apartamento">
+        <option value="">Selecciona un apartamento</option>
+    </select>
+</div>
+
             <button type="submit"><i class="fas fa-user-plus"></i> Agregar Usuario</button>
         </form>
     </div>
+
+    <Script>
+
+  // Función para cargar apartamentos en función del edificio seleccionado
+    async function cargarApartamentos() {
+        const edificioId = document.getElementById('edificio').value;
+        const apartamentoSelect = document.getElementById('apartamento');
+        
+        // Limpiar el selector de apartamentos
+        apartamentoSelect.innerHTML = '<option value="">Selecciona un apartamento</option>';
+
+        if (edificioId) {
+            try {
+                const response = await fetch(`/api/apartamentosss/${edificioId}`);
+                const apartamentos = await response.json();
+
+                // Agregar opciones de apartamentos al selector
+                apartamentos.forEach(apartamento => {
+                    const option = document.createElement('option');
+                    option.value = apartamento.id;
+                    option.textContent = apartamento.numero;
+                    apartamentoSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error al cargar apartamentos:', error);
+            }
+        }
+    }
+
+   function toggleCargoField() {
+            const roleSelect = document.getElementById("role");
+            const cargoGroup = document.getElementById("cargo-group");
+            const edificioGroup = document.getElementById("edificio-group");
+            const apartamentoGroup = document.getElementById("apartamento-group");
+
+            // Mostrar el campo de cargo si el rol es "admin"
+            if (roleSelect.value === "admin") {
+                cargoGroup.style.display = "flex";
+                edificioGroup.style.display = "none";
+                apartamentoGroup.style.display = "none";
+            } 
+            // Mostrar los campos de edificio y apartamento si el rol es "residentes"
+            else if (roleSelect.value === "residentes") {
+                cargoGroup.style.display = "none";
+                edificioGroup.style.display = "flex";
+                apartamentoGroup.style.display = "flex";
+            } 
+            // Ocultar todos los campos adicionales si no hay rol seleccionado
+            else {
+                cargoGroup.style.display = "none";
+                edificioGroup.style.display = "none";
+                apartamentoGroup.style.display = "none";
+            }
+        }
+
+
+
+
+
+    </Script>
 </body>
 </html>
