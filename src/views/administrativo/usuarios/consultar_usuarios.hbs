@@ -122,27 +122,26 @@ table tbody tr:hover {
 
 </style>
 
-
 <h1>Lista de Usuarios</h1>
 
-<form method="GET" action="/consultar_usuarios">
+<!-- Formulario de Filtro -->
+<form id="filterForm">
     <label for="nombre">Nombre:</label>
-    <input type="text" id="nombre" name="nombre" value="{{nombre}}">
+    <input type="text" id="nombre" name="nombre" oninput="filterUsers()">
 
     <label for="email">Email:</label>
-    <input type="text" id="email" name="email" value="{{email}}">
+    <input type="text" id="email" name="email" oninput="filterUsers()">
 
-
-      <label for="role">Role:</label>
-    <select id="role" name="role">
+    <label for="role">Role:</label>
+    <select id="role" name="role" onchange="filterUsers()">
         <option value="">Seleccione un rol</option>
-        <option value="admin" {{#if (eq role 'admin')}}selected{{/if}}>Admin</option>
-        <option value="residentes" {{#if (eq role 'residentes')}}selected{{/if}}>Residentes</option>
+        <option value="admin">Admin</option>
+        <option value="residentes">Residentes</option>
     </select>
-    <button type="submit">Buscar</button>
 </form>
 
-<table>
+<!-- Tabla de Usuarios -->
+<table id="usuariosTable">
     <thead>
         <tr>
             <th>ID</th>
@@ -151,6 +150,8 @@ table tbody tr:hover {
             <th>Role</th>
             <th>Cargo</th>
             <th>Fecha de Cumpleaños</th>
+            <th>Edificio</th>
+            <th>Apartamento</th>
         </tr>
     </thead>
     <tbody>
@@ -162,7 +163,37 @@ table tbody tr:hover {
             <td>{{this.role}}</td>
             <td>{{this.cargo}}</td>
             <td>{{formatDate this.fecha_cumpleaños}}</td>
+            <td>{{this.edificio}}</td>
+            <td>{{this.apartamento}}</td>
         </tr>
         {{/each}}
     </tbody>
 </table>
+
+<script>
+    function filterUsers() {
+        const nombreFilter = document.getElementById('nombre').value.toLowerCase();
+        const emailFilter = document.getElementById('email').value.toLowerCase();
+        const roleFilter = document.getElementById('role').value;
+
+        const table = document.getElementById('usuariosTable').getElementsByTagName('tbody')[0];
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+            const nombre = rows[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+            const email = rows[i].getElementsByTagName('td')[2].textContent.toLowerCase();
+            const role = rows[i].getElementsByTagName('td')[3].textContent;
+
+            // Condición de visibilidad de la fila
+            if (
+                (nombre.includes(nombreFilter) || nombreFilter === "") &&
+                (email.includes(emailFilter) || emailFilter === "") &&
+                (role === roleFilter || roleFilter === "")
+            ) {
+                rows[i].style.display = ""; // Mostrar la fila
+            } else {
+                rows[i].style.display = "none"; // Ocultar la fila
+            }
+        }
+    }
+</script>

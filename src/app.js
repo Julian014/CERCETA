@@ -3001,47 +3001,19 @@ app.get('/FOTO', (req, res) => {
         res.redirect('/login');
     }
 });
-
-
-
-
 app.get('/consultar_usuarios', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
-        
-        // Obtener filtros del query string
-        const { nombre, email, cargo, role } = req.query;
-
-        // Construir la consulta con filtros
-        let query = 'SELECT id, nombre, email, role, cargo, fecha_cumpleaños FROM usuarios WHERE 1=1';
-        const params = [];
-
-        if (nombre) {
-            query += ' AND nombre LIKE ?';
-            params.push(`%${nombre}%`);
-        }
-        if (email) {
-            query += ' AND email LIKE ?';
-            params.push(`%${email}%`);
-        }
-        if (cargo) {
-            query += ' AND cargo LIKE ?';
-            params.push(`%${cargo}%`);
-        }
-        if (role) {
-            query += ' AND role LIKE ?';
-            params.push(`%${role}%`);
-        }
 
         try {
-            const [results] = await pool.query(query, params);
+            const [usuarios] = await pool.query(`
+                SELECT id, nombre, email, role, cargo, fecha_cumpleaños, edificio, apartamento
+                FROM usuarios
+            `);
+
             res.render('administrativo/usuarios/consultar_usuarios.hbs', { 
                 name, 
-                usuarios: results, 
-                nombre, 
-                email, 
-                cargo, 
-                role,
+                usuarios,
                 layout: 'layouts/nav_admin.hbs' 
             });
         } catch (error) {
@@ -3052,6 +3024,12 @@ app.get('/consultar_usuarios', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
+
+
+
 app.get('/buscar_usuarios', async (req, res) => {
     const { nombre, email } = req.query;
     
