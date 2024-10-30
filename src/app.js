@@ -130,6 +130,17 @@ const transporter = nodemailer.createTransport({
 
 const crypto = require('crypto'); // Importa el módulo crypto
 
+
+
+hbs.registerHelper('json', function(context) {
+    return JSON.stringify(context);
+});
+
+
+
+
+
+
 app.get("/menuAdministrativo", async (req, res) => {
     if (req.session.loggedin === true) {
         try {
@@ -152,17 +163,57 @@ app.get("/menuAdministrativo", async (req, res) => {
             // Muestra en consola para verificar que los valores son correctos
             console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
 
-            // Realiza la consulta a la base de datos para contar los residentes con rol "clientes"
+            // Consulta para contar los residentes con rol "clientes"
             const [clientesRows] = await pool.query('SELECT COUNT(*) AS totalClientes FROM user WHERE roles = "clientes"');
             const totalClientes = clientesRows[0].totalClientes;
 
-            // Realiza la consulta a la base de datos para contar la cantidad de apartamentos
+            // Consulta para contar la cantidad de apartamentos
             const [apartamentosRows] = await pool.query('SELECT COUNT(*) AS totalApartamentos FROM apartamentos');
             const totalApartamentos = apartamentosRows[0].totalApartamentos;
 
-            // Realiza la consulta a la base de datos para contar la cantidad de edificios
+            // Consulta para contar la cantidad de edificios
             const [edificiosRows] = await pool.query('SELECT COUNT(*) AS totaledificios FROM edificios');
             const totaledificios = edificiosRows[0].totaledificios;
+
+            // Consulta para contar la cantidad de empleados
+            const [empleadosRows] = await pool.query('SELECT COUNT(*) AS totalEmpleados FROM usuarios WHERE role = "admin"');
+            const totalEmpleados = empleadosRows[0].totalEmpleados;
+
+            // Consulta para contar la cantidad de residentes
+            const [residentesRows] = await pool.query('SELECT COUNT(*) AS totalResidentes FROM usuarios WHERE role = "residentes"');
+            const residentes = residentesRows[0].totalResidentes;
+
+            // Nueva consulta para obtener las últimas alertas con nombre_actividad y fecha_ejecucion
+            const [alertasRows] = await pool.query('SELECT nombre_actividad, fecha_ejecucion FROM alertas ORDER BY fecha_ejecucion DESC LIMIT 5');
+            const alertas = alertasRows;
+
+            // Consulta para obtener los pagos mensuales por edificio
+            const [pagosMensualesRows] = await pool.query(`
+                SELECT 
+                    nombre_edificio, 
+                    MONTH(fecha_pago) AS mes, 
+                    SUM(valor_pago) AS total_mensual 
+                FROM pagos_apartamentos 
+                GROUP BY nombre_edificio, MONTH(fecha_pago)
+                ORDER BY nombre_edificio, mes
+            `);
+
+            // Transformar los datos para el gráfico
+            const datosGrafico = {};
+            pagosMensualesRows.forEach(row => {
+                if (!datosGrafico[row.nombre_edificio]) {
+                    datosGrafico[row.nombre_edificio] = Array(12).fill(0);
+                }
+                datosGrafico[row.nombre_edificio][row.mes - 1] = row.total_mensual;
+            });
+// Nueva consulta para obtener los últimos cinco pagos
+const [ultimosPagosRows] = await pool.query(`
+    SELECT apartamento_id, fecha_pago, valor_pago 
+    FROM pagos_apartamentos 
+    ORDER BY fecha_pago DESC 
+    LIMIT 5
+`);
+const ultimosPagos = ultimosPagosRows;
 
             // Renderiza la vista y pasa los datos necesarios
             res.render("administrativo/menuadministrativo.hbs", {
@@ -172,10 +223,16 @@ app.get("/menuAdministrativo", async (req, res) => {
                 esAdministracionOperativa,
                 esContabilidad,
                 esOperativo,
-                userId ,
+                userId,
                 totalClientes,
                 totalApartamentos,
-                totaledificios
+                totaledificios,
+                totalEmpleados,  // Pasamos la variable totalEmpleados a la vista
+                residentes,       // Pasamos la variable totalResidentes como residentes a la vista
+                ultimosPagos,  // Pasamos los últimos pagos a la vista
+
+                alertas,          // Pasamos las últimas alertas a la vista
+                datosGrafico: JSON.stringify(datosGrafico)  // Convertir datosGrafico a JSON
             });
         } catch (error) {
             console.error('Error al obtener el conteo de datos:', error);
@@ -185,6 +242,22 @@ app.get("/menuAdministrativo", async (req, res) => {
         res.redirect("/login");
     }
 });
+
+
+
+app.get('/ver_ubicaciones', (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        const userId = req.session.userId;
+
+        res.render('administrativo/geolocalizador/ver_ubicaciones.hbs', { name,userId ,layout: 'layouts/nav_admin.hbs' });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+
 
 
 
