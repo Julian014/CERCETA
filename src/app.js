@@ -3439,11 +3439,23 @@ app.post('/buscarPagos_mispagos', async (req, res) => {
 
   
 
-
-app.get('/crear_bitacora_administrativa', (req, res) => {
+app.get('/crear_bitacora_administrativa', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
-        res.render('administrativo/Bitacora/crear_bitacora_administrativa.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+        try {
+            // Consultar edificios de la base de datos
+            const [edificios] = await pool.query('SELECT id, nombre FROM edificios');
+            
+            // Renderizar la vista con los datos de los edificios
+            res.render('administrativo/Bitacora/crear_bitacora_administrativa.hbs', { 
+                name, 
+                edificios, 
+                layout: 'layouts/nav_admin.hbs' 
+            });
+        } catch (error) {
+            console.error('Error al obtener edificios:', error);
+            res.status(500).send('Error al cargar los datos de los edificios');
+        }
     } else {
         res.redirect('/login');
     }
