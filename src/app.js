@@ -45,6 +45,12 @@ hbs.registerHelper('formatDate', (date) => {
 hbs.registerHelper('eq', (a, b) => {
     return a === b;
 });
+
+
+
+
+
+
 // Ruta para manejar el login
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -70,7 +76,7 @@ app.post('/login', async (req, res) => {
             } else if (role === 'tecnico') {
                 return res.redirect('/tecnico');
             } else if (role === 'residentes') {
-                return res.redirect('/Residentes/home_residentes.hbs');
+                return res.redirect('/menu_residentes');
             }
         } else {
             // Muestra la página de login con mensaje de error si las credenciales son incorrectas
@@ -95,6 +101,78 @@ app.get('/geolocalizacion', (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
+
+
+// Ruta para el menú administrativo
+app.get('/menu_residentes', (req, res) => {
+    if (req.session.loggedin === true) {
+        const userId = req.session.userId;
+
+        const nombreUsuario = req.session.user.name; // Use user session data
+        res.render('Residentes/home_residentes.hbs', { nombreUsuario ,userId ,layout: 'layouts/nav_residentes.hbs' });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+
+
+app.get('/menu_residentes', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        const userId = req.session.userId;
+
+        try {
+            // Consulta para obtener el edificio_id del usuario
+            const [userResult] = await pool.query('SELECT edificio FROM usuarios WHERE id = ?', [userId]);
+            if (userResult.length === 0) {
+                return res.status(404).send('Usuario no encontrado');
+            }
+            
+            const edificioId = userResult[0].edificio;
+
+            // Consulta para obtener las publicaciones del edificio
+            const [resultados] = await pool.query('SELECT * FROM publicaciones WHERE edificio_id = ? ORDER BY fecha DESC', [edificioId]);
+
+            // Convertir los datos binarios a base64
+            const blogPosts = resultados.map((post) => ({
+                ...post,
+                imagen: post.imagen ? post.imagen.toString('base64') : null,
+                pdf: post.pdf ? post.pdf.toString('base64') : null,
+                word: post.word ? post.word.toString('base64') : null,
+                excel: post.excel ? post.excel.toString('base64') : null
+            }));
+
+            res.render('Residentes/home_residentes.hbs', { name, userId, blogPosts, layout: 'layouts/nav_residentes.hbs' });
+        } catch (err) {
+            console.error(err);
+            res.status(500).send('Error al obtener las entradas del blog');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3224,6 +3302,25 @@ app.post('/guardarUbicacion', async (req, res) => {
   });
   
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 
 // Iniciar el servidor
 app.listen(3000, () => {
