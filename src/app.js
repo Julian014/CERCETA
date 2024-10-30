@@ -245,19 +245,6 @@ const ultimosPagos = ultimosPagosRows;
 
 
 
-app.get('/ver_ubicaciones', (req, res) => {
-    if (req.session.loggedin === true) {
-        const name = req.session.name;
-        const userId = req.session.userId;
-
-        res.render('administrativo/geolocalizador/ver_ubicaciones.hbs', { name,userId ,layout: 'layouts/nav_admin.hbs' });
-    } else {
-        res.redirect('/login');
-    }
-});
-
-
-
 
 
 
@@ -1806,26 +1793,22 @@ app.post('/guardar_informe', upload.fields([
 
 
 
-
 app.post('/guardar_usuario', async (req, res) => {
-    const { nombre, user_email, user_password, role } = req.body;
-    const cargos = req.body['cargo[]']; // Acceso correcto al array de cargos seleccionados
+    const { nombre, user_email, user_password, role, fecha_cumpleaños } = req.body;
+    const cargos = req.body['cargo[]'];
 
-    console.log("Cargos seleccionados:", cargos); // Verificar que cargos esté recibiendo datos
+    console.log("Cargos seleccionados:", cargos);
 
     try {
-        // Verificar si el nombre de usuario o el correo ya existen
         const checkQuery = 'SELECT * FROM usuarios WHERE nombre = ? OR email = ?';
         const [rows] = await pool.query(checkQuery, [nombre, user_email]);
 
         if (rows.length > 0) {
             res.send('<script>alert("El nombre de usuario o el correo ya están en uso. Por favor, elige otros."); window.location.href="/agregar_usuarios";</script>');
         } else {
-            // Concatenar cargos seleccionados en un solo string separados por comas
             const cargoString = cargos && cargos.length > 0 ? cargos.join(', ') : null;
-            // Insertar el nuevo usuario
-            const insertQuery = 'INSERT INTO usuarios (nombre, email, password, role, cargo) VALUES (?, ?, ?, ?, ?)';
-            await pool.query(insertQuery, [nombre, user_email, user_password, role, cargoString]);
+            const insertQuery = 'INSERT INTO usuarios (nombre, email, password, role, cargo, fecha_cumpleaños) VALUES (?, ?, ?, ?, ?, ?)';
+            await pool.query(insertQuery, [nombre, user_email, user_password, role, cargoString, fecha_cumpleaños]);
 
             res.send('<script>alert("Usuario guardado exitosamente."); window.location.href="/agregar_usuarios";</script>');
         }
@@ -2063,10 +2046,6 @@ async function sendAppNotification(userId, actividad, fechaEjecucion) {
 
 
 
-cron.schedule('1 12 * * *', () => {
-    console.log("Cron job ejecutándose cada día a las 8:00 AM...");
-    verificarAlertasPendientes();
-});
 
 app.get('/notificaciones', async (req, res) => {
     const userId = req.session.userId; // Asegúrate de que el ID de usuario esté en la sesión
@@ -2953,6 +2932,155 @@ app.get('/obtener_ids_inspeccion', async (req, res) => {
         res.status(500).send('Error en el servidor');
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+app.get('/FOTO', (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        res.render('administrativo/informes/crear_informe_operativo.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+
+
+
+// Función para enviar correos de cumpleaños
+function enviarCorreoCumple(nombre, email) {
+    const mailOptions = {
+        from: 'nexus.innovationss@gmail.com',
+        to: email,
+        subject: `¡Feliz cumpleaños, ${nombre}! 🎉`,
+        text: `¡Hola ${nombre}!\n\nTodo el equipo te desea un feliz cumpleaños. Esperamos que tengas un día maravilloso.\n\n¡Feliz cumpleaños! 🎂🥳`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log('Error al enviar correo:', error);
+        } else {
+            console.log('Correo enviado: ' + info.response);
+        }
+    });
+
+}
+
+
+
+
+const verificarCumpleanios = async () => {
+    const hoy = moment().format('YYYY-MM-DD'); // Fecha completa como YYYY-MM-DD
+    console.log("Fecha de hoy:", hoy);
+
+    try {
+        // Consulta para obtener todos los usuarios y verificar fechas de cumpleaños
+        const [usuarios] = await pool.query(`SELECT nombre, email, fecha_cumpleaños FROM usuarios`);
+        
+        // Muestra todos los usuarios y sus fechas de cumpleaños para verificar formato
+        console.log("Usuarios en la base de datos:", usuarios);
+
+        // Consulta específica para cumpleaños hoy
+        const [results] = await pool.query(`SELECT nombre, email FROM usuarios WHERE DATE_FORMAT(fecha_cumpleaños, '%Y-%m-%d') = ?`, [hoy]);
+        
+        console.log("Resultados de cumpleaños:", results); // Verificar resultados de la consulta
+
+        if (results.length === 0) {
+            console.log("No hay cumpleaños hoy.");
+            return;
+        }
+
+        // Envía un correo de prueba para verificar que la función de envío funciona
+        enviarCorreoCumple("Carlos", "soporte.it.vianco@gmail.com");
+
+        results.forEach((usuario) => {
+            console.log("Enviando correo a:", usuario.email); // Registrar cada envío de correo
+            enviarCorreoCumple(usuario.nombre, usuario.email);
+        });
+    } catch (error) {
+        console.error('Error al consultar la base de datos:', error);
+    }
+};
+
+// Llama a la función una vez al inicio para verificar
+verificarCumpleanios();
+
+cron.schedule('40 10 * * *', () => {
+    console.log("Cron para cumpleaños ejecutándose...");
+    verificarCumpleanios();
+});
+
+
+
+
+cron.schedule('1 12 * * *', () => {
+    console.log("Cron para alertas ejecutándose...");
+    verificarAlertasPendientes();
+});
+
+
+
+app.post('/guardarUbicacion', async (req, res) => {
+    const { nombre, latitud, longitud } = req.body;
+  
+    try {
+      // Inserta la ubicación y el nombre en la base de datos
+      await pool.query('INSERT INTO ubicaciones (nombre, latitud, longitud, fecha) VALUES (?, ?, ?, NOW())', [nombre, latitud, longitud]);
+      res.status(200).send({ mensaje: 'Ubicación guardada con éxito' });
+    } catch (error) {
+      console.error("Error al guardar ubicación:", error);
+      res.status(500).send({ error: 'Error al guardar ubicación' });
+    }
+  });
+  
+
+
+
+
+
+  app.get('/ver_ubicaciones', async (req, res) => {
+    if (req.session.loggedin === true) {
+      const name = req.session.name;
+      const userId = req.session.userId;
+  
+      try {
+        // Consulta para obtener la última ubicación de cada usuario
+        const [ubicaciones] = await pool.query(`
+          SELECT u1.nombre, u1.latitud, u1.longitud, u1.fecha
+          FROM ubicaciones u1
+          INNER JOIN (
+            SELECT nombre, MAX(fecha) AS ultima_fecha
+            FROM ubicaciones
+            GROUP BY nombre
+          ) u2 ON u1.nombre = u2.nombre AND u1.fecha = u2.ultima_fecha
+        `);
+  
+        // Renderiza la vista con las ubicaciones
+        res.render('administrativo/geolocalizador/ver_ubicaciones.hbs', {
+          name,
+          userId,
+          ubicaciones,
+          layout: 'layouts/nav_admin.hbs'
+        });
+      } catch (error) {
+        console.error("Error al obtener ubicaciones:", error);
+        res.status(500).send("Error al obtener ubicaciones");
+      }
+    } else {
+      res.redirect('/login');
+    }
+  });
+  
 
 
 // Iniciar el servidor

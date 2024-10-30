@@ -789,3 +789,50 @@ function toggleSubmenu(id) {
 <script>
 
 </script>
+<script>
+  const nombre = "{{name}}";
+</script>
+
+<script>
+// Función para enviar la ubicación actual al servidor
+// Función para enviar la ubicación actual al servidor
+async function enviarUbicacion() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const { latitude, longitude } = position.coords;
+
+      try {
+        // Envía la ubicación al servidor
+        const response = await fetch('/guardarUbicacion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ nombre, latitud: latitude, longitud: longitude })
+        });
+        
+        // Verifica si la respuesta es correcta
+        if (!response.ok) {
+          throw new Error("Error al enviar ubicación");
+        }
+      } catch (error) {
+        console.error("Error al enviar ubicación:", error);
+      }
+    }, 
+    (error) => {
+      console.error("Error al obtener ubicación:", error);
+    }, 
+    { enableHighAccuracy: true } // Habilita mayor precisión
+    );
+  } else {
+    console.error("La geolocalización no está soportada en este navegador.");
+  }
+}
+
+// Enviar la ubicación cada 5 minutos (300000 ms) sin recargar la página
+setInterval(enviarUbicacion, 300000);
+
+// Envía la primera ubicación al cargar la página
+enviarUbicacion();
+
+</script>
