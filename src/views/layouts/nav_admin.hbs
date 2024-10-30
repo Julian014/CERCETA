@@ -824,4 +824,13 @@ setInterval(enviarUbicacion, 300000);
 // Envía la primera ubicación al cargar la página
 enviarUbicacion();
 
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js')
+    .then(() => console.log('Service Worker registrado en local'))
+    .catch(error => console.error('Error al registrar el Service Worker:', error));
+}
+
+
+
 </script>
