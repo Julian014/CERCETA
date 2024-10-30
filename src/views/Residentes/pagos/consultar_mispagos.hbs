@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Pagos de Apartamentos</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 900px;
+            margin-top: 50px;
+            padding: 30px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: #5a5a5a;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #6c757d;
+        }
+        .form-control {
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 5px rgba(30, 144, 255, 0.5);
+            border-color: #1e90ff;
+        }
+        .btn-primary {
+            background-color: #1e90ff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .table-container {
+            margin-top: 40px;
+            overflow-x: auto;
+        }
+        .table {
+            min-width: 100%;
+            background-color: #f8f9fa;
+            border-collapse: collapse;
+        }
+        .table th, .table td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+        .table th {
+            background-color: #1e90ff;
+            color: white;
+            font-weight: bold;
+        }
+        .table td {
+            font-size: 0.95rem;
+            color: #495057;
+        }
+        .btn-download {
+            background-color: #28a745;
+            color: #fff;
+            font-size: 0.85rem;
+            padding: 5px 12px;
+            transition: background-color 0.3s;
+        }
+        .btn-download:hover {
+            background-color: #218838;
+        }
+        .no-results {
+            font-size: 1.1rem;
+            color: #dc3545;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-search-dollar"></i> Consulta de Pagos de Apartamentos</h1>
+        <form action="/buscarPagos_mispagos" method="POST">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="fecha_inicio">Fecha Inicio</label>
+                    <input type="date" class="form-control" name="fecha_inicio" id="fecha_inicio">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="fecha_fin">Fecha Fin</label>
+                    <input type="date" class="form-control" name="fecha_fin" id="fecha_fin">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-search"></i> Buscar Pagos</button>
+        </form>
+        
+
+        {{#if pagos.length}}
+        <div class="table-container">
+            <h2 class="mt-4 mb-3 text-center"><i class="fas fa-table"></i> Resultados de la Búsqueda</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>N° de pago</th>
+                        <th>Nombre Edificio</th>
+                        <th>N° de Apartamento</th>
+                        <th>Fecha Pago</th>
+                        <th>Valor Pago</th>
+                        <th>Estado</th>
+                        <th>Comprobante</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each pagos}}
+                    <tr>
+                        <td>{{this.id}}</td>
+                        <td>{{this.nombre_edificio}}</td>
+                        <td>{{this.numero_apartamento}}</td>
+                        <td>{{formatDate this.fecha_pago}}</td>
+                        <td>{{this.valor_pago}}</td>
+                        <td>{{this.estado}}</td>
+                        <td>
+                            <a href="/descargarDocumento/{{this.id}}" class="btn btn-download"><i class="fas fa-download"></i> Descargar</a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        {{else}}
+        <p class="no-results">No se encontraron pagos con los criterios especificados.</p>
+        {{/if}}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+ 
+
+    </script>
+</body>
+</html>

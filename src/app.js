@@ -3341,16 +3341,96 @@ app.post('/guardarUbicacion', async (req, res) => {
 
 
 
+app.get('/Consulta_Comprobantes_de_Pago_residentes', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const userId = req.session.userId;
 
+        try {
+            // Consulta para obtener edificio y apartamento del usuario
+            const query = 'SELECT edificio, apartamento FROM usuarios WHERE id = ?';
+            const [rows] = await pool.query(query, [userId]);
 
+            if (rows.length > 0) {
+                const { edificio, apartamento } = rows[0];
+                console.log('Edificio:', edificio, 'Apartamento:', apartamento); // Verifica los valores obtenidos
 
+                res.render('Residentes/pagos/consultar_mispagos.hbs', { 
+                    name: req.session.name, 
+                    userId, 
+                    edificioSeleccionado: edificio, 
+                    apartamentoSeleccionado: apartamento, 
+                    layout: 'layouts/nav_residentes.hbs'
+                });
+            } else {
+                res.redirect('/login'); // Redirige si no se encuentra el usuario
+            }
+        } catch (error) {
+            console.error('Error al obtener edificio y apartamento:', error);
+            res.status(500).send('Error interno del servidor');
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+app.post('/buscarPagos_mispagos', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const userId = req.session.userId;
 
+        try {
+            // Paso 1: Obtener el ID del edificio y apartamento del usuario
+            const [userRows] = await pool.query('SELECT edificio AS edificio_id, apartamento AS apartamento_id FROM usuarios WHERE id = ?', [userId]);
 
+            if (userRows.length > 0) {
+                const { edificio_id, apartamento_id } = userRows[0];
+                const { fecha_inicio, fecha_fin } = req.body;
 
+                // Paso 2: Obtener el nombre del edificio usando el ID del edificio
+                const [edificioRows] = await pool.query('SELECT nombre FROM edificios WHERE id = ?', [edificio_id]);
+                if (edificioRows.length === 0) {
+                    console.error("Edificio no encontrado");
+                    return res.status(404).send("Edificio no encontrado");
+                }
+                const nombre_edificio = edificioRows[0].nombre;
 
+                // Paso 3: Obtener el número del apartamento usando el ID del apartamento y edificio_id
+                const [apartamentoRows] = await pool.query('SELECT numero FROM apartamentos WHERE id = ? AND edificio_id = ?', [apartamento_id, edificio_id]);
+                if (apartamentoRows.length === 0) {
+                    console.error("Apartamento no encontrado");
+                    return res.status(404).send("Apartamento no encontrado");
+                }
+                const numero_apartamento = apartamentoRows[0].numero;
 
+                // Paso 4: Buscar pagos en pagos_apartamentos usando nombre_edificio y numero_apartamento
+                let query = "SELECT * FROM pagos_apartamentos WHERE nombre_edificio = ? AND numero_apartamento = ?";
+                const params = [nombre_edificio, numero_apartamento];
 
+                // Añadir filtros de fechas si están presentes
+                if (fecha_inicio && fecha_fin) {
+                    query += " AND fecha_pago BETWEEN ? AND ?";
+                    params.push(fecha_inicio, fecha_fin);
+                }
 
+                console.log("Consulta final:", query, "Parámetros:", params);
+
+                // Ejecutar la consulta
+                const [results] = await pool.query(query, params);
+                console.log("Resultados obtenidos:", results);
+                res.render('Residentes/pagos/consultar_mispagos.hbs', {
+                    name: req.session.name,
+                    pagos: results,
+                    layout: 'layouts/nav_residentes.hbs'
+                });
+            } else {
+                res.redirect('/login'); // Redirige si no se encuentra el usuario
+            }
+        } catch (error) {
+            console.error("Error al consultar los pagos:", error);
+            res.status(500).send("Error en la consulta de pagos");
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
 
   
 
