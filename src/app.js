@@ -3372,6 +3372,11 @@ app.get('/Consulta_Comprobantes_de_Pago_residentes', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
+
+
 app.post('/buscarPagos_mispagos', async (req, res) => {
     if (req.session.loggedin === true) {
         const userId = req.session.userId;
@@ -3433,6 +3438,37 @@ app.post('/buscarPagos_mispagos', async (req, res) => {
 });
 
   
+
+
+app.get('/crear_bitacora_administrativa', (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        res.render('administrativo/Bitacora/crear_bitacora_administrativa.hbs', { name,layout: 'layouts/nav_admin.hbs' });
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Iniciar el servidor
 app.listen(3000, () => {
