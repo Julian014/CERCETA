@@ -277,7 +277,7 @@ app.get("/menuAdministrativo", async (req, res) => {
             console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
 
             // Consulta para contar los residentes con rol "clientes"
-            const [clientesRows] = await pool.query('SELECT COUNT(*) AS totalClientes FROM user WHERE roles = "clientes"');
+            const [clientesRows] = await pool.query('SELECT COUNT(*) AS totalClientes FROM usuarios WHERE role = "clientes"');
             const totalClientes = clientesRows[0].totalClientes;
 
             // Consulta para contar la cantidad de apartamentos
