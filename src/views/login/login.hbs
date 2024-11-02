@@ -10,13 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
-  
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-   
     <!-- Internal CSS -->
-    
     <style>
-
         body {
             margin: 0;
             padding: 0;
@@ -43,33 +39,26 @@
             transition: background-image 0.5s ease-in-out;
         }
 
-      
-
-      
-     
         .login-container {
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding-top: 80px; /* Space for fixed header */
-            height: calc(100vh - 80px); /* Adjust for fixed header height */
+            padding-top: 80px;
             position: relative;
-            right: 30%;
-            top: 70px;
         }
 
- .login-box {
-    width: 420px;
-    padding: 40px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
-    border-radius: 20px;
-    background-color: rgba(255, 255, 255, 0.85); /* Fondo blanco con algo de transparencia */
-    position: absolute;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    opacity: 0;
-    visibility: hidden;
-}
+        .login-box {
+            width: 420px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.85);
+            position: relative;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+        }
 
         .login-box.active {
             opacity: 1;
@@ -78,7 +67,6 @@
 
         .login-box h2 {
             margin: 0 0 20px;
-            padding: 0;
             font-size: 30px;
             font-weight: 700;
             text-align: center;
@@ -160,17 +148,6 @@
         }
 
         @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                padding: 20px;
-                text-align: center;
-            }
-
-            nav {
-                flex-direction: column;
-                gap: 10px;
-            }
-
             .login-container {
                 padding-top: 20px;
             }
@@ -178,18 +155,17 @@
             .login-box {
                 width: 90%;
                 padding: 20px;
+                box-sizing: border-box;
             }
-        }
 
-        .background-image {
-            position: fixed;
-            left: 0;
-            width: 100%;
-            height: 100% /* Ajuste para la altura del header */
-            z-index: -1;
-            background-size: cover;
-            background-position: center;
-            transition: background-image 0.5s ease-in-out;
+            .login-box h2 {
+                font-size: 24px;
+            }
+
+            .role-button {
+                font-size: 14px;
+                padding: 8px 15px;
+            }
         }
 
         .button-container {
@@ -218,7 +194,6 @@
 <body>
     <div class="background-image" id="backgroundImage"></div>
 
-
     <div class="login-container">
         <div id="conductores" class="login-box active">
             <h2>Inicia sesión</h2>
@@ -226,8 +201,7 @@
                 <button class="role-button" onclick="changeBackground('administrativo')">Administrativo</button>
                 <button class="role-button" onclick="changeBackground('clientes')">Residentes</button>
             </div>
-
-<form action="/login" method="POST" class="form">
+            <form action="/login" method="POST" class="form">
                 <div class="textbox">
                     <input type="text" placeholder="Correo electrónico" name="email" required>
                 </div>
@@ -252,9 +226,6 @@
                 case 'administrativo':
                     imageUrl = 'imagenes/FONDOADMINISTATIVO.png';
                     break;
-                case 'tecnico':
-                    imageUrl = 'imagenes/Login%20segun%20tipo%20de%20usuario%20Biopolab_page-0002.jpg';
-                    break;
                 case 'clientes':
                     imageUrl = 'imagenes/FONDORESIDENTES.png';
                     break;
@@ -264,10 +235,8 @@
             }
 
             backgroundImage.style.backgroundImage = `url(${imageUrl})`;
-            console.log(`Background image changed to: ${imageUrl}`);
         }
 
-        // Set initial background image to 'administrativo' on page load
         window.onload = function() {
             changeBackground('administrativo');
         };
