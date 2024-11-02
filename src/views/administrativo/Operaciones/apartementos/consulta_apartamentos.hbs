@@ -15,21 +15,22 @@
 
         .container {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             max-width: 1200px;
-            margin: 50px auto;
+            margin: 20px auto;
             padding: 20px;
             background-color: #fff;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
         }
 
-        .search-container {
-            width: 30%;
+        .search-container, .results-container {
+            width: 100%;
             padding: 20px;
             background-color: #f7f7f7;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         .search-container h2 {
@@ -55,11 +56,6 @@
             color: #1E99D3;
         }
 
-        .results-container {
-            width: 65%;
-            padding: 20px;
-        }
-
         .apartamento-detalles {
             display: none;
             margin-top: 20px;
@@ -72,13 +68,14 @@
         }
 
         .apartamento-detalles img {
-            width: 150px;
-            height: 150px;
+            width: 100%;
+            max-width: 150px;
+            height: auto;
             border-radius: 50%;
             object-fit: cover;
-            position: absolute;
-            top: 0;
-            right: 0;
+            position: relative;
+            display: block;
+            margin: 0 auto;
         }
 
         .edit-button {
@@ -107,7 +104,7 @@
             background-color: white;
             border-radius: 5px;
             color: #fff;
-            margin: 10px;
+            margin: 10px 0;
         }
 
         .icon-input select {
@@ -118,6 +115,24 @@
             padding: 10px;
             color: #413d4b;
             background-color: transparent;
+        }
+
+        /* Media Query for Mobile Devices */
+        @media (min-width: 768px) {
+            .container {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .search-container {
+                width: 30%;
+            }
+
+            .results-container {
+                width: 65%;
+                padding: 20px;
+                background-color: #fff;
+            }
         }
     </style>
 </head>
@@ -199,7 +214,6 @@
                             <p><strong>Responsable:</strong> ${data.apartamento.responsable}</p>
                             <p><strong>Celular:</strong> ${data.apartamento.celular}</p>
                             <p><strong>Correo:</strong> ${data.apartamento.correo}</p>
-                            <br>
                             <br>
                             <a href="/editar_apartamento?apartamentoId=${data.apartamento.id}" class="edit-button">Editar Apartamento <i class="fas fa-edit"></i></a>
                         `;
