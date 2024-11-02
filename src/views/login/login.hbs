@@ -54,10 +54,12 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
             border-radius: 20px;
             background-color: rgba(255, 255, 255, 0.85);
-            position: relative;
+            position: absolute;
             transition: opacity 0.3s ease, visibility 0.3s ease;
             opacity: 0;
             visibility: hidden;
+            right: 30%;
+            top: 70px;
         }
 
         .login-box.active {
@@ -147,27 +149,6 @@
             color: #4082f5;
         }
 
-        @media (max-width: 768px) {
-            .login-container {
-                padding-top: 20px;
-            }
-
-            .login-box {
-                width: 90%;
-                padding: 20px;
-                box-sizing: border-box;
-            }
-
-            .login-box h2 {
-                font-size: 24px;
-            }
-
-            .role-button {
-                font-size: 14px;
-                padding: 8px 15px;
-            }
-        }
-
         .button-container {
             display: flex;
             justify-content: center;
@@ -188,6 +169,26 @@
 
         .role-button:hover {
             background-color: #90c9a7;
+        }
+
+        @media (max-width: 768px) {
+            .login-box {
+                right: auto;
+                top: auto;
+                width: 90%;
+                padding: 20px;
+                box-sizing: border-box;
+                position: relative;
+            }
+
+            .login-box h2 {
+                font-size: 24px;
+            }
+
+            .role-button {
+                font-size: 14px;
+                padding: 8px 15px;
+            }
         }
     </style>
 </head>

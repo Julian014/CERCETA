@@ -210,6 +210,17 @@ document.getElementById('uploadForm').addEventListener('submit', function(event)
     document.getElementById('excel').addEventListener('change', function() {
         validateFile(this, ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'], 'excelError');
     });
+    window.addEventListener('DOMContentLoaded', (event) => {
+    const fechaInput = document.getElementById('fecha');
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    
+    fechaInput.value = `${year}-${month}-${day}`;
+    console.log("Fecha actual establecida:", fechaInput.value); // Esto muestra la fecha en la consola
+});
+
 </script>
 
 </body>
