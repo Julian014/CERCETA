@@ -785,6 +785,7 @@ function toggleSubmenu(id) {
 <script>
 // Función para enviar la ubicación actual al servidor
 // Función para enviar la ubicación actual al servidor
+// Función para enviar la ubicación actual al servidor
 async function enviarUbicacion() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(async (position) => {
@@ -799,7 +800,7 @@ async function enviarUbicacion() {
           },
           body: JSON.stringify({ nombre, latitud: latitude, longitud: longitude })
         });
-        
+
         // Verifica si la respuesta es correcta
         if (!response.ok) {
           throw new Error("Error al enviar ubicación");
@@ -807,10 +808,10 @@ async function enviarUbicacion() {
       } catch (error) {
         console.error("Error al enviar ubicación:", error);
       }
-    }, 
+    },
     (error) => {
       console.error("Error al obtener ubicación:", error);
-    }, 
+    },
     { enableHighAccuracy: true } // Habilita mayor precisión
     );
   } else {
@@ -818,19 +819,37 @@ async function enviarUbicacion() {
   }
 }
 
-// Enviar la ubicación cada 5 minutos (300000 ms) sin recargar la página
-setInterval(enviarUbicacion, 300000);
+// Verifica el permiso de ubicación en localStorage y solicita permiso si no está guardado
+function verificarYEnviarUbicacion() {
+  const ubicacionPermitida = localStorage.getItem("ubicacionPermitida");
 
-// Envía la primera ubicación al cargar la página
-enviarUbicacion();
-
-
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js')
-    .then(() => console.log('Service Worker registrado en local'))
-    .catch(error => console.error('Error al registrar el Service Worker:', error));
+  if (ubicacionPermitida === "true") {
+    enviarUbicacion();
+    setInterval(enviarUbicacion, 300000); // Enviar la ubicación cada 5 minutos
+  } else {
+    // Solicita permisos de ubicación solo una vez
+    navigator.permissions.query({ name: "geolocation" }).then((result) => {
+      if (result.state === "granted") {
+        localStorage.setItem("ubicacionPermitida", "true");
+        enviarUbicacion();
+        setInterval(enviarUbicacion, 300000); // Enviar la ubicación cada 5 minutos
+      } else if (result.state === "prompt") {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            localStorage.setItem("ubicacionPermitida", "true");
+            enviarUbicacion();
+            setInterval(enviarUbicacion, 300000); // Enviar la ubicación cada 5 minutos
+          },
+          (error) => {
+            console.error("Permiso de ubicación denegado o fallido:", error);
+          }
+        );
+      }
+    });
+  }
 }
 
-
+// Llama a la función al cargar la página
+verificarYEnviarUbicacion();
 
 </script>
