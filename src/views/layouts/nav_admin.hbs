@@ -184,6 +184,24 @@
     .dark .hamburger {
       background-color: #37474f;
     }
+    @media (max-width: 1024px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    height: 100%;
+    transform: translateX(-100%);
+    z-index: 40;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .hamburger {
+    display: block;
+  }
+}
+
   </style>
 
 
