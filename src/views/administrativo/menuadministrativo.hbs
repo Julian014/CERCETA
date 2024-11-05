@@ -9,10 +9,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 
     <style>
-        body {
-            background-color: #f4f6f9;
-            font-family: Arial, sans-serif;
-        }
+
         
         .card {
             border: none;
@@ -66,11 +63,16 @@
             font-size: 0.8rem;
             font-weight: 600;
         }
+        .main-content{
+        background-color: #e3e6ea;
+    color: #333;
+        }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container mt-2">
         {{#if esGerente}}
+        <br>
         
         <!-- Sección de resumen de métricas -->
         <div class="row mb-4">
