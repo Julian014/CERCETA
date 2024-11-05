@@ -107,7 +107,7 @@
 <body>
     <div class="form-container">
         <h2>Agregar Usuario</h2>
-        <form action="/guardar_usuario" method="POST" autocomplete="off">
+<form action="/guardar_usuario" method="POST" autocomplete="off" onsubmit="validateForm(event)">
             <div class="form-group">
                 <label for="nombre"><i class="fas fa-user icon"></i> Nombre:</label>
                 <input type="text" id="nombre" name="nombre" required>
@@ -200,36 +200,75 @@
         }
     }
 
-   function toggleCargoField() {
-            const roleSelect = document.getElementById("role");
-            const cargoGroup = document.getElementById("cargo-group");
-            const edificioGroup = document.getElementById("edificio-group");
-            const apartamentoGroup = document.getElementById("apartamento-group");
+  function toggleCargoField() {
+        const roleSelect = document.getElementById("role");
+        const cargoGroup = document.getElementById("cargo-group");
+        const edificioGroup = document.getElementById("edificio-group");
+        const apartamentoGroup = document.getElementById("apartamento-group");
 
-            // Mostrar el campo de cargo si el rol es "admin"
-            if (roleSelect.value === "admin") {
-                cargoGroup.style.display = "flex";
-                edificioGroup.style.display = "none";
-                apartamentoGroup.style.display = "none";
-            } 
-            // Mostrar los campos de edificio y apartamento si el rol es "residentes"
-            else if (roleSelect.value === "residentes") {
-                cargoGroup.style.display = "none";
-                edificioGroup.style.display = "flex";
-                apartamentoGroup.style.display = "flex";
-            } 
-            // Ocultar todos los campos adicionales si no hay rol seleccionado
-            else {
-                cargoGroup.style.display = "none";
-                edificioGroup.style.display = "none";
-                apartamentoGroup.style.display = "none";
+        // Mostrar el campo de cargo si el rol es "admin"
+        if (roleSelect.value === "admin") {
+            cargoGroup.style.display = "flex";
+            edificioGroup.style.display = "none";
+            apartamentoGroup.style.display = "none";
+            
+            // Seleccionar automáticamente la opción "Operativo" y deshabilitarla
+            const operativoCheckbox = cargoGroup.querySelector('input[value="operativo"]');
+            if (operativoCheckbox) {
+                operativoCheckbox.checked = true;
+                operativoCheckbox.disabled = true; // Deshabilita la casilla
+            }
+        } 
+        // Mostrar los campos de edificio y apartamento si el rol es "residentes"
+        else if (roleSelect.value === "residentes") {
+            cargoGroup.style.display = "none";
+            edificioGroup.style.display = "flex";
+            apartamentoGroup.style.display = "flex";
+            
+            // Habilitar la casilla "Operativo" si se elige otro rol
+            const operativoCheckbox = cargoGroup.querySelector('input[value="operativo"]');
+            if (operativoCheckbox) {
+                operativoCheckbox.checked = false;
+                operativoCheckbox.disabled = false; // Habilita la casilla de nuevo
+            }
+        } 
+        // Ocultar todos los campos adicionales si no hay rol seleccionado
+        else {
+            cargoGroup.style.display = "none";
+            edificioGroup.style.display = "none";
+            apartamentoGroup.style.display = "none";
+            
+            // Habilitar la casilla "Operativo" si no hay rol seleccionado
+            const operativoCheckbox = cargoGroup.querySelector('input[value="operativo"]');
+            if (operativoCheckbox) {
+                operativoCheckbox.checked = false;
+                operativoCheckbox.disabled = false; // Habilita la casilla de nuevo
             }
         }
+    }
 
+    // Función para validar que se seleccione otro cargo adicional
+    function validateForm(event) {
+        const roleSelect = document.getElementById("role").value;
+        const cargoGroup = document.getElementById("cargo-group");
+        
+        if (roleSelect === "admin") {
+            const checkboxes = cargoGroup.querySelectorAll('input[type="checkbox"]:not([value="operativo"])');
+            let anotherChecked = false;
 
+            // Verificar si al menos otro checkbox está marcado
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    anotherChecked = true;
+                }
+            });
 
-
-
+            if (!anotherChecked) {
+                alert("Por favor, seleccione al menos otro cargo además de 'Operativo'.");
+                event.preventDefault(); // Evitar el envío del formulario
+            }
+        }
+    }
     </Script>
 </body>
 </html>

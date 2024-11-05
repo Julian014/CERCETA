@@ -1932,12 +1932,19 @@ app.post('/guardar_informe', upload.fields([
 
 
 
-
 app.post('/guardar_usuario', async (req, res) => {
     const { nombre, user_email, user_password, role, fecha_cumpleaños } = req.body;
-    const cargos = req.body['cargo[]'];
-    const edificio = req.body.edificio || null; // Obtener el edificio si existe
-    const apartamento = req.body.apartamento || null; // Obtener el apartamento si existe
+    let cargos = req.body['cargo[]'];
+    const edificio = req.body.edificio || null;
+    const apartamento = req.body.apartamento || null;
+
+    // Asegurarse de que cargos sea un array y añadir "Operativo" si el rol es admin
+    if (!Array.isArray(cargos)) {
+        cargos = cargos ? [cargos] : []; // Convierte en array si es una cadena o en un array vacío si es undefined
+    }
+    if (role === "admin" && !cargos.includes("operativo")) {
+        cargos.push("operativo");
+    }
 
     console.log("Cargos seleccionados:", cargos);
     console.log("Edificio:", edificio);
@@ -1951,7 +1958,7 @@ app.post('/guardar_usuario', async (req, res) => {
             res.send('<script>alert("El nombre de usuario o el correo ya están en uso. Por favor, elige otros."); window.location.href="/agregar_usuarios";</script>');
         } else {
             // Convertir los cargos seleccionados en una cadena separada por comas
-            const cargoString = cargos && cargos.length > 0 ? cargos.join(', ') : null;
+            const cargoString = cargos.length > 0 ? cargos.join(', ') : null;
 
             // Crear la consulta de inserción, incluyendo edificio y apartamento si el rol es "residente"
             const insertQuery = `
@@ -1978,7 +1985,6 @@ app.post('/guardar_usuario', async (req, res) => {
         res.send('<script>alert("Hubo un error al guardar el usuario."); window.location.href="/agregar_usuarios";</script>');
     }
 });
-
 
 
 
