@@ -9,12 +9,12 @@
     "id": "/login",  // Este campo es opcional pero puedes mantenerlo
     "icons": [
       {
-        "src": "/imagenes/logo pestaña.PNG",
+        "src": "imagenes/Recurso%1hdpi.png",
         "sizes": "192x192",
         "type": "image/png"
       },
       {
-        "src": "/imagenes/logo pestaña.PNG",
+        "src": "imagenes/Recurso%1hdpi.png",
         "sizes": "512x512",
         "type": "image/png"
       }

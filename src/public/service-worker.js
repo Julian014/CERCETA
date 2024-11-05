@@ -8,8 +8,8 @@ self.addEventListener('install', event => {
                 '/styles.css', // Archivo de estilos global
                 '/app.js', // Archivo de JavaScript global
                 '/manifest.json', // Archivo de manifest para PWA
-                '/imagenes/logo%20pestaña.PNG', // Asegúrate de que el espacio se codifique correctamente
-                '/imagenes/logo%20pestaña.PNG', // Asegúrate de que el espacio se codifique correctamente
+                'imagenes/Recurso 1hdpi.png', // Asegúrate de que el espacio se codifique correctamente
+                'imagenes/Recurso 1hdpi.png', // Asegúrate de que el espacio se codifique correctamente
             ]);
         })
     );

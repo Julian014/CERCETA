@@ -18,6 +18,33 @@
     z-index: -1;
    }
   </style>
+  <style>
+  .video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -1;
+  }
+
+/* Fuerza el ancho completo en pantallas pequeñas */
+.form-container {
+  width: 100%;
+  max-width: none; /* Elimina el límite de ancho en móviles */
+  padding: 1rem; /* Agrega algo de padding para mejorar el aspecto */
+}
+
+/* Ajustes para pantallas medianas y grandes */
+@media (min-width: 640px) {
+  .form-container {
+    max-width: 24rem; /* Límite de ancho solo en pantallas mayores */
+  }
+}
+
+</style>
+
  </head>
  <body class="relative">
   <video autoplay loop muted class="video-background">
@@ -32,52 +59,49 @@
     </span>
    </div>
   </header>
-  <div class="flex items-center justify-center min-h-screen px-4">
-   <div class="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg w-full max-w-md">
+ <div class="flex items-center justify-center min-h-screen px-4">
+  <div class="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg form-container">
     <div class="flex justify-center mb-4">
-     <img alt="Alianza Priority Logo" height="50" src="imagenes/LOGO FONODO BLANCO_Mesa de trabajo 1.png" width="100"/>
+      <img alt="Alianza Priority Logo" height="50" src="imagenes/LOGO FONODO BLANCO_Mesa de trabajo 1.png" width="100"/>
     </div>
-            <form action="/login" method="POST" class="form">
-     <div class="mb-4">
-      <label class="block text-sm font-bold mb-2" for="username">
-       CORREO
-      </label>
-      <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" name="email"/>
-     </div>
-     <div class="mb-4">
-      <label class="block text-sm font-bold mb-2" for="password" >
-       CONTRASEÑA
-      </label>
-      <div class="relative">
-       <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" name="password"/>
-       <div class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
-        <i class="fas fa-eye">
-        </i>
-       </div>
+    <form action="/login" method="POST" class="form">
+      <div class="mb-4">
+        <label class="block text-sm font-bold mb-2" for="username">
+          CORREO
+        </label>
+        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" name="email"/>
       </div>
-     </div>
-     <div class="mb-4">
-   
-     </div>
-     <div class="mb-4">
-     
-<button type="submit" class="bg-[#1E99D3] hover:bg-[#1A87BD] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
-    Entrar
-</button>
-
-     </div>
-     <div class="text-center">
-      <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
-       ¿Has olvidado la contraseña?
-      </a>
-      <br/>
-      <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
-       ¿Necesitas ayuda?
-      </a>
-     </div>
+      <div class="mb-4">
+        <label class="block text-sm font-bold mb-2" for="password">
+          CONTRASEÑA
+        </label>
+        <div class="relative">
+          <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" name="password"/>
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+            <i class="fas fa-eye"></i>
+          </div>
+        </div>
+      </div>
+      <div class="mb-4">
+        <button type="submit" class="bg-[#1E99D3] hover:bg-[#1A87BD] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
+          Entrar
+        </button>
+      </div>
+      <div class="text-center">
+        <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
+          ¿Has olvidado la contraseña?
+        </a>
+        <br/>
+        <a class="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800" href="#">
+          ¿Necesitas ayuda?
+        </a>
+      </div>
     </form>
-   </div>
   </div>
+</div>
+
+
+
   <div class="fixed bottom-4 right-4 flex space-x-4">
    <a class="bg-blue-500 text-white p-3 rounded-full shadow-lg" href="#">
     <i class="fab fa-whatsapp">
