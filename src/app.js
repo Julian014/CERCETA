@@ -3482,9 +3482,10 @@ app.post('/guardarBitacora', upload.single('contenidoPng'), async (req, res) => 
     }
 });
 
+app.get('/', (req, res) => {
+    res.redirect('/login');
+});
 
-
-// Iniciar el servidor
-app.listen(3000, () => {
+app.listen(2000, () => {
     console.log('Servidor corriendo en el puerto 3000');
 });
