@@ -1,348 +1,263 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CERCETA</title>
+    <title>CERCETA Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.css" rel="stylesheet">
-</head>
-<style>
-    /* Global and Variable Styles */
-    :root {
-        --bg-dark: #2d2d2d;
-        --bg-darker: white;
-        --primary-color: #2e9ed5;
-        --text-light: #f5f5f5;
-        --text-muted: #b0b0b0;
-        --accent-color: #1E99D3;
-        --sidebar-width: 250px;
-    }
-    * {
-        font-family: 'sensation', sans-serif;
-        font-weight: bold;
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    body {
-        background-color: #d6cec3;
-        color: var(--text-light);
-    }
-    .container {
-        display: flex;
-        flex-direction: column;
-    }
-    .main-content {
-        width: calc(100% - var(--sidebar-width));
-        padding: 20px;
-        transition: width 0.3s ease;
-    }
-    .top-navbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px;
-        background-color: #C92458;
-        border-radius: 10px;
-        color: white;
-        font-size: 25px;
-    }
-    .dashboard-content {
-        display: flex;
-        flex-direction: column;
-    }
-    .grid-container {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        grid-gap: 20px;
-    }
-    .card {
-        background-color: var(--bg-dark);
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
-    h2 {
-        font-size: 2rem;
-    }
-    p {
-        font-size: 1rem;
-        color: var(--text-muted);
-    }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        body {
+    background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        .main-content{
+    background: linear-gradient(135deg, #f0f4f8, #d9e2ec);
 
-    /* Responsive Styles */
-    @media (max-width: 768px) {
-        .top-navbar {
-            flex-direction: column;
-            text-align: center;
+
         }
-        .grid-container {
-            grid-template-columns: 1fr;
-        }
-        .main-content {
-            width: 100%;
-        }
-    }
-    @media (max-width: 480px) {
-        .top-navbar {
-            font-size: 20px;
-            padding: 10px;
-        }
-        h2 {
-            font-size: 1.5rem;
+        .container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 1rem;
         }
         .card {
-            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        .card.welcome {
+            background: linear-gradient(135deg, #0a6ef7, #7CB646);
+            color: #fff;
+            text-align: center;
+            padding: 3rem;
+            border-radius: 10px;
+        }
+        .card h2 {
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        .stat {
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            padding: 1.2rem;
+            border-left: 5px solid #1E99D3;
+            border-radius: 8px;
         }
         .stat-icon {
-            font-size: 30px;
-        .toggle-menu-btn {
-            font-size: 20px;
+            font-size: 2rem;
+            color: #1E99D3;
+            margin-right: 1rem;
         }
-    }
-</style>
+        .card-title {
+            color: #1E99D3;
+            font-weight: 600;
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+        #map-container {
+            height: 300px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+            cursor: pointer;
+        }
+        .list-group-item {
+            border: none;
+            font-size: 0.9rem;
+            padding: 0.75rem 1.2rem;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+        .list-group-item:hover {
+            background-color: #f7faff;
+        }
+        .list-group-item span.badge {
+            background-color: #ff7d4d;
+            color: white;
+        }
+        .btn-custom {
+            background-color: #1E99D3;
+            color: #fff;
+            padding: 0.5rem 1.25rem;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+        .btn-custom:hover {
+            background-color: #005bb5;
+        }
+    </style>
+</head>
 
 <body>
     <div class="container">
         <section class="main-content">
- 
-
-            <div class="dashboard-content">
-                <div class="card welcome">
-                    <h2>BIENVENIDO</h2>
-                    <p>{{name}}</p>
+            {{#if esGerente}}
+                <div class="dashboard-content">
+                    <div class="card welcome">
+                        <h2>BIENVENIDO</h2>
+                        <p>{{name}}</p>
+                    </div>
+                    <div class="grid-container">
+                        <div class="card stat">
+                            <i class="fas fa-city stat-icon"></i>
+                            <div>
+                                <h3>{{totaledificios}}</h3>
+                                <p>EDIFICIOS</p>
+                            </div>
+                        </div>
+                        <div class="card stat">
+                            <i class="fas fa-building stat-icon"></i>
+                            <div>
+                                <h3>{{totalApartamentos}}</h3>
+                                <p>APARTAMENTOS</p>
+                            </div>
+                        </div>
+                        <div class="card stat">
+                            <i class="fas fa-users stat-icon"></i>
+                            <div>
+                                <h3>{{residentes}}</h3>
+                                <p>RESIDENTES</p>
+                            </div>
+                        </div>
+                        <div class="card stat">
+                            <i class="fas fa-user-friends stat-icon"></i>
+                            <div>
+                                <h3>{{totalEmpleados}}</h3>
+                                <p>EMPLEADOS</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h3 class="card-title">Últimos Pagos</h3>
+                                    <ul class="list-group">
+                                        {{#each ultimosPagos}}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span>Apartamento: {{apartamento_id}}</span>
+                                            <span>{{formatDate fecha_pago}} - ${{valor_pago}}</span>
+                                        </li>
+                                        {{/each}}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h3 class="card-title">Pagos Mensuales por Edificio</h3>
+                                    <canvas id="pagosChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h3 class="card-title">Últimas alertas</h3>
+                                    <ul class="list-group">
+                                        {{#each alertas}}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span>{{nombre_actividad}}</span>
+                                            <span class="badge badge-primary">{{formatDate fecha_ejecucion}}</span>
+                                        </li>
+                                        {{/each}}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="grid-container">
-                    <div class="card stat">
-                        <i class="fas fa-city stat-icon"></i>
-                        <div>
-                            <h3 id="edificios-count">Cargando...</h3>
-                            <p>EDIFICIOS</p>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h3 class="card-title">Ubicaciones</h3>
+                        <div id="map-container">
+                            <div id="map" onclick="window.location.href='/ver_ubicaciones';"></div>
                         </div>
-                    </div>
-                    <div class="card stat">
-                        <i class="fas fa-building stat-icon"></i>
-                        <div>
-                            <h3 id="apartamentos-count">Cargando...</h3>
-                            <p>APARTAMENTOS</p>
-                        </div>
-                    </div>
-                    <div class="card stat">
-                        <i class="fas fa-users stat-icon"></i>
-                        <div>
-                            <h3>5,245</h3>
-                            <p>Users</p>
-                        </div>
-                    </div>
-                    <div class="card chart-container">
-                        <canvas id="barChart"></canvas>
-                    </div>
-                    <div class="card chart-container">
-                        <canvas id="lineChart"></canvas>
                     </div>
                 </div>
-            </div>
+                <div class="text-center mt-4">
+                    <button class="btn btn-custom">Ver Más Detalles</button>
+                </div>
+            {{/if}}
         </section>
     </div>
 
-    <!-- Chart.js library -->
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"></script>
     <script>
-        const barCtx = document.getElementById('barChart').getContext('2d');
-        new Chart(barCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-                datasets: [{
-                    label: 'Data Set 1',
-                    data: [45, 25, 50, 30, 55, 25, 45, 20],
-                    backgroundColor: '#1E99D3',
-                }, {
-                    label: 'Data Set 2',
-                    data: [20, 40, 30, 45, 25, 35, 20, 50],
-backgroundColor: '#7CB646',
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+        $(document).ready(function() {
+            const datosGrafico = {{{datosGrafico}}};
+            const labels = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            const datasets = Object.keys(datosGrafico).map(nombreEdificio => ({
+                label: nombreEdificio,
+                data: datosGrafico[nombreEdificio],
+                backgroundColor: 'rgba(10, 110, 247, 0.2)',
+                borderColor: 'rgba(10, 110, 247, 1)',
+                borderWidth: 1
+            }));
 
-
-    <!-- Include Chart.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"></script>
-    <script>
-        // Bar Chart
-        const barCtx = document.getElementById('barChart').getContext('2d');
-        new Chart(barCtx, {
-            type: 'bar',
-            data: {
-                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August'],
-                datasets: [{
-                    label: 'Data Set 1',
-                    data: [45, 25, 50, 30, 55, 25, 45, 20],
-                    backgroundColor: '#1E99D3',
-                }, {
-                    label: 'Data Set 2',
-                    data: [20, 40, 30, 45, 25, 35, 20, 50],
-backgroundColor: '#7CB646',
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
+            const ctx = document.getElementById('pagosChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
                     }
                 }
-            }
-        });
-
-        // Line Chart
-        const lineCtx = document.getElementById('lineChart').getContext('2d');
-        new Chart(lineCtx, {
-            type: 'line',
-            data: {
-                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August'],
-                datasets: [{
-                    label: 'Data Set 1',
-                    data: [10, 20, 15, 30, 25, 20, 30, 35],
-                    borderColor: '#1E99D3',
-                    fill: false,
-                    tension: 0.1
-                }, {
-                    label: 'Data Set 2',
-                    data: [15, 25, 20, 35, 30, 25, 40, 45],
-                    borderColor: '#7CB646',
-                    fill: false,
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Toggle profile dropdown menu
-        document.getElementById('profile-icon').addEventListener('click', function () {
-            var dropdown = document.getElementById('dropdown-menu');
-            dropdown.classList.toggle('show');
-        });
-
-        // Close dropdown if clicked outside
-        window.onclick = function (event) {
-            if (!event.target.matches('#profile-icon')) {
-                var dropdowns = document.getElementsByClassName("dropdown-menu");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
-                    }
-                }
-            }
-        }
-        
-
-
-// Toggle submenu visibility
-const menuItems = document.querySelectorAll('.menu-item');
-
-menuItems.forEach(item => {
-    item.addEventListener('click', function () {
-        // Remove active class from all menu items and hide all submenus
-        menuItems.forEach(i => {
-            const submenu = i.querySelector('.submenu');
-            if (submenu && submenu !== this.querySelector('.submenu')) {
-                submenu.classList.remove('show');
-                submenu.style.maxHeight = null;
-            }
-            i.classList.remove('active');
-        });
-
-        // Add active class to the clicked menu item
-        this.classList.add('active');
-
-        // Show or hide the submenu of the clicked item
-        const submenu = this.querySelector('.submenu');
-        if (submenu) {
-            submenu.classList.toggle('show');
-            submenu.style.maxHeight = submenu.classList.contains('show') ? submenu.scrollHeight + "px" : null;
-        }
-    });
-});
-        // Handle submenu item selection
-        const submenuItems = document.querySelectorAll('.submenu li');
-
-        submenuItems.forEach(subitem => {
-            subitem.addEventListener('click', function (e) {
-                e.stopPropagation();  // Prevent click from closing the submenu
-
-                // Remove active class from all submenu items
-                submenuItems.forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
             });
         });
-        // Toggle sidebar visibility
-document.getElementById('toggle-menu').addEventListener('click', function () {
-    const sidebar = document.querySelector('.sidebar');
-    const mainContent = document.querySelector('.main-content');
 
-    // Toggle visibility of the sidebar
-    sidebar.classList.toggle('hidden-sidebar');
+        document.addEventListener("DOMContentLoaded", function () {
+            const map = L.map('map').setView([4.7110, -74.0721], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
 
-    // Adjust the main content width accordingly
-    if (sidebar.classList.contains('hidden-sidebar')) {
-        mainContent.classList.add('expanded-content');
-    } else {
-        mainContent.classList.remove('expanded-content');
-    }
-});
-document.addEventListener("DOMContentLoaded", function () {
-    // Fetch the edificios count from the API
-fetch('/api/edificios-count')
-    .then(response => response.json())
-    .then(data => {
-        console.log('Edificios count:', data); // Log data here
-        document.getElementById('edificios-count').innerText = data.count;
-    })
-    .catch(error => console.error('Error fetching edificios count:', error));
-
-});
-
-// Consolidate the DOMContentLoaded events to ensure data loads correctl
-document.addEventListener("DOMContentLoaded", function () {
-    fetch('/api/edificios-count')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('edificios-count').innerText = data.count;
-        })
-        .catch(error => console.error('Error fetching edificios count:', error));
-
-    fetch('/api/apartamentos-count')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('apartamentos-count').innerText = data.count;
-        })
-        .catch(error => console.error('Error fetching apartamentos count:', error));
-});
-
-
-
-
-
+            L.marker([4.7110, -74.0721]).addTo(map)
+                .bindPopup('Realiza seguimiento')
+                .openPopup();
+        });
     </script>
 </body>
 </html>

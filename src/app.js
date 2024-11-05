@@ -3492,6 +3492,6 @@ app.get('/', (req, res) => {
     res.redirect('/login');
 });
 
-app.listen(2000, () => {
+app.listen(3000, () => {
     console.log('Servidor corriendo en el puerto 3000');
 });
