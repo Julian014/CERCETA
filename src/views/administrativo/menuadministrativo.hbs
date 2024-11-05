@@ -1,10 +1,11 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
+
+
+
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CERCETA Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.css" rel="stylesheet">
@@ -110,60 +111,95 @@
         .btn-custom:hover {
             background-color: #005bb5;
         }
-    </style>
-</head>
+     .calculator-image {
+    position: relative;
+    width: 181px;
+    height: 125px;
+    transform: translate(887px, 290px);
+    left: 16px;
+    top: -266px;
+    transition: transform 0.3s ease;
+}
 
-<body>
+/* Media query for larger screens (desktop) */
+@media (min-width: 1200px) {
+    .calculator-image {
+        transform: translate(887px, 290px);
+    }
+}
+
+/* Media query for medium screens (tablets) */
+@media (max-width: 1199px) {
+    .calculator-image {
+        transform: translate(400px, 150px);
+        width: 150px;
+        height: 100px;
+    }
+}
+
+/* Media query for small screens (mobile) */
+@media (max-width: 768px) {
+    .calculator-image {
+        transform: translate(0, 0);
+        width: 120px;
+        height: 80px;
+        right: 20%;
+        top: 0;
+        margin: 20px auto;
+        display: block;
+    }
+}
+
+
+    </style>
+
+
+
     <div class="container">
         <section class="main-content">
-            {{#if esGerente}}
-                <div class="dashboard-content">
+            
+                <div class="dashboard-content" style="">
                     <div class="card welcome">
-                        <h2>BIENVENIDO</h2>
-                        <p>{{name}}</p>
+                        <h2>CERCETA SOLUCIONES ADMINISTRATIVAS</h2>
+                        <p>carlos</p>
                     </div>
                     <div class="grid-container">
                         <div class="card stat">
                             <i class="fas fa-city stat-icon"></i>
                             <div>
-                                <h3>{{totaledificios}}</h3>
+                                <h3>2</h3>
                                 <p>EDIFICIOS</p>
                             </div>
                         </div>
                         <div class="card stat">
                             <i class="fas fa-building stat-icon"></i>
                             <div>
-                                <h3>{{totalApartamentos}}</h3>
+                                <h3>3</h3>
                                 <p>APARTAMENTOS</p>
                             </div>
                         </div>
                         <div class="card stat">
                             <i class="fas fa-users stat-icon"></i>
                             <div>
-                                <h3>{{residentes}}</h3>
+                                <h3>1</h3>
                                 <p>RESIDENTES</p>
                             </div>
                         </div>
                         <div class="card stat">
                             <i class="fas fa-user-friends stat-icon"></i>
                             <div>
-                                <h3>{{totalEmpleados}}</h3>
+                                <h3>3</h3>
                                 <p>EMPLEADOS</p>
                             </div>
                         </div>
                     </div>
+<img src="svg/Calculator.svg" alt="" class="calculator-image">
                     <div class="row">
                         <div class="col-md-4">
                             <div class="card mb-3">
                                 <div class="card-body">
                                     <h3 class="card-title">Últimos Pagos</h3>
                                     <ul class="list-group">
-                                        {{#each ultimosPagos}}
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span>Apartamento: {{apartamento_id}}</span>
-                                            <span>{{formatDate fecha_pago}} - ${{valor_pago}}</span>
-                                        </li>
-                                        {{/each}}
                                     </ul>
                                 </div>
                             </div>
@@ -172,7 +208,7 @@
                             <div class="card mb-3">
                                 <div class="card-body">
                                     <h3 class="card-title">Pagos Mensuales por Edificio</h3>
-                                    <canvas id="pagosChart"></canvas>
+                                    <canvas id="pagosChart" width="1020" height="510" style="display: block; box-sizing: border-box; height: 255px; width: 510px;"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -181,12 +217,6 @@
                                 <div class="card-body">
                                     <h3 class="card-title">Últimas alertas</h3>
                                     <ul class="list-group">
-                                        {{#each alertas}}
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <span>{{nombre_actividad}}</span>
-                                            <span class="badge badge-primary">{{formatDate fecha_ejecucion}}</span>
-                                        </li>
-                                        {{/each}}
                                     </ul>
                                 </div>
                             </div>
@@ -194,27 +224,25 @@
                     </div>
                 </div>
                 <div class="card mb-3">
-                    <div class="card-body">
-                        <h3 class="card-title">Ubicaciones</h3>
-                        <div id="map-container">
-                            <div id="map" onclick="window.location.href='/ver_ubicaciones';"></div>
-                        </div>
-                    </div>
+                <div class="card-body">
+    <h3 class="card-title">Ubicaciones</h3>
+    <div id="map-container">
+        <div id="map" onclick="window.location.href='/ver_ubicaciones';" class="leaflet-container leaflet-touch leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" tabindex="0" style="position: relative;"><div class="leaflet-pane leaflet-map-pane" style="transform: translate3d(-258px, 0px, 0px);"><div class="leaflet-pane leaflet-tile-pane"><div class="leaflet-layer " style="z-index: 1; opacity: 1;"><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 18; transform: translate3d(0px, 0px, 0px) scale(1);"><img alt="" role="presentation" src="https://a.tile.openstreetmap.org/12/1205/1993.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(456px, -193px, 0px); opacity: 1;"><img alt="" role="presentation" src="https://b.tile.openstreetmap.org/12/1205/1994.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(456px, 63px, 0px); opacity: 1;"><img alt="" role="presentation" src="https://c.tile.openstreetmap.org/12/1204/1993.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(200px, -193px, 0px); opacity: 1;"><img alt="" role="presentation" src="https://b.tile.openstreetmap.org/12/1206/1993.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(712px, -193px, 0px); opacity: 1;"><img alt="" role="presentation" src="https://a.tile.openstreetmap.org/12/1204/1994.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(200px, 63px, 0px); opacity: 1;"><img alt="" role="presentation" src="https://c.tile.openstreetmap.org/12/1206/1994.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(712px, 63px, 0px); opacity: 1;"><img alt="" role="presentation" src="https://b.tile.openstreetmap.org/12/1203/1993.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-56px, -193px, 0px); opacity: 1;"><img alt="" role="presentation" src="https://c.tile.openstreetmap.org/12/1207/1993.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(968px, -193px, 0px); opacity: 1;"><img alt="" role="presentation" src="https://c.tile.openstreetmap.org/12/1203/1994.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-56px, 63px, 0px); opacity: 1;"><img alt="" role="presentation" src="https://a.tile.openstreetmap.org/12/1207/1994.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(968px, 63px, 0px); opacity: 1;"></div></div></div><div class="leaflet-pane leaflet-shadow-pane"><img src="https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png" class="leaflet-marker-shadow leaflet-zoom-animated" alt="" style="margin-left: -12px; margin-top: -41px; width: 41px; height: 41px; transform: translate3d(513px, 150px, 0px);"></div><div class="leaflet-pane leaflet-overlay-pane"></div><div class="leaflet-pane leaflet-marker-pane"><img src="https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png" class="leaflet-marker-icon leaflet-zoom-animated leaflet-interactive" alt="" tabindex="0" style="margin-left: -12px; margin-top: -41px; width: 25px; height: 41px; transform: translate3d(513px, 150px, 0px); z-index: 150;"></div><div class="leaflet-pane leaflet-tooltip-pane"></div><div class="leaflet-pane leaflet-popup-pane"><div class="leaflet-popup  leaflet-zoom-animated" style="opacity: 1; transform: translate3d(514px, 116px, 0px); bottom: -7px; left: -73px;"><div class="leaflet-popup-content-wrapper"><div class="leaflet-popup-content" style="width: 105px;">Realiza seguimiento</div></div><div class="leaflet-popup-tip-container"><div class="leaflet-popup-tip"></div></div><a class="leaflet-popup-close-button" href="#close">×</a></div></div><div class="leaflet-proxy leaflet-zoom-animated" style="transform: translate3d(308537px, 510551px, 0px) scale(2048);"></div></div><div class="leaflet-control-container"><div class="leaflet-top leaflet-left"><div class="leaflet-control-zoom leaflet-bar leaflet-control"><a class="leaflet-control-zoom-in" href="#" title="Zoom in" role="button" aria-label="Zoom in">+</a><a class="leaflet-control-zoom-out" href="#" title="Zoom out" role="button" aria-label="Zoom out">−</a></div></div><div class="leaflet-top leaflet-right"></div><div class="leaflet-bottom leaflet-left"></div><div class="leaflet-bottom leaflet-right"><div class="leaflet-control-attribution leaflet-control"><a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> | © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</div></div></div></div>
+    </div>
+</div>
                 </div>
-                <div class="text-center mt-4">
-                    <button class="btn btn-custom">Ver Más Detalles</button>
-                </div>
-            {{/if}}
+             
         </section>
     </div>
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"></script>
     <script>
         $(document).ready(function() {
-            const datosGrafico = {{{datosGrafico}}};
+            const datosGrafico = {};
             const labels = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
             const datasets = Object.keys(datosGrafico).map(nombreEdificio => ({
                 label: nombreEdificio,
@@ -247,17 +275,294 @@
             });
         });
 
-        document.addEventListener("DOMContentLoaded", function () {
-            const map = L.map('map').setView([4.7110, -74.0721], 12);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 18,
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+     document.addEventListener("DOMContentLoaded", function () {
+        // Initialize the map
+        const map = L.map('map').setView([4.7110, -74.0721], 12); // Centered on Bogotá, Colombia
 
-            L.marker([4.7110, -74.0721]).addTo(map)
-                .bindPopup('Realiza seguimiento')
-                .openPopup();
-        });
+        // Set up the OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Add a marker with a popup
+        L.marker([4.7110, -74.0721]).addTo(map)
+            .bindPopup('Realiza seguimiento')
+            .openPopup();
+    });
     </script>
-</body>
-</html>
+
+
+
+</div>
+
+    </div>
+  </div>
+
+
+
+
+
+
+<script>
+// Function to toggle the notification popup
+function toggleNotificationPopup() {
+    const popup = document.getElementById('notificationPopup');
+    popup.classList.toggle('hidden'); // Solo mostrar o esconder el popup al hacer clic
+
+    // Si el popup está visible, agregamos un event listener para hacer clic fuera de él
+    if (!popup.classList.contains('hidden')) {
+        document.addEventListener('click', closePopupOnClickOutside);
+    } else {
+        document.removeEventListener('click', closePopupOnClickOutside);
+    }
+}
+
+// Function to close the popup when clicking outside
+function closePopupOnClickOutside(event) {
+    const popup = document.getElementById('notificationPopup');
+    const bell = document.getElementById('notificationBell');
+    
+    // Verificar si el clic ocurrió fuera del popup y de la campana de notificaciones
+    if (!popup.contains(event.target) && event.target !== bell) {
+        popup.classList.add('hidden'); // Ocultar el popup
+        document.removeEventListener('click', closePopupOnClickOutside); // Remover el listener
+    }
+}
+
+
+// Variable to control notification sound interval
+let notificationSoundInterval;
+let isUserInteracted = false;
+
+// Detect user interaction to allow sound playback
+window.addEventListener('click', () => {
+    isUserInteracted = true;
+});
+
+// Function to play the notification sound
+function playNotificationSound() {
+    const audio = new Audio('sonidos/level-up-2-199574.mp3');
+    audio.play().catch(error => console.error("Error al reproducir sonido:", error));
+}
+
+// Function to start sound at 5-second intervals
+function startNotificationSound() {
+    if (isUserInteracted) {
+        playNotificationSound();
+        notificationSoundInterval = setInterval(playNotificationSound, 5000);
+    }
+}
+
+// Function to stop sound when notifications are marked as read
+// Function to stop sound when notifications are marked as read
+function stopNotificationSound() {
+    if (notificationSoundInterval) {
+        clearInterval(notificationSoundInterval);
+        notificationSoundInterval = null; // Reiniciar el intervalo
+    }
+}
+
+async function loadNotifications() {
+    try {
+        const response = await fetch('/notificaciones');
+        const data = await response.json();
+        
+        const notificationCount = data.notificaciones.length;
+        const notificationBadge = document.getElementById('notificationCount');
+        const notificationList = document.getElementById('notificationList');
+
+        // Actualiza el conteo de notificaciones
+        if (notificationCount > 0) {
+            notificationBadge.classList.remove('hidden');
+            notificationBadge.textContent = notificationCount;
+            notificationList.innerHTML = '';
+
+            // Llena la lista de notificaciones
+            data.notificaciones.forEach(notificacion => {
+                const listItem = document.createElement('li');
+                listItem.className = notificacion.leido ? 'bg-gray-200 p-2 rounded-lg' : 'bg-blue-100 p-2 rounded-lg font-bold';
+                
+                listItem.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span>${notificacion.actividad}</span>
+                        <span class="text-xs text-gray-500">${new Date(notificacion.fecha).toLocaleString()}</span>
+                    </div>
+                `;
+                notificationList.appendChild(listItem);
+            });
+
+        } else {
+            notificationBadge.classList.add('hidden');
+            notificationList.innerHTML = '<li class="text-center text-gray-500">No hay notificaciones nuevas</li>';
+        }
+    } catch (error) {
+        console.error("Error al cargar notificaciones:", error);
+    }
+}
+
+
+function markNotificationsAsRead(userId) {
+    const notificationBadge = document.getElementById('notificationCount');
+    const notificationList = document.getElementById('notificationList');
+    const popup = document.getElementById('notificationPopup');
+
+    // Ocultar la notificación visualmente
+    notificationBadge.classList.add('hidden');
+    notificationBadge.textContent = '0';
+    notificationList.innerHTML = '<li>No hay notificaciones nuevas</li>';
+    popup.classList.add('hidden'); // Ocultar el popup después de marcar como leídas
+
+    // Verificar si el userId está definidotoggleNotificationPopup
+    if (!userId) {
+        console.error('El user_id no está definido.');
+        return;
+    }
+
+    // Llamar a la API para marcar como leídas
+    fetch(`/marcarNotificacionesComoLeidas/${userId}`, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log("Notificaciones marcadas como leídas:", data);
+            } else {
+                console.error("No se pudo marcar como leído:", data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error al marcar notificaciones como leídas:", error);
+        });
+}
+
+
+
+// Cargar las notificaciones automáticamente al cargar la página y cada 30 segundos
+window.onload = function() {
+    loadNotifications(); // Cargar notificaciones automáticamente al cargar la página
+    setInterval(loadNotifications, 30000); // Cargar notificaciones cada 30 segundos
+};
+
+// Hamburger menu toggle
+const hamburger = document.getElementById('hamburger-menu');
+const sidebar = document.getElementById('sidebar');
+
+hamburger.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+});
+
+// Theme toggle logic
+const themeToggle = document.getElementById('theme-toggle');
+const htmlElement = document.documentElement;
+
+themeToggle.addEventListener('click', () => {
+    htmlElement.classList.toggle('dark');
+    if (htmlElement.classList.contains('dark')) {
+        localStorage.setItem('theme', 'dark');
+    } else {
+        localStorage.setItem('theme', 'light');
+    }
+});
+
+// Load theme from localStorage
+const storedTheme = localStorage.getItem('theme');
+if (storedTheme === 'dark') {
+    htmlElement.classList.add('dark');
+}
+
+// Mark the active link in the sidebar
+const currentPath = window.location.pathname;
+const menuLinks = document.querySelectorAll('.sidebar ul li a');
+
+menuLinks.forEach(link => {
+    if (link.dataset.link === currentPath) {
+        link.classList.add('active');
+    }
+});
+
+// Submenu toggle
+function toggleSubmenu(id) {
+    const submenu = document.getElementById(id);
+    submenu.classList.toggle('hidden');
+}
+
+
+</script>
+
+<script>
+
+</script>
+<script>
+  const nombre = "carlos";
+</script>
+
+<script>
+// Función para enviar la ubicación actual al servidor
+// Función para enviar la ubicación actual al servidor
+// Función para enviar la ubicación actual al servidor
+async function enviarUbicacion() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const { latitude, longitude } = position.coords;
+
+      try {
+        // Envía la ubicación al servidor
+        const response = await fetch('/guardarUbicacion', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ nombre, latitud: latitude, longitud: longitude })
+        });
+
+        // Verifica si la respuesta es correcta
+        if (!response.ok) {
+          throw new Error("Error al enviar ubicación");
+        }
+      } catch (error) {
+        console.error("Error al enviar ubicación:", error);
+      }
+    },
+    (error) => {
+      console.error("Error al obtener ubicación:", error);
+    },
+    { enableHighAccuracy: true } // Habilita mayor precisión
+    );
+  } else {
+    console.error("La geolocalización no está soportada en este navegador.");
+  }
+}
+
+// Verifica el permiso de ubicación en localStorage y solicita permiso si no está guardado
+function verificarYEnviarUbicacion() {
+  const ubicacionPermitida = localStorage.getItem("ubicacionPermitida");
+
+  if (ubicacionPermitida === "true") {
+    enviarUbicacion();
+    setInterval(enviarUbicacion, 300000); // Enviar la ubicación cada 5 minutos
+  } else {
+    // Solicita permisos de ubicación solo una vez
+    navigator.permissions.query({ name: "geolocation" }).then((result) => {
+      if (result.state === "granted") {
+        localStorage.setItem("ubicacionPermitida", "true");
+        enviarUbicacion();
+        setInterval(enviarUbicacion, 300000); // Enviar la ubicación cada 5 minutos
+      } else if (result.state === "prompt") {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            localStorage.setItem("ubicacionPermitida", "true");
+            enviarUbicacion();
+            setInterval(enviarUbicacion, 300000); // Enviar la ubicación cada 5 minutos
+          },
+          (error) => {
+            console.error("Permiso de ubicación denegado o fallido:", error);
+          }
+        );
+      }
+    });
+  }
+}
+
+// Llama a la función al cargar la página
+verificarYEnviarUbicacion();
+
+</script>
