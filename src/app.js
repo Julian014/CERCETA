@@ -380,7 +380,6 @@ const multer = require('multer');
 // Configuración de multer para manejar la subida de archivos
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-
 app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
     const {
         fechaincio,
@@ -417,11 +416,8 @@ app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
         miembro_comite3_correo
     } = req.body;
 
-    if (!req.file) {
-        return res.status(400).json({ error: 'No se ha subido ninguna foto' });
-    }
-
-    const foto = req.file.buffer;
+    // Si no hay archivo, foto será null
+    const foto = req.file ? req.file.buffer : null;
 
     const sql = `INSERT INTO edificios (
         fechaincio, nombre, nit, cedula_representante_legal, nombre_representante_legal,
