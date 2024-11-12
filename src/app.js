@@ -413,7 +413,15 @@ app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
         miembro_comite3_nombre,
         miembro_comite3_cedula,
         miembro_comite3_celular,
-        miembro_comite3_correo
+        miembro_comite3_correo,
+        miembro_comite4_nombre,
+        miembro_comite4_cedula,
+        miembro_comite4_celular,
+        miembro_comite4_correo,
+        miembro_comite5_nombre,
+        miembro_comite5_cedula,
+        miembro_comite5_celular,
+        miembro_comite5_correo
     } = req.body;
 
     // Si no hay archivo, foto será null
@@ -428,8 +436,16 @@ app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
         miembro_comite1_nombre, miembro_comite1_cedula, miembro_comite1_celular, miembro_comite1_correo,
         miembro_comite2_nombre, miembro_comite2_cedula, miembro_comite2_celular, miembro_comite2_correo,
         miembro_comite3_nombre, miembro_comite3_cedula, miembro_comite3_celular, miembro_comite3_correo,
+           miembro_comite4_nombre,
+        miembro_comite4_cedula,
+        miembro_comite4_celular,
+        miembro_comite4_correo,
+        miembro_comite5_nombre,
+        miembro_comite5_cedula,
+        miembro_comite5_celular,
+        miembro_comite5_correo,
         foto
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,?,?,?)`;
 
     const values = [
         fechaincio, nombre, nit, cedula_representante_legal, nombre_representante_legal,
@@ -440,6 +456,14 @@ app.post('/agregar-edificio', upload.single('foto'), async (req, res) => {
         miembro_comite1_nombre, miembro_comite1_cedula, miembro_comite1_celular, miembro_comite1_correo,
         miembro_comite2_nombre, miembro_comite2_cedula, miembro_comite2_celular, miembro_comite2_correo,
         miembro_comite3_nombre, miembro_comite3_cedula, miembro_comite3_celular, miembro_comite3_correo,
+        miembro_comite4_nombre,
+        miembro_comite4_cedula,
+        miembro_comite4_celular,
+        miembro_comite4_correo,
+        miembro_comite5_nombre,
+        miembro_comite5_cedula,
+        miembro_comite5_celular,
+        miembro_comite5_correo,
         foto
     ];
 
