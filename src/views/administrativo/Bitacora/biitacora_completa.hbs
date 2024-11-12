@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe de Bitácora Completa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h2 {
+            color: #4a90e2;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Estilo para el formulario */
+        form {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        form label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        form select, form input[type="date"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+            outline-color: #4a90e2;
+        }
+
+        /* Estilos para el botón */
+        button[type="submit"], button#downloadBtn {
+            background-color: #4a90e2;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button[type="submit"]:hover, button#downloadBtn:hover {
+            background-color: #357abd;
+        }
+
+        /* Sección de imágenes */
+        #bitacoraImages {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #bitacoraImages img {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        /* Espaciado entre botones */
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Informe de Bitácora Completa</h2>
+
+    <!-- Formulario de búsqueda -->
+    <form action="/Crear_bitacora_completa" method="post">
+        <label for="tipo_mantenimiento">Tipo de Mantenimiento:</label>
+        <select name="tipo_mantenimiento" id="tipo_mantenimiento" required>
+            <option value="">Seleccione un tipo</option>
+            <option value="todos">Todos</option>
+            {{#each tiposMantenimiento}}
+                <option value="{{this}}">{{this}}</option>
+            {{/each}}
+        </select>
+
+        <label for="fecha_inicio">Fecha de Inicio:</label>
+        <input type="date" name="fecha_inicio" id="fecha_inicio" required>
+
+        <label for="fecha_fin">Fecha de Fin:</label>
+        <input type="date" name="fecha_fin" id="fecha_fin" required>
+
+        <button type="submit">Generar Informe</button>
+    </form>
+
+    <!-- Sección de imágenes -->
+    <div id="bitacoraImages">
+        {{#each mantenimientos}}
+            {{#if this.contenido_png}}
+                <img src="data:image/png;base64,{{this.contenido_png}}" alt="Imagen de Mantenimiento">
+            {{else}}
+                <p>Sin imagen disponible</p>
+            {{/if}}
+        {{/each}}
+    </div>
+
+    <!-- Botón para descargar el PDF -->
+    <div class="buttons-container">
+        <button id="downloadBtn" onclick="generatePDF()">Descargar PDF</button>
+    </div>
+
+    <script>
+        async function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+
+            // Seleccionar todas las imágenes en la sección de bitácora
+            const images = document.querySelectorAll('#bitacoraImages img');
+
+            for (let i = 0; i < images.length; i++) {
+                const img = images[i];
+
+                // Convertir la imagen a data URL (base64)
+                const imgData = img.src;
+
+                // Agregar una página para cada imagen
+                if (i > 0) pdf.addPage();
+
+                // Calcular dimensiones para ajustar la imagen al PDF
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const imgWidth = img.naturalWidth;
+                const imgHeight = img.naturalHeight;
+                const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+                const width = imgWidth * ratio;
+                const height = imgHeight * ratio;
+
+                // Agregar la imagen a la página PDF
+                pdf.addImage(imgData, 'PNG', (pdfWidth - width) / 2, (pdfHeight - height) / 2, width, height);
+            }
+
+            // Descargar el PDF
+            pdf.save('bitacora_completa.pdf');
+        }
+    </script>
+
+</body>
+</html>

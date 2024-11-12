@@ -3475,6 +3475,92 @@ app.post('/guardarBitacora', upload.single('contenidoPng'), async (req, res) => 
     }
 });
 
+
+
+
+
+
+
+app.get('/Crear_bitacora_completa', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        const userId = req.session.userId;
+
+        const query = 'SELECT DISTINCT tipo_mantenimiento FROM bitacora_mantenimientos';
+
+        try {
+            const [results] = await pool.query(query);
+            const tiposMantenimiento = results.map(row => row.tipo_mantenimiento);
+
+            res.render('administrativo/Bitacora/biitacora_completa.hbs', {
+                name,
+                userId,
+                layout: 'layouts/nav_admin.hbs',
+                tiposMantenimiento
+            });
+        } catch (error) {
+            console.error("Error al obtener tipos de mantenimiento:", error);
+            res.status(500).send("Error en el servidor.");
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+
+
+
+app.post('/Crear_bitacora_completa', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const { tipo_mantenimiento, fecha_inicio, fecha_fin } = req.body;
+
+        // Consulta SQL basada en si se selecciona "todos" o un tipo específico
+        let query;
+        let queryParams;
+
+        if (tipo_mantenimiento === 'todos') {
+            query = 'SELECT * FROM bitacora_mantenimientos WHERE fecha BETWEEN ? AND ?';
+            queryParams = [fecha_inicio, fecha_fin];
+        } else {
+            query = 'SELECT * FROM bitacora_mantenimientos WHERE tipo_mantenimiento = ? AND fecha BETWEEN ? AND ?';
+            queryParams = [tipo_mantenimiento, fecha_inicio, fecha_fin];
+        }
+
+        try {
+            const [results] = await pool.query(query, queryParams);
+
+            // Convertir contenido_png a base64 para cada resultado
+            const mantenimientos = results.map(row => {
+                return {
+                    ...row,
+                    contenido_png: row.contenido_png ? Buffer.from(row.contenido_png).toString('base64') : null
+                };
+            });
+
+            // Renderizar la vista con los datos convertidos
+            res.render('administrativo/Bitacora/biitacora_completa.hbs', {
+                name: req.session.name,
+                userId: req.session.userId,
+                layout: 'layouts/nav_admin.hbs',
+                mantenimientos: mantenimientos
+            });
+        } catch (error) {
+            console.error("Error al obtener datos de bitácora:", error);
+            res.status(500).send("Error en el servidor.");
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+
+
+
+
+
+
+
 app.get('/', (req, res) => {
     res.redirect('/login');
 });
