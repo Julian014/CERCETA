@@ -493,9 +493,6 @@ app.get('/api/edificios', async (req, res) => {
     }
 });
 
-
-
-
 app.post('/agregar_apartamento', upload.single('foto'), async (req, res) => {
     const {
         numero,
@@ -506,11 +503,8 @@ app.post('/agregar_apartamento', upload.single('foto'), async (req, res) => {
         correo
     } = req.body;
 
-    if (!req.file) {
-        return res.status(400).json({ error: 'No se ha subido ninguna foto' });
-    }
-
-    const foto = req.file.buffer;
+    // Si no hay archivo, foto será un buffer vacío
+    const foto = req.file ? req.file.buffer : Buffer.alloc(0); // Crea un buffer vacío si no se sube archivo
 
     const sql = `INSERT INTO apartamentos (
         numero, edificio_id, responsable, piso, celular, correo, foto
@@ -528,9 +522,6 @@ app.post('/agregar_apartamento', upload.single('foto'), async (req, res) => {
         res.status(500).json({ error: 'Error al agregar el apartamento' });
     }
 });
-
-
-
 
 
 
