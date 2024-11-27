@@ -235,8 +235,8 @@ const { v4: uuidv4 } = require('uuid'); // Utiliza UUID para generar IDs únicos
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'nexus.innovationss@gmail.com', // Coloca tu correo electrónico
-        pass: 'dhmtnkcehxzfwzbd' // Coloca tu contraseña de correo electrónico
+        user: 'zyrainnovations@gmail.com', // Coloca tu correo electrónico
+        pass: 'hykrxuzhpokjlwhu' // Coloca tu contraseña de correo electrónico
     },
     messageId: uuidv4(), // Genera un Message-ID único para cada correo enviado
 });
@@ -979,8 +979,8 @@ app.post('/enviarComunicado', upload.array('archivos'), async (req, res) => {
             port: 587,
             secure: false, // true for 465, false for other ports
             auth: {
-                user: 'nexus.innovationss@gmail.com', // tu correo electrónico
-                pass: 'bqffoqklqfrlvxyt' // tu contraseña de aplicación
+                user: 'zyrainnovations@gmail.com', // tu correo electrónico
+                pass: 'hykrxuzhpokjlwhu' // tu contraseña de aplicación
             }
         });
 
@@ -993,7 +993,7 @@ app.post('/enviarComunicado', upload.array('archivos'), async (req, res) => {
 
         // Opciones del correo
         let mailOptions = {
-            from: '"nexus" <nexus.innovationss@gmail.com>', // dirección del remitente
+            from: '"nexus" <zyrainnovations@gmail.com>', // dirección del remitente
             to: correos.join(','), // lista de destinatarios
             subject: `Comunicado General - ${uniqueId}`, // asunto con identificador único
             text: mensaje, // cuerpo del texto plano
@@ -1106,8 +1106,8 @@ app.post('/enviarComunicado_individual', upload.array('archivos'), async (req, r
             port: 587,
             secure: false, // true for 465, false for other ports
             auth: {
-                user: 'nexus.innovationss@gmail.com', // tu correo electrónico
-                pass: 'bqffoqklqfrlvxyt' // tu contraseña de aplicación
+                user: 'zyrainnovations@gmail.com', // tu correo electrónico
+                pass: 'hykrxuzhpokjlwhu' // tu contraseña de aplicación
             }
         });
 
@@ -1120,7 +1120,7 @@ app.post('/enviarComunicado_individual', upload.array('archivos'), async (req, r
 
         // Opciones del correo
         let mailOptions = {
-            from: '"nexus" <nexus.innovationss@gmail.com>', // dirección del remitente
+            from: '"nexus" <zyrainnovations@gmail.com>', // dirección del remitente
             to: correos.join(','), // lista de destinatarios
             subject: `Comunicado individual - ${uniqueId}`, // asunto con identificador único
             text: mensaje, // cuerpo del texto plano
@@ -1270,7 +1270,7 @@ app.post('/validarPago', upload.single('documento_pago'), async (req, res) => {
 
         // Configuración del mensaje de correo
         const mailOptions = {
-            from: 'nexus.innovationss@gmail.com', // Reemplaza con tu correo
+            from: 'zyrainnovations@gmail.com', // Reemplaza con tu correo
             to: correoDestinatario,
             subject: 'Confirmación de Pago - Cerceta',
             text: `Estimado propietario,
@@ -1887,7 +1887,7 @@ app.post('/guardar_informe', upload.fields([
             const transporter = nodemailer.createTransport({
                 service: 'gmail', // Cambia esto según tu proveedor de correo
                 auth: {
-                    user: 'nexus.innovationss@gmail.com',
+                    user: 'zyrainnovations@gmail.com',
                     pass: 'dhmtnkcehxzfwzbd' // Cambia esto a una variable de entorno en producción
                 }
             });
@@ -1914,7 +1914,7 @@ app.post('/guardar_informe', upload.fields([
             }
 
             const mailOptions = {
-                from: 'nexus.innovationss@gmail.com',
+                from: 'zyrainnovations@gmail.com',
                 to: emails.map(email => email.correo).join(','),
                 subject: 'Informe de Mantenimiento',
                 text: 'Adjunto el informe de mantenimiento correspondiente.',
@@ -2163,13 +2163,13 @@ async function sendEmail(to, actividad, fecha) {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: 'nexus.innovationss@gmail.com', // tu correo electrónico
+            user: 'zyrainnovations@gmail.com', // tu correo electrónico
             pass: 'bqffoqklqfrlvxyt' // tu contraseña de aplicación
         }
     });
 
     const mailOptions = {
-        from: 'nexus.innovationss@gmail.com',
+        from: 'zyrainnovations@gmail.com',
         to: to,
         subject: `Recordatorio de Actividad: ${actividad}`,
         text: `Hola, tienes la actividad "${actividad}" programada para el ${moment(fecha).format('DD/MM/YYYY')}. ¡No olvides realizarla!`
@@ -3028,14 +3028,14 @@ app.post('/enviar-png', upload.single('image'), async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: 'nexus.innovationss@gmail.com',
-                pass: 'dhmtnkcehxzfwzbd'
+                user: 'zyrainnovations@gmail.com',
+                pass: 'hykrxuzhpokjlwhu'
             }
         });
 
         // Opciones de correo, incluyendo el archivo de imagen como adjunto
         const mailOptions = {
-            from: 'nexus.innovationss@gmail.com',
+            from: 'zyrainnovations@gmail.com',
             to: email,
             subject: 'Supervisión - Informe en Imagen',
             text: 'Adjuntamos el informe de supervisión en formato PNG.',
@@ -3229,7 +3229,7 @@ app.post('/editar_usuario/:id', async (req, res) => {
 // Función para enviar correos de cumpleaños
 function enviarCorreoCumple(nombre, email) {
     const mailOptions = {
-        from: 'nexus.innovationss@gmail.com',
+        from: 'zyrainnovations@gmail.com',
         to: email,
         subject: `¡Feliz cumpleaños, ${nombre}! 🎉`,
         text: `¡Hola ${nombre}!\n\nTodo el equipo te desea un feliz cumpleaños. Esperamos que tengas un día maravilloso.\n\n¡Feliz cumpleaños! 🎂🥳`
