@@ -940,13 +940,8 @@ app.get('/ComunicadosGeneral', async (req, res) => {
 });
 
 
-
-
-
-
-// Ruta para enviar el comunicado
 app.post('/enviarComunicado', upload.array('archivos'), async (req, res) => {
-    let { edificiosSeleccionados, mensaje } = req.body;
+    let { edificiosSeleccionados, mensaje, asunto } = req.body; // Recibe el asunto desde el formulario
     let archivos = req.files;
 
     if (edificiosSeleccionados.includes('all')) {
@@ -970,17 +965,14 @@ app.post('/enviarComunicado', upload.array('archivos'), async (req, res) => {
         const [results] = await pool.query(query, [edificiosSeleccionados]);
         const correos = results.map(row => row.correo);
 
-        // Generar un identificador único para el asunto
-        const uniqueId = new Date().toISOString();
-
         // Configuración de nodemailer
         let transporter = nodemailer.createTransport({
             host: 'smtp.gmail.com',
             port: 587,
-            secure: false, // true for 465, false for other ports
+            secure: false,
             auth: {
-                user: 'zyrainnovations@gmail.com', // tu correo electrónico
-                pass: 'hykrxuzhpokjlwhu' // tu contraseña de aplicación
+                user: 'zyrainnovations@gmail.com',
+                pass: 'hykrxuzhpokjlwhu'
             }
         });
 
@@ -988,27 +980,27 @@ app.post('/enviarComunicado', upload.array('archivos'), async (req, res) => {
         let attachments = archivos.map(file => ({
             filename: file.originalname,
             content: file.buffer,
-            cid: file.originalname.split('.')[0] // usar el nombre del archivo sin extensión como cid
+            cid: file.originalname.split('.')[0]
         }));
 
         // Opciones del correo
         let mailOptions = {
-            from: '"nexus" <zyrainnovations@gmail.com>', // dirección del remitente
-            to: correos.join(','), // lista de destinatarios
-            subject: `Comunicado General - ${uniqueId}`, // asunto con identificador único
-            text: mensaje, // cuerpo del texto plano
+            from: '"nexus" <zyrainnovations@gmail.com>',
+            to: correos.join(','), // Lista de destinatarios
+            subject: asunto || 'Comunicado General', // Usa el asunto proporcionado o uno predeterminado
+            text: mensaje,
             html: `
                 <h1>Comunicado Importante</h1>
                 <p>${mensaje}</p>
                 ${attachments.map(att => `<img src="cid:${att.cid}"/>`).join('')}
-            `, // cuerpo del html
+            `,
             attachments: attachments
         };
 
         // Enviar el correo
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
-                console.log(error);
+                console.error(error);
                 return res.status(500).send('Error al enviar el comunicado');
             }
             console.log('Message sent: %s', info.messageId);
@@ -1020,7 +1012,6 @@ app.post('/enviarComunicado', upload.array('archivos'), async (req, res) => {
         res.status(500).send('Error al enviar el comunicado');
     }
 });
-
 
 
 
