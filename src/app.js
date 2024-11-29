@@ -1083,7 +1083,7 @@ app.post('/getApartamentos', async (req, res) => {
 
 // Ruta para enviar el comunicado
 app.post('/enviarComunicado_individual', upload.array('archivos'), async (req, res) => {
-    const { apartamentosSeleccionados, mensaje } = req.body;
+    const { apartamentosSeleccionados, mensaje, asunto } = req.body; // Recibir el asunto desde el cuerpo del formulario
     
     let archivos = req.files;
 
@@ -1096,9 +1096,6 @@ app.post('/enviarComunicado_individual', upload.array('archivos'), async (req, r
     try {
         const [results] = await pool.query(query, [apartamentosSeleccionados]);
         const correos = results.map(row => row.correo);
-
-        // Generar un identificador único para el asunto
-        const uniqueId = new Date().toISOString();
 
         // Configuración de nodemailer
         let transporter = nodemailer.createTransport({
@@ -1122,7 +1119,7 @@ app.post('/enviarComunicado_individual', upload.array('archivos'), async (req, r
         let mailOptions = {
             from: '"nexus" <zyrainnovations@gmail.com>', // dirección del remitente
             to: correos.join(','), // lista de destinatarios
-            subject: `Comunicado individual - ${uniqueId}`, // asunto con identificador único
+            subject: asunto, // Usar el asunto proporcionado por el usuario
             text: mensaje, // cuerpo del texto plano
             html: `
                 <h1>Comunicado Importante</h1>
@@ -1147,6 +1144,8 @@ app.post('/enviarComunicado_individual', upload.array('archivos'), async (req, r
         res.status(500).send('Error al enviar el comunicado');
     }
 });
+
+
 
 
 
