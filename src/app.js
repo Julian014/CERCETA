@@ -50,43 +50,56 @@ hbs.registerHelper('eq', (a, b) => {
 
 
 
-
 // Ruta para manejar el login
 app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Consulta para verificar si el usuario existe con el correo y contraseña dados
-        const [results] = await pool.query('SELECT * FROM usuarios WHERE email = ? AND password = ?', [email, password]);
+        // Consulta para verificar si el usuario existe con el correo, contraseña dados y está activo
+        const [results] = await pool.query(
+            'SELECT * FROM usuarios WHERE email = ? AND password = ?',
+            [email, password]
+        );
 
         if (results.length > 0) {
-            // Almacena los datos del usuario en la sesión
-            req.session.user = results[0];  // Almacena el objeto completo del usuario
-            req.session.userId = results[0].id; // Guarda el `userId` en la sesión correctamente
-            req.session.name = results[0].nombre;  // Guarda el nombre del usuario en la sesión
-            req.session.loggedin = true;  // Establece el estado de sesión como conectado
-            req.session.roles = results[0].role;  // Guarda los roles en la sesión
-            req.session.cargo = results[0].cargo; // Almacena el cargo en la sesión
+            const user = results[0];
 
-            const role = results[0].role;  // Obtiene el rol del usuario
+            // Verificar si el estado del usuario es activo
+            if (user.estado !== 'activo') {
+                // Devolver un mensaje de usuario inactivo sin destruir la sesión
+                return res.json({ status: 'inactive', message: 'Usuario inactivo' });
+            } else {
+                // Almacena los datos del usuario en la sesión
+                req.session.user = user;  // Almacena el objeto completo del usuario
+                req.session.userId = user.id; // Guarda el `userId` en la sesión
+                req.session.name = user.nombre;  // Guarda el nombre del usuario en la sesión
+                req.session.loggedin = true;  // Establece el estado de sesión como conectado
+                req.session.roles = user.role;  // Guarda los roles en la sesión
+                req.session.cargo = user.cargo; // Almacena el cargo en la sesión
 
-            // Redirige basado en el rol del usuario
-            if (role === 'admin') {
-                return res.redirect('/menuAdministrativo');
-            } else if (role === 'tecnico') {
-                return res.redirect('/tecnico');
-            } else if (role === 'residentes') {
-                return res.redirect('/menu_residentes');
+                const role = user.role;  // Obtiene el rol del usuario
+
+                // Redirige basado en el rol del usuario
+                if (role === 'admin') {
+                    return res.redirect('/menuAdministrativo');
+                } else if (role === 'tecnico') {
+                    return res.redirect('/tecnico');
+                } else if (role === 'residentes') {
+                    return res.redirect('/menu_residentes');
+                }
             }
         } else {
             // Muestra la página de login con mensaje de error si las credenciales son incorrectas
-            res.render('login/login', { error: 'Correo o contraseña incorrectos' });
+            res.render('login/login', { error: 'Correo, contraseña incorrectos o usuario inactivo' });
         }
     } catch (err) {
         // Maneja los errores y envía una respuesta 500 en caso de problemas con la base de datos o el servidor
         res.status(500).json({ error: err.message });
     }
 });
+
+
+
 
 
 
@@ -938,6 +951,9 @@ app.get('/ComunicadosGeneral', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
 
 
 app.post('/enviarComunicado', upload.array('archivos'), async (req, res) => {
@@ -3130,7 +3146,7 @@ app.get('/consultar_usuarios', async (req, res) => {
         try {
             // Obtener todos los usuarios
             const [usuarios] = await pool.query(`
-                SELECT id, nombre, email, role, cargo, fecha_cumpleaños, edificio, apartamento
+                SELECT id, nombre, email, role, cargo, fecha_cumpleaños, edificio, apartamento, estado
                 FROM usuarios
             `);
 
@@ -3142,7 +3158,7 @@ app.get('/consultar_usuarios', async (req, res) => {
             res.render('administrativo/usuarios/consultar_usuarios.hbs', { 
                 name, 
                 usuarios,
-                edificios, // Pasar los edificios a la vista
+                edificios,
                 layout: 'layouts/nav_admin.hbs' 
             });
         } catch (error) {
@@ -3153,6 +3169,14 @@ app.get('/consultar_usuarios', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
+
+
+
+
+
 
 app.get('/obtener_apartamentos_usuarios/:edificioId', async (req, res) => {
     const { edificioId } = req.params;
@@ -3196,22 +3220,25 @@ app.get('/buscar_usuarios', async (req, res) => {
 });
 
 
-
 app.post('/editar_usuario/:id', async (req, res) => {
     const { id } = req.params;
-    const { nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento } = req.body;
+    const { nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento, estado } = req.body;
 
     try {
-        await pool.query(
-            'UPDATE usuarios SET nombre = ?, email = ?, role = ?, cargo = ?, fecha_cumpleaños = ?, edificio = ?, apartamento = ? WHERE id = ?',
-            [nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento, id]
-        );
-        res.sendStatus(200); // Respuesta exitosa
+        await pool.query(`
+            UPDATE usuarios 
+            SET nombre = ?, email = ?, role = ?, cargo = ?, fecha_cumpleaños = ?, 
+                edificio = ?, apartamento = ?, estado = ?
+            WHERE id = ?
+        `, [nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento, estado, id]);
+
+        res.status(200).json({ message: 'Usuario actualizado correctamente' });
     } catch (error) {
-        console.error('Error al actualizar el usuario:', error);
-        res.sendStatus(500); // Error en el servidor
+        console.error(error);
+        res.status(500).json({ error: 'Error al actualizar el usuario' });
     }
 });
+
 
 
 

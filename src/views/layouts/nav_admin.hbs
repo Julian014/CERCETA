@@ -866,5 +866,28 @@ function verificarYEnviarUbicacion() {
 
 // Llama a la función al cargar la página
 verificarYEnviarUbicacion();
+// Supón que este código se ejecuta en la página de login
+fetch('/login', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        email: userEmail,  // Correo del usuario
+        password: userPassword  // Contraseña del usuario
+    })
+})
+.then(response => response.json())
+.then(data => {
+    if (data.status === 'inactive') {
+        // Si el estado es "inactivo", cerrar sesión y redirigir al login
+        alert(data.message);  // Muestra el mensaje "Usuario inactivo"
+        window.location.href = '/login';  // Redirige a la página de login
+    } else {
+        // Si el login es exitoso, redirigir según el rol
+        window.location.href = '/menuAdministrativo';  // O la redirección correspondiente
+    }
+})
+.catch(error => console.error('Error en el login:', error));
 
 </script>
