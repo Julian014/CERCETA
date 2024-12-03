@@ -3596,9 +3596,46 @@ app.post('/Crear_bitacora_completa', async (req, res) => {
 });
 
 
+app.get('/fechas', async (req, res) => {
+    try {
+      // Consulta para obtener las fechas de ejecución de la tabla 'alertas'
+      const [rows] = await pool.query('SELECT fecha_ejecucion FROM alertas WHERE fecha_ejecucion IS NOT NULL');
+      
+      // Extraer solo las fechas de ejecución y enviarlas al frontend
+      const fechas = rows.map(row => row.fecha_ejecucion.toISOString().split('T')[0]); // Asegurarse de que la fecha esté en formato 'YYYY-MM-DD'
+      console.log(fechas); // Agregar esto para verificar las fechas en la consola
+      res.json(fechas);
+    } catch (err) {
+      // Manejo de errores
+      console.error('Error al obtener las fechas:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+  // Ruta para obtener las fechas de ejecución desde la tabla 'alertas'
 
-
-
+  app.get('/actividades-mes', async (req, res) => {
+    try {
+      // Obtener el mes y año actuales
+      const today = new Date();
+      const mes = today.getMonth() + 1;  // Los meses en JavaScript empiezan en 0
+      const anio = today.getFullYear();
+  
+      // Consulta SQL para obtener las actividades del mes actual
+      const query = `
+        SELECT nombre_actividad, DATE_FORMAT(fecha_ejecucion, '%H:%i') as hora 
+        FROM alertas 
+        WHERE YEAR(fecha_ejecucion) = ? AND MONTH(fecha_ejecucion) = ?
+      `;
+      
+      const [rows] = await pool.query(query, [anio, mes]);
+      
+      // Enviar las actividades al frontend
+      res.json(rows);
+    } catch (err) {
+      console.error('Error al obtener las actividades:', err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
 
 
 
