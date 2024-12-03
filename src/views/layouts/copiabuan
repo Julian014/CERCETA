@@ -1,15 +1,13 @@
-<!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>CERCETA</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compact Sidebar</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
-  <link rel="icon" href="imagenes/Recurso 1hdpi.png" type="image/x-icon"/>
-</head>
-
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    rel="stylesheet"
+  />
   <style>
     /* Estilo para el estado reducido del menú */
     #sidebar {
@@ -196,173 +194,26 @@
     margin-left: 0; /* Elimina el margen para pantallas pequeñas */
   }
 }
-/* Asegura que el header esté fijo */
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-}
 
-/* Asegura que el sidebar esté fijo */
-#sidebar {
-  position: fixed;
-  top: 60px; /* Debajo del header */
-  left: 0;
-  height: calc(100vh - 60px); /* Altura de la pantalla menos el header */
-  overflow-y: auto;
-  z-index: 5;
-}
-
-/* Ajusta el contenido principal */
-#content {
-  margin-top: 60px; /* Espacio para el header */
-  margin-left: 256px; /* Espacio para el sidebar */
-  padding: 20px;
-  transition: margin-left 0.3s ease;
-}
-
-/* Cuando el sidebar esté colapsado */
-#sidebar.collapsed + #content {
-  margin-left: 60px; /* Ajusta el margen izquierdo */
-}
-
-/* Para pantallas pequeñas */
-@media (max-width: 768px) {
-  #content {
-    margin-left: 0; /* Elimina el espacio lateral en pantallas pequeñas */
-  }
-
-  #sidebar {
-    display: none; /* Oculta el sidebar por defecto */
-  }
-
-  #sidebar.open {
-    display: block; /* Muestra el sidebar cuando está abierto */
-  }
-
-}#sidebar.open {
-  display: block;
-  transform: translateX(0); /* Lo muestra */
-}
-@media (max-width: 768px) {
-  #sidebar {
-    display: none;
-  }
-  #sidebar.open {
-    display: block;
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Estilo global para el modo oscuro */
-body.dark-mode {
-  background-color: #121212; /* Fondo oscuro para toda la página */
-  color: #ffffff; /* Texto claro para contraste */
-}
-
-/* Ajustes para contenedores y fondos internos */
-body.dark-mode #sidebar {
-  background-color: #333; /* Fondo oscuro para el sidebar */
-}
-
-body.dark-mode #content {
-  background-color: #1e1e1e; /* Fondo oscuro para el contenido principal */
-}
-
-body.dark-mode header {
-  background-color: #222; /* Fondo oscuro para el header */
-  color: #ffffff;
-}
-
-body.dark-mode .menu-text {
-  color: #cccccc; /* Texto del menú con un tono más claro */
-}
-
-body.dark-mode .text-gray-600 {
-  color: #bbbbbb; /* Ajuste para otros textos grises */
-}
-
-body.dark-mode .bg-gray-100 {
-  background-color: #1e1e1e; /* Cambia fondos claros */
-}
-
-body.dark-mode .bg-gray-300 {
-  background-color: #444; /* Ajuste para fondos gris intermedio */
-}
-
-body.dark-mode .bg-indigo-600 {
-  background-color: #6200ea; /* Resalta botones en modo oscuro */
-}
-
-body.dark-mode .bg-indigo-600:hover {
-  background-color: #3700b3; /* Resalta botones al pasar */
-}
-body.dark-mode input,
-body.dark-mode textarea,
-body.dark-mode select {
-  color: black; /* Texto blanco */
-
-}
-#titulo {
-  color: black;
-}
-
-
-
-body.dark-mode #titulo {
-  color: white; /* Cambia el color de h1 a blanco en modo oscuro */
-}
-
-body.dark-mode #social i {
-  color: white; /* Cambia el color de los íconos a blanco en modo oscuro */
-}
-
-body.dark-mode h2 {
-  color: black; /* Cambia el color de los íconos a blanco en modo oscuro */
-}
 </style>
-
-
-
-
-
-
-
+</head>
+<body class="bg-gray-100">
   <div class="flex flex-col">
     <!-- Header -->
 
     <header class="header">
       <div class="logo flex items-center">
-<div class="logo flex items-center">
-  <img src="imagenes/Recurso 1hdpi.png" alt="Logo" class="w-10 h-10 rounded-full"> <!-- Asegúrate de ajustar el tamaño -->
+        <div class="bg-indigo-600 text-white rounded-full p-2">
+          <span class="text-xl font-bold">CL</span>
         </div>
-        <h1  id="titulo" >CERCETA</h1>
+        <h1 style="color: black;" >Codinglab</h1>
       </div>
-  <div id="social" class="socials flex items-center">
-  <i class="fab fa-facebook"></i>
-  <i class="fab fa-twitter"></i>
-  <i class="fab fa-instagram"></i>
-  <i class="fab fa-linkedin"></i>
-</div>
-
+      <div class="socials flex items-center">
+        <i class="fab fa-facebook"></i>
+        <i class="fab fa-twitter"></i>
+        <i class="fab fa-instagram"></i>
+        <i class="fab fa-linkedin"></i>
+      </div>
 
       <!-- Ícono de menú hamburguesa (solo en pantallas pequeñas) -->
       <div class="hamburger" id="hamburger-menu">
@@ -386,7 +237,7 @@ body.dark-mode h2 {
 
       <!-- Navigation menu -->
       <nav class="px-6 py-4">
-        <a href="/menuAdministrativo" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
+        <a href="#" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
           <i class="fas fa-home w-6 text-lg"></i>
           <span class="ml-3 menu-text">inicio</span>
         </a>
@@ -444,15 +295,44 @@ body.dark-mode h2 {
         </div>
       </div>
 
- 
+      <!-- Toggle Button -->
+      <div
+        id="toggle-button"
+        class="absolute top-2 right-2 bg-indigo-600 text-white rounded-full p-1 cursor-pointer"
+      >
+        <i class="fas fa-chevron-right"></i>
+      </div>
     </div>
   </div>
 
-<div id="content" class="flex-grow p-6 overflow-auto bg-gray-100">
 
-    {{{body}}}
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
+
+
+<div id="content" class="flex-grow p-6 overflow-auto bg-gray-100">
+ 
+
+{{body}}
+
+
+
+
+</div>
+
+
+
+
+
+
+  <script>
+    // Selecciona el botón y el menú lateral
+    const toggleButton = document.getElementById("toggle-button");
+    const sidebar = document.getElementById("sidebar");
+
+    // Agrega el evento de clic para colapsar el menú
+    toggleButton.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+    });
+
     // Lógica del modo oscuro
     const darkModeToggle = document.getElementById('darkModeToggle');
     const body = document.body;
@@ -460,6 +340,7 @@ body.dark-mode h2 {
     const sunIcon = document.querySelector('.sun-icon');
     const darkModeText = document.getElementById('darkModeText');
 
+    // Cargar el estado de modo oscuro si está en almacenamiento local
     if (localStorage.getItem('darkMode') === 'true') {
       body.classList.add('dark-mode');
       moonIcon.classList.add('hidden');
@@ -468,6 +349,7 @@ body.dark-mode h2 {
       darkModeToggle.checked = true;
     }
 
+    // Cambiar el modo oscuro al hacer clic en el interruptor
     darkModeToggle.addEventListener('change', () => {
       if (darkModeToggle.checked) {
         body.classList.add('dark-mode');
@@ -483,8 +365,7 @@ body.dark-mode h2 {
         localStorage.setItem('darkMode', 'false');
       }
     });
-  });
-</script>
+  </script>
     <script>
   // Lógica para el menú hamburguesa
   document.addEventListener("DOMContentLoaded", () => {
@@ -499,5 +380,3 @@ body.dark-mode h2 {
   </script>
 </body>
 </html>
-
-
