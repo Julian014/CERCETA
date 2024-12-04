@@ -122,7 +122,7 @@
       align-items: center;
       padding: 10px 20px;
       background-color: #fff;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 7px 6px rgba(0, 0, 0, 0.1);
     }
 
     .header .logo {
@@ -338,6 +338,35 @@ body.dark-mode #social i {
 body.dark-mode h2 {
   color: black; /* Cambia el color de los íconos a blanco en modo oscuro */
 }
+
+
+
+
+  @media (max-width: 768px) {
+
+#social{
+  display: none;
+}
+
+#social{
+  display: none;
+}
+
+    }
+
+  @media (max-width: 500px) {
+
+#social{
+  display: none;
+}
+
+    }
+
+
+
+
+
+
 </style>
 
 
@@ -390,12 +419,12 @@ body.dark-mode h2 {
           <i class="fas fa-home w-6 text-lg"></i>
           <span class="ml-3 menu-text">inicio</span>
         </a>
-       <a href="#" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
+       <a href="/menu_usuarios" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
     <i class="fas fa-users w-6 text-lg"></i>
     <span class="ml-3 menu-text">Usuarios</span>
 </a>
 
-       <a href="#" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
+       <a href="/menu_inmuebles" class="flex items-center py-3 text-gray-600 hover:text-indigo-600">
     <i class="fas fa-building w-6 text-lg"></i>
     <span class="ml-3 menu-text">Inmuebles</span>
 </a>
@@ -429,6 +458,13 @@ body.dark-mode h2 {
           <i class="fas fa-sign-out-alt w-6 text-lg"></i>
           <span class="ml-3 menu-text">Logout</span>
         </a>
+
+
+
+
+
+
+        
         <div class="flex items-center py-3 dark-mode-content">
           <!-- Default Moon Icon (for Light Mode) -->
           <i class="fas fa-moon w-6 text-gray-600 moon-icon"></i>
@@ -451,6 +487,24 @@ body.dark-mode h2 {
 <div id="content" class="flex-grow p-6 overflow-auto bg-gray-100">
 
     {{{body}}}
+    <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Seleccionar elementos del DOM
+    const hamburgerMenu = document.getElementById("hamburger-menu");
+    const sidebar = document.getElementById("sidebar");
+
+    if (hamburgerMenu && sidebar) {
+      // Agregar el evento de clic al ícono de hamburguesa
+      hamburgerMenu.addEventListener("click", () => {
+        console.log("Hamburguesa clickeada");
+        sidebar.classList.toggle("open"); // Alternar clase 'open'
+      });
+    } else {
+      console.error("No se encontró el menú hamburguesa o el sidebar.");
+    }
+  });
+</script>
+
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     // Lógica del modo oscuro

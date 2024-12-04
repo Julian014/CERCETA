@@ -374,6 +374,128 @@ const ultimosPagos = ultimosPagosRows;
 
 
 
+app.get("/menu_usuarios", async (req, res) => {
+    if (req.session.loggedin === true) {
+        try {
+            const userId = req.session.userId;
+
+            const nombreUsuario = req.session.name || req.session.user.name;
+            console.log(`El usuario ${nombreUsuario} está autenticado.`);
+            req.session.nombreGuardado = nombreUsuario;
+
+            // Obtén el cargo del usuario desde la sesión y conviértelo en un array
+            const cargos = req.session.cargo.split(',').map(cargo => cargo.trim());
+            console.log(`Cargos del usuario: ${cargos}`);
+
+            // Define las variables de cargo en función de si están en el array
+            const esGerente = cargos.includes('Gerente');
+            const esAdministracionOperativa = cargos.includes('administracion_operativa');
+            const esContabilidad = cargos.includes('contabilidad');
+            const esOperativo = cargos.includes('operativo');
+
+            // Muestra en consola para verificar que los valores son correctos
+            console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
+
+         
+            // Consulta para contar la cantidad de empleados
+          
+      
+        
+
+
+            // Renderiza la vista y pasa los datos necesarios
+            res.render("administrativo/usuarios/menu_usuarios.hbs", {
+                layout: 'layouts/nav_admin.hbs',
+                name: nombreUsuario,
+                esGerente,
+                esAdministracionOperativa,
+                esContabilidad,
+                esOperativo,
+                userId,
+            });
+        } catch (error) {
+            console.error('Error al obtener el conteo de datos:', error);
+            res.status(500).send('Error al cargar el menú administrativo');
+        }
+    } else {
+        res.redirect("/login");
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+app.get("/menu_inmuebles", async (req, res) => {
+    if (req.session.loggedin === true) {
+        try {
+            const userId = req.session.userId;
+
+            const nombreUsuario = req.session.name || req.session.user.name;
+            console.log(`El usuario ${nombreUsuario} está autenticado.`);
+            req.session.nombreGuardado = nombreUsuario;
+
+            // Obtén el cargo del usuario desde la sesión y conviértelo en un array
+            const cargos = req.session.cargo.split(',').map(cargo => cargo.trim());
+            console.log(`Cargos del usuario: ${cargos}`);
+
+            // Define las variables de cargo en función de si están en el array
+            const esGerente = cargos.includes('Gerente');
+            const esAdministracionOperativa = cargos.includes('administracion_operativa');
+            const esContabilidad = cargos.includes('contabilidad');
+            const esOperativo = cargos.includes('operativo');
+
+            // Muestra en consola para verificar que los valores son correctos
+            console.log({ esGerente, esAdministracionOperativa, esContabilidad, esOperativo });
+
+         
+            // Consulta para contar la cantidad de empleados
+          
+      
+        
+
+
+            // Renderiza la vista y pasa los datos necesarios
+            res.render("administrativo/Operaciones/ClientesEdificios/menu_inmuebles.hbs", {
+                layout: 'layouts/nav_admin.hbs',
+                name: nombreUsuario,
+                esGerente,
+                esAdministracionOperativa,
+                esContabilidad,
+                esOperativo,
+                userId,
+            });
+        } catch (error) {
+            console.error('Error al obtener el conteo de datos:', error);
+            res.status(500).send('Error al cargar el menú administrativo');
+        }
+    } else {
+        res.redirect("/login");
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
 
 app.get('/agregar_edificio', (req, res) => {
     if (req.session.loggedin === true) {
