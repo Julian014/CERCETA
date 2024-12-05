@@ -1,26 +1,51 @@
-// Escucha el evento de instalación del Service Worker
-self.addEventListener('install', event => {
+const CACHE_NAME = 'app-cache-v1';
+const urlsToCache = [
+    '/',                  // Página raíz
+    '/login',             // Página de login
+    '/styles.css',        // Archivo CSS principal
+    '/app.js',            // Archivo JavaScript principal
+    '/manifest.json',     // Manifesto de la aplicación
+    'imagenes/apk192.png' // Iconos
+];
+
+// Instalación del Service Worker
+self.addEventListener('install', function (event) {
     event.waitUntil(
-        caches.open('v1').then(cache => {
-            return cache.addAll([
-                '/', // Página de inicio o principal
-                '/login', // Ruta del login que carga la vista Handlebars
-                '/styles.css', // Archivo de estilos global
-                '/app.js', // Archivo de JavaScript global
-                '/manifest.json', // Archivo de manifest para PWA
-                '/imagenes/fondoapk.png', // Asegúrate de que el espacio se codifique correctamente
-                '/imagenes/fondoapk.png', // Asegúrate de que el espacio se codifique correctamente
-            ]);
-        })
+        caches.open(CACHE_NAME).then(function (cache) {
+            return cache.addAll(urlsToCache).catch((error) => {
+                console.error('Error al almacenar en caché:', error);
+            });
+        }).then(() => self.skipWaiting()) // Forzar la activación del nuevo Service Worker
     );
 });
 
-// Escucha el evento de fetch para manejar las solicitudes de red
-self.addEventListener('fetch', event => {
+// Activación del Service Worker (limpiar cachés antiguas)
+self.addEventListener('activate', function (event) {
+    const cacheWhitelist = [CACHE_NAME];
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    if (!cacheWhitelist.includes(cacheName)) {
+                        console.log(`Eliminando caché antigua: ${cacheName}`);
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        }).then(() => self.clients.claim()) // Tomar el control de la aplicación
+    );
+});
+
+// Interceptor de solicitudes (fetch)
+self.addEventListener('fetch', function (event) {
     event.respondWith(
-        caches.match(event.request).then(response => {
-            // Si hay una respuesta en la caché, devuélvela; si no, realiza la solicitud a la red
-            return response || fetch(event.request);
+        caches.match(event.request).then(function (response) {
+            if (response) {
+                return response; // Responder desde la caché
+            }
+            return fetch(event.request).catch((error) => {
+                console.error('Error al hacer fetch:', error);
+            });
         })
     );
 });
