@@ -175,10 +175,6 @@ border: 1px solid black;
 
 
 
-
-
-
-  
   <div class="flex justify-center items-center mb-6">
     <label for="fechaSeleccionada" class="mr-2 text-gray-700 font-semibold">Selecciona la fecha:</label>
     <input type="date" id="fechaSeleccionada" class="border border-gray-300 rounded-md px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -234,79 +230,147 @@ border: 1px solid black;
         <!-- Puedes agregar más opciones aquí -->
     </select>
 </div>
-      <div class="section-content">
-        <div class="text-section">
-          <textarea class="textarea-content" placeholder="Agrega tod la informacion de lo que se realizo"></textarea>
-        </div>
-<div class="image-section">
-  <div class="upload-section" id="uploadSection1">
-    <input type="file" id="fileInput1" accept="image/*">
-    <p>Arrastra y suelta una imagen o haz clic para subir</p>
-    <img id="previewImage1" class="image" alt="Vista previa de imagen" style="display: none;">
+<div id="contenido">
+  <div class="section">
+    <h2 class="section-title">
+      <input class="input-title form-control" placeholder="Agrega un subtítulo aquí">
+    </h2>
+    <div class="section-content">
+      <label for="edificio" class="section-title">Seleccione el Edificio:</label>
+      <select id="edificio" name="edificioId" class="form-control">
+        <option value="" disabled selected>Selecciona un edificio</option>
+      </select>
+    </div>
   </div>
 </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2 class="section-title">
-        <input class="input-title" placeholder="Agrega un subtítulo aquí">
-      </h2>
-      <div class="section-content">
-        <div class="image-section">
-     <div class="upload-section" id="uploadSection2">
-    <input type="file" id="fileInput2" accept="image/*">
-    <p>Arrastra y suelta una imagen o haz clic para subir</p>
-    <img id="previewImage2" class="image" alt="Vista previa de imagen" style="display: none;">
-    </div>
-
-        </div>
-        <div class="text-section">
-          <textarea class="textarea-content" placeholder="Escribe aquí la información del subtítulo"></textarea>
-        </div>
-      </div>
-    </div>
-    <div class="section">
-      <h2 class="section-title">
-        <input class="input-title" placeholder="Agrega un subtítulo">
-      </h2>
-      <div class="section-content">
-        <div class="text-section">
-          <textarea class="textarea-content" placeholder="Agrega tod la informacion de lo que se realizo"></textarea>
-        </div>
-
-<div class="image-section">
-  <div class="upload-section" id="uploadSection3">
-    <input type="file" id="fileInput3" accept="image/*">
-    <p>Arrastra y suelta una imagen o haz clic para subir</p>
-    <img id="previewImage3" class="image" alt="Vista previa de imagen" style="display: none;">
-  </div>
 </div>
 
-      </div>
-    </div>
-    <div class="footer-section">
-      <h2 class="section-title">
-        <input class="input-title" placeholder="Título final del boletín">
-      </h2>
-      <textarea id="tarea-foter" class="textarea" placeholder="Resumen o conclusiones aquí" style="width: 100%; height: 190px;"></textarea>
-      <div class="footer-inputs">
-   
-      </div>
-    </div>
-    <div class="text-center mt-8">
-      <input class="footer-signature" placeholder="Nombre del autor del boletín">
-    </div>
-    <br>
-<br>
-  </div>
 </div>
+</div>
+<div class="text-center mt-8">
+  <button id="addSectionBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 transition ease-in-out duration-150">
+    Agregar Sección
+  </button>
+</div>
+
     <div class="text-center mt-8">
       <button id="saveBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition ease-in-out duration-150">
         Guardar Bitácora
       </button>
     </div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+  // Función para crear una nueva sección
+  function agregarSeccion() {
+    const container = document.getElementById('contenido');
+    
+    // Crear un nuevo div de sección
+    const nuevaSeccion = document.createElement('div');
+    nuevaSeccion.className = 'section';
+
+    nuevaSeccion.innerHTML = `
+      <h2 class="section-title">
+        <input class="input-title" placeholder="Agrega un subtítulo aquí">
+      </h2>
+      <div class="section-content">
+        <div class="image-section">
+          <div class="upload-section">
+            <input type="file" accept="image/*">
+            <p>Arrastra y suelta una imagen o haz clic para subir</p>
+            <img class="image" alt="Vista previa de imagen" style="display: none;">
+          </div>
+        </div>
+        <div class="text-section">
+          <textarea class="textarea-content" placeholder="Escribe aquí la información del subtítulo"></textarea>
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(nuevaSeccion);
+  }
+
+  // Funcionalidad para manejar botones
+  document.getElementById('addSectionBtn').addEventListener('click', agregarSeccion);
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const contenedorSecciones = document.getElementById('contenido');
+
+  // Función para manejar la subida de imágenes de manera dinámica
+  function handleImageUpload(event) {
+    const input = event.target;
+    const uploadSection = input.closest('.upload-section');
+    const previewImage = uploadSection.querySelector('.image');
+
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        previewImage.src = e.target.result;
+        previewImage.style.display = 'block';
+        uploadSection.querySelector('p').style.display = 'none';
+        uploadSection.style.border = 'none';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  // Funcionalidad para manejar eventos de "arrastrar y soltar"
+  function handleDragOver(event) {
+    event.preventDefault();
+    const uploadSection = event.currentTarget;
+    uploadSection.style.borderColor = '#4A90E2';
+  }
+
+  function handleDragLeave(event) {
+    const uploadSection = event.currentTarget;
+    uploadSection.style.borderColor = '#ccc';
+  }
+
+  function handleDrop(event) {
+    event.preventDefault();
+    const uploadSection = event.currentTarget;
+    uploadSection.style.borderColor = '#ccc';
+    const fileInput = uploadSection.querySelector('input[type="file"]');
+    handleImageUpload({ target: fileInput });
+  }
+
+  // Delegar la lógica de eventos para todas las secciones dinámicamente
+  contenedorSecciones.addEventListener('change', (event) => {
+    if (event.target.matches('input[type="file"]')) {
+      handleImageUpload(event);
+    }
+  });
+
+  contenedorSecciones.addEventListener('dragover', (event) => {
+    if (event.target.closest('.upload-section')) {
+      handleDragOver.call(event.target.closest('.upload-section'), event);
+    }
+  });
+
+  contenedorSecciones.addEventListener('dragleave', (event) => {
+    if (event.target.closest('.upload-section')) {
+      handleDragLeave.call(event.target.closest('.upload-section'), event);
+    }
+  });
+
+  contenedorSecciones.addEventListener('drop', (event) => {
+    if (event.target.closest('.upload-section')) {
+      handleDrop.call(event.target.closest('.upload-section'), event);
+    }
+  });
+
+  // Funcionalidad para que el clic en la sección active el input de imagen
+  contenedorSecciones.addEventListener('click', (event) => {
+    if (event.target.matches('.upload-section')) {
+      const fileInput = event.target.querySelector('input[type="file"]');
+      if (fileInput) fileInput.click();
+    }
+  });
+});
+
+
+</script>
 
    <script>
       // Obtener la fecha actual
