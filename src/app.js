@@ -3884,28 +3884,28 @@ app.post('/guardarBitacora', upload.single('contenidoPng'), async (req, res) => 
 
 
 
-
-
-
 app.get('/Crear_bitacora_completa', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
 
-        const query = 'SELECT DISTINCT tipo_mantenimiento FROM bitacora_mantenimientos';
-
         try {
-            const [results] = await pool.query(query);
-            const tiposMantenimiento = results.map(row => row.tipo_mantenimiento);
+            // Realizamos la consulta para obtener edificio_id y su respectivo nombre de la tabla edificios
+            const query = `
+                SELECT DISTINCT b.edificio_id, e.nombre
+                FROM bitacora_mantenimientos b
+                LEFT JOIN edificios e ON b.edificio_id = e.id
+            `;
+            const [edificios] = await pool.query(query);
 
             res.render('administrativo/Bitacora/biitacora_completa.hbs', {
                 name,
                 userId,
                 layout: 'layouts/nav_admin.hbs',
-                tiposMantenimiento
+                edificios // Enviamos los datos de edificios para que se usen en la vista
             });
         } catch (error) {
-            console.error("Error al obtener tipos de mantenimiento:", error);
+            console.error("Error al obtener datos:", error);
             res.status(500).send("Error en el servidor.");
         }
     } else {
@@ -3917,20 +3917,37 @@ app.get('/Crear_bitacora_completa', async (req, res) => {
 
 
 
-app.post('/Crear_bitacora_completa', async (req, res) => {
+app.post('/Crear_bitacora_completa', async (req, res) => { 
     if (req.session.loggedin === true) {
-        const { tipo_mantenimiento, fecha_inicio, fecha_fin } = req.body;
+        const { tipo_mantenimiento, fecha_inicio, fecha_fin, edificio_id } = req.body; // Capturar parámetros del formulario
 
-        // Consulta SQL basada en si se selecciona "todos" o un tipo específico
         let query;
-        let queryParams;
+        let queryParams = [fecha_inicio, fecha_fin];
 
-        if (tipo_mantenimiento === 'todos') {
-            query = 'SELECT * FROM bitacora_mantenimientos WHERE fecha BETWEEN ? AND ?';
-            queryParams = [fecha_inicio, fecha_fin];
+        // Ajustar la consulta según si el usuario seleccionó "todos" o un edificio específico
+        if (edificio_id && edificio_id !== 'todos') {
+            // Usuario seleccionó un edificio específico
+            if (tipo_mantenimiento === 'todos') {
+                query = `
+                    SELECT * 
+                    FROM bitacora_mantenimientos 
+                    WHERE fecha BETWEEN ? AND ? AND edificio_id = ?`;
+                queryParams.push(edificio_id);
+            } else {
+                query = `
+                    SELECT * 
+                    FROM bitacora_mantenimientos 
+                    WHERE tipo_mantenimiento = ? AND fecha BETWEEN ? AND ? AND edificio_id = ?`;
+                queryParams = [tipo_mantenimiento, ...queryParams, edificio_id];
+            }
         } else {
-            query = 'SELECT * FROM bitacora_mantenimientos WHERE tipo_mantenimiento = ? AND fecha BETWEEN ? AND ?';
-            queryParams = [tipo_mantenimiento, fecha_inicio, fecha_fin];
+            // Usuario no seleccionó un edificio específico
+            if (tipo_mantenimiento === 'todos') {
+                query = 'SELECT * FROM bitacora_mantenimientos WHERE fecha BETWEEN ? AND ?';
+            } else {
+                query = 'SELECT * FROM bitacora_mantenimientos WHERE tipo_mantenimiento = ? AND fecha BETWEEN ? AND ?';
+                queryParams.unshift(tipo_mantenimiento);
+            }
         }
 
         try {
@@ -3944,7 +3961,6 @@ app.post('/Crear_bitacora_completa', async (req, res) => {
                 };
             });
 
-            // Renderizar la vista con los datos convertidos
             res.render('administrativo/Bitacora/biitacora_completa.hbs', {
                 name: req.session.name,
                 userId: req.session.userId,
@@ -3959,6 +3975,17 @@ app.post('/Crear_bitacora_completa', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+
+
+
+
+
+
+
+
+
 
 
 app.get('/fechas', async (req, res) => {
@@ -4008,6 +4035,6 @@ app.get('/', (req, res) => {
     res.redirect('/login');
 });
 
-app.listen(3000, () => {
+app.listen(1000, () => {
     console.log('Servidor corriendo en el puerto 3000');
 });

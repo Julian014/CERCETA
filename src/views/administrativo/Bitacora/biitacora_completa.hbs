@@ -103,25 +103,36 @@
 
     <h2>Informe de Bitácora Completa</h2>
 
-    <!-- Formulario de búsqueda -->
-    <form action="/Crear_bitacora_completa" method="post">
-        <label for="tipo_mantenimiento">Tipo de Mantenimiento:</label>
-        <select name="tipo_mantenimiento" id="tipo_mantenimiento" required>
-            <option value="">Seleccione un tipo</option>
-            <option value="todos">Todos</option>
-            {{#each tiposMantenimiento}}
-                <option value="{{this}}">{{this}}</option>
-            {{/each}}
-        </select>
+<form action="/Crear_bitacora_completa" method="post">
+    <label for="tipo_mantenimiento">Tipo de Mantenimiento:</label>
+    <select name="tipo_mantenimiento" id="tipo_mantenimiento" required>
+        <option value="">Seleccione un tipo</option>
+        <option value="todos">Todos</option>
+        {{#each tiposMantenimiento}}
+            <option value="{{this}}">{{this}}</option>
+        {{/each}}
+    </select>
 
-        <label for="fecha_inicio">Fecha de Inicio:</label>
-        <input type="date" name="fecha_inicio" id="fecha_inicio" required>
+   <!-- Campo para seleccionar edificio dinámicamente desde la base de datos -->
+<label for="edificio_id">Edificio:</label>
+<select name="edificio_id" id="edificio_id" required>
+    <option value="todos">Todos</option>
+    {{#each edificios}}
+        <option value="{{this.edificio_id}}">{{this.nombre}}</option>
+    {{/each}}
+</select>
 
-        <label for="fecha_fin">Fecha de Fin:</label>
-        <input type="date" name="fecha_fin" id="fecha_fin" required>
 
-        <button type="submit">Generar Informe</button>
-    </form>
+    <label for="fecha_inicio">Fecha de Inicio:</label>
+    <input type="date" name="fecha_inicio" id="fecha_inicio" required>
+
+    <label for="fecha_fin">Fecha de Fin:</label>
+    <input type="date" name="fecha_fin" id="fecha_fin" required>
+
+    <button type="submit">Generar Informe</button>
+</form>
+
+
 
     <!-- Sección de imágenes -->
     <div id="bitacoraImages">
