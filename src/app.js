@@ -2314,23 +2314,21 @@ app.post('/guardar_informe', upload.fields([
 
 
 
-app.post('/guardar_usuario', async (req, res) => {
+app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
     const { nombre, user_email, user_password, role, fecha_cumpleaños } = req.body;
     let cargos = req.body['cargo[]'];
     const edificio = req.body.edificio || null;
     const apartamento = req.body.apartamento || null;
 
-    // Asegurarse de que cargos sea un array y añadir "Operativo" si el rol es admin
+    // Procesar la imagen si existe
+    const foto = req.file ? req.file.buffer : null;
+
     if (!Array.isArray(cargos)) {
-        cargos = cargos ? [cargos] : []; // Convierte en array si es una cadena o en un array vacío si es undefined
+        cargos = cargos ? [cargos] : [];
     }
     if (role === "admin" && !cargos.includes("operativo")) {
         cargos.push("operativo");
     }
-
-    console.log("Cargos seleccionados:", cargos);
-    console.log("Edificio:", edificio);
-    console.log("Apartamento:", apartamento);
 
     try {
         const checkQuery = 'SELECT * FROM usuarios WHERE nombre = ? OR email = ?';
@@ -2339,16 +2337,13 @@ app.post('/guardar_usuario', async (req, res) => {
         if (rows.length > 0) {
             res.send('<script>alert("El nombre de usuario o el correo ya están en uso. Por favor, elige otros."); window.location.href="/agregar_usuarios";</script>');
         } else {
-            // Convertir los cargos seleccionados en una cadena separada por comas
             const cargoString = cargos.length > 0 ? cargos.join(', ') : null;
 
-            // Crear la consulta de inserción, incluyendo edificio y apartamento si el rol es "residente"
             const insertQuery = `
                 INSERT INTO usuarios 
-                    (nombre, email, password, role, cargo, fecha_cumpleaños, edificio, apartamento) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+                    (nombre, email, password, role, cargo, fecha_cumpleaños, edificio, apartamento, foto) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-            // Ejecutar la consulta con los datos correspondientes
             await pool.query(insertQuery, [
                 nombre,
                 user_email,
@@ -2357,7 +2352,8 @@ app.post('/guardar_usuario', async (req, res) => {
                 cargoString,
                 fecha_cumpleaños,
                 role === "residentes" ? edificio : null,
-                role === "residentes" ? apartamento : null
+                role === "residentes" ? apartamento : null,
+                foto
             ]);
 
             res.send('<script>alert("Usuario guardado exitosamente."); window.location.href="/agregar_usuarios";</script>');
@@ -2367,6 +2363,8 @@ app.post('/guardar_usuario', async (req, res) => {
         res.send('<script>alert("Hubo un error al guardar el usuario."); window.location.href="/agregar_usuarios";</script>');
     }
 });
+
+
 
 
 
@@ -4003,8 +4001,20 @@ app.get('/fechas', async (req, res) => {
       res.status(500).json({ error: err.message });
     }
   });
-  // Ruta para obtener las fechas de ejecución desde la tabla 'alertas'
 
+
+
+
+
+
+
+
+
+
+
+
+
+  // Ruta para obtener las fechas de ejecución desde la tabla 'alertas'
   app.get('/actividades-mes', async (req, res) => {
     try {
       // Obtener el mes y año actuales
@@ -4028,6 +4038,14 @@ app.get('/fechas', async (req, res) => {
       res.status(500).json({ error: err.message });
     }
   });
+
+
+
+
+
+
+
+
 
 
 
