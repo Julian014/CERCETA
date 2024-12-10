@@ -3499,19 +3499,24 @@ app.get('/FOTO', (req, res) => {
 });
 
 
-
-
-
 app.get('/consultar_usuarios', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
 
         try {
             // Obtener todos los usuarios
-            const [usuarios] = await pool.query(`
-                SELECT id, nombre, email, role, cargo, fecha_cumpleaños, edificio, apartamento, estado
+            const [usuariosRaw] = await pool.query(`
+                SELECT id, nombre, email, role, cargo, fecha_cumpleaños, edificio, apartamento, estado, foto
                 FROM usuarios
             `);
+
+            // Convertir las fotos a Base64
+            const usuarios = usuariosRaw.map(usuario => {
+                if (usuario.foto) {
+                    usuario.foto = Buffer.from(usuario.foto).toString('base64');
+                }
+                return usuario;
+            });
 
             // Obtener todos los edificios
             const [edificios] = await pool.query(`
@@ -3532,6 +3537,7 @@ app.get('/consultar_usuarios', async (req, res) => {
         res.redirect('/login');
     }
 });
+
 
 
 
@@ -3583,25 +3589,35 @@ app.get('/buscar_usuarios', async (req, res) => {
 });
 
 
-app.post('/editar_usuario/:id', async (req, res) => {
+
+
+
+
+
+app.post('/editar_usuario/:id', upload.single('foto'), async (req, res) => {
     const { id } = req.params;
     const { nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento, estado } = req.body;
+    let fotoBase64 = null;
+
+    if (req.file) {
+        // Convertir el buffer de la foto a base64
+        fotoBase64 = req.file.buffer.toString('base64');
+    }
 
     try {
         await pool.query(`
             UPDATE usuarios 
             SET nombre = ?, email = ?, role = ?, cargo = ?, fecha_cumpleaños = ?, 
-                edificio = ?, apartamento = ?, estado = ?
+                edificio = ?, apartamento = ?, estado = ?, foto = ?
             WHERE id = ?
-        `, [nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento, estado, id]);
+        `, [nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento, estado, fotoBase64, id]);
 
-        res.status(200).json({ message: 'Usuario actualizado correctamente' });
+        res.status(200).json({ message: 'Usuario actualizado correctamente', foto: fotoBase64 });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error al actualizar el usuario' });
     }
 });
-
 
 
 

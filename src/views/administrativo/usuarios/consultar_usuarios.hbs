@@ -392,6 +392,8 @@ body.dark-mode h1 {
             <th>Edificio</th>
             <th>Apartamento</th>
              <th>Estado</th>
+                         <th>Foto</th>
+
             <th>Acciones</th>
         </tr>
     </thead>
@@ -407,11 +409,18 @@ body.dark-mode h1 {
             <td>{{this.edificio}}</td>
             <td>{{this.apartamento}}</td>
             <td>{{this.estado}}</td>
+     <td>
+                {{#if foto}}
+                <img src="data:image/jpeg;base64,{{foto}}" alt="Foto de {{nombre}}" style="width: 50px; height: 50px; object-fit: cover;">
+                {{else}}
+                Sin foto
+                {{/if}}
+            </td>
  <td>
 <button onclick="openEditModal(
     {{this.id}}, '{{this.nombre}}', '{{this.email}}', '{{this.role}}', 
     '{{this.cargo}}', '{{this.fecha_cumpleaños}}', '{{this.edificio}}', 
-    '{{this.apartamento}}', '{{this.estado}}'
+    '{{this.apartamento}}', '{{this.estado}}', '{{this.foto}}'
 )">Editar</button>
         </td>
     </tr>
@@ -440,6 +449,17 @@ body.dark-mode h1 {
         <form id="editForm" onsubmit="submitEditForm(event)">
             <div class="modal-body">
                 <input type="hidden" id="editId">
+
+
+
+
+<label>Foto actual:</label>
+<img id="currentFoto" src="" alt="Foto actual" style="width: 100px; height: 100px; object-fit: cover;">
+
+<label for="editFoto">Cambiar Foto:</label>
+<input type="file" id="editFoto" accept="image/*">
+
+
                 <label for="editNombre">Nombre:</label>
                 <input type="text" id="editNombre" required>
 
@@ -523,34 +543,53 @@ body.dark-mode h1 {
 
 
 
-
-function openEditModal(id, nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento, estado) {
-        console.log("Fecha de Cumpleaños: ", fechaCumpleaños); // Verifica el valor de la fecha
-
-    // Convertir fecha al formato correcto (yyyy-mm-dd) si es necesario
-    const formattedFechaCumpleaños = new Date(fechaCumpleaños).toISOString().split('T')[0];
-
+async function openEditModal(id, nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento, estado, foto) {
     document.getElementById('editId').value = id;
     document.getElementById('editNombre').value = nombre;
     document.getElementById('editEmail').value = email;
     document.getElementById('editRole').value = role;
     document.getElementById('editCargo').value = cargo;
-    document.getElementById('editFechaCumpleaños').value = formattedFechaCumpleaños; // Asigna la fecha en formato correcto
+
+    const date = new Date(fechaCumpleaños);
+    document.getElementById('editFechaCumpleaños').value = !isNaN(date.getTime()) 
+        ? date.toISOString().split('T')[0] 
+        : '';
+
     document.getElementById('editEdificio').value = edificio;
     document.getElementById('editApartamento').value = apartamento;
     document.getElementById('editEstado').value = estado;
+
+    const fotoElement = document.getElementById('currentFoto');
+    if (foto) {
+        // Convertir base64 directamente para mostrarla en la vista
+        fotoElement.src = `data:image/jpeg;base64,${foto}`;
+    } else {
+        fotoElement.src = '';
+        fotoElement.alt = 'Sin foto';
+    }
+
     document.getElementById('editModal').style.display = 'flex';
 }
 
 
-function closeEditModal() {
-    document.getElementById('editModal').style.display = 'none';
-}
+
+document.getElementById('editFoto').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const fotoElement = document.getElementById('currentFoto');
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            fotoElement.src = e.target.result; // Previsualizar la foto
+            fotoElement.alt = 'Foto seleccionada';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
 
 async function submitEditForm(event) {
     event.preventDefault();
 
-    // Obtener los datos del formulario
     const id = document.getElementById('editId').value;
     const nombre = document.getElementById('editNombre').value;
     const email = document.getElementById('editEmail').value;
@@ -559,21 +598,34 @@ async function submitEditForm(event) {
     const fechaCumpleaños = document.getElementById('editFechaCumpleaños').value;
     const edificio = document.getElementById('editEdificio').value;
     const apartamento = document.getElementById('editApartamento').value;
-    const estado = document.getElementById('editEstado').value; // Asegúrate de incluir el estado aquí
+    const estado = document.getElementById('editEstado').value;
+
+    const fotoInput = document.getElementById('editFoto').files[0];
+
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('nombre', nombre);
+    formData.append('email', email);
+    formData.append('role', role);
+    formData.append('cargo', cargo);
+    formData.append('fechaCumpleaños', fechaCumpleaños);
+    formData.append('edificio', edificio);
+    formData.append('apartamento', apartamento);
+    formData.append('estado', estado);
+    if (fotoInput) {
+        formData.append('foto', fotoInput);
+    }
 
     try {
         const response = await fetch(`/editar_usuario/${id}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ nombre, email, role, cargo, fechaCumpleaños, edificio, apartamento, estado }) // Incluir estado aquí
+            body: formData,
         });
 
         if (response.ok) {
             alert('Usuario actualizado correctamente');
             closeEditModal();
-            location.reload(); // Recargar la página para ver los cambios
+            location.reload();
         } else {
             alert('Error al actualizar el usuario');
         }
@@ -581,12 +633,6 @@ async function submitEditForm(event) {
         console.error('Error al enviar datos de edición:', error);
     }
 }
-
-
-
-
-
-
 
 
 
@@ -628,4 +674,8 @@ async function submitEditForm(event) {
       console.error("No se encontró el menú hamburguesa o el sidebar.");
     }
   });
+  function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+
 </script>
