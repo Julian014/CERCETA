@@ -4123,6 +4123,54 @@ app.post('/blog/crear', upload.single('imagen'), async (req, res) => {
     }
 });
 
+app.post('/like', (req, res) => {
+    const { post_id, usuario_id } = req.body;
+
+    // Verificar si el usuario ya ha dado like a la publicación
+    pool.query('SELECT * FROM likes WHERE post_id = ? AND usuario_id = ?', [post_id, usuario_id], (err, results) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+
+        if (results.length > 0) {
+            // Si ya existe un like, eliminarlo
+            pool.query('DELETE FROM likes WHERE post_id = ? AND usuario_id = ?', [post_id, usuario_id], (err) => {
+                if (err) {
+                    return res.status(500).json({ error: err.message });
+                }
+
+                // Decrementar el contador de likes en la tabla de publicaciones
+                pool.query('UPDATE posts_admin SET likes = likes - 1 WHERE id = ?', [post_id], (err) => {
+                    if (err) {
+                        return res.status(500).json({ error: err.message });
+                    }
+                    res.status(200).json({ message: 'Like eliminado' });
+                });
+            });
+        } else {
+            // Si no existe un like, insertarlo
+            pool.query('INSERT INTO likes (post_id, usuario_id) VALUES (?, ?)', [post_id, usuario_id], (err) => {
+                if (err) {
+                    return res.status(500).json({ error: err.message });
+                }
+
+                // Incrementar el contador de likes en la tabla de publicaciones
+                pool.query('UPDATE posts_admin SET likes = likes + 1 WHERE id = ?', [post_id], (err) => {
+                    if (err) {
+                        return res.status(500).json({ error: err.message });
+                    }
+                    res.status(200).json({ message: 'Like registrado' });
+                });
+            });
+        }
+    });
+});
+
+
+
+
+
+
 
 
 

@@ -4,173 +4,170 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog Empresarial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
+        /* Estilo para el modal */
+        .modal {
+            display: none; /* Oculto por defecto */
+            position: fixed; /* Fijo */
+            z-index: 50; /* Por encima de otros elementos */
+            left: 0;
+            top: 0;
+            width: 100%; /* Ancho completo */
+            height: 100%; /* Alto completo */
+            overflow: auto; /* Habilitar desplazamiento si es necesario */
+            background-color: rgba(0, 0, 0, 0.8); /* Fondo oscuro */
         }
-
-        header {
-            background-color: #0078D4;
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%; /* Ancho del contenido del modal */
+            max-width: 700px; /* Ancho máximo */
+        }
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
             color: white;
-            padding: 20px 0;
-            text-align: center;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 2.5rem;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .create-post {
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-        }
-
-        .create-post h2 {
-            font-size: 1.8rem;
-            color: #333;
-            margin-bottom: 15px;
-        }
-
-        .create-post form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .create-post input,
-        .create-post textarea {
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-
-        .create-post button {
-            padding: 12px;
-            background: #0078D4;
-            color: white;
-            border: none;
-            border-radius: 6px;
+            font-size: 40px;
+            font-weight: bold;
             cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.3s ease;
-        }
-
-        .create-post button:hover {
-            background: #005EA3;
-        }
-
-        .post {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-            transition: transform 0.3s ease;
-        }
-
-        .post:hover {
-            transform: scale(1.02);
-        }
-
-        .post h2 {
-            font-size: 1.5rem;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .post p {
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-
-        .post-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-
-        .like-btn {
-            background: #0078D4;
-            color: white;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background 0.3s ease;
-        }
-
-        .like-btn:hover {
-            background: #005EA3;
-        }
-
-        .post-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 20px;
-        }
-
-        .post-footer .date {
-            font-size: 0.9rem;
-            color: #777;
         }
     </style>
 </head>
-<body>
+<body class="bg-gray-100">
 
-<header>
-    <h1>Blog Empresarial</h1>
-</header>
-
-<div class="container">
+<div class="container mx-auto p-4">
     <!-- Formulario para Crear una Publicación -->
-    <div class="create-post">
-        <h2>📝 Crear Nueva Publicación</h2>
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h2 class="text-2xl font-bold mb-4">📝 Crear Nueva Publicación</h2>
         <form action="/blog/crear" method="POST" enctype="multipart/form-data">
-            <input type="text" name="titulo" placeholder="Título de la publicación" required />
-            <textarea name="contenido" placeholder="Contenido de la publicación" required></textarea>
-            <input type="file" name="imagen" accept="image/png" />
-            <button type="submit">Publicar</button>
+            <input type="text" name="titulo" placeholder="Título de la publicación" required class="border border-gray-300 rounded-lg p-2 w-full mb-4" />
+            <textarea name="contenido" placeholder="Contenido de la publicación" required class="border border-gray-300 rounded-lg p-2 w-full mb-4 h-32"></textarea>
+            <input type="file" name="imagen" accept="image/png" class="mb-4" />
+            <button type="submit" class="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600">Publicar</button>
         </form>
     </div>
 
     <hr/>
 
     <!-- Lista de Publicaciones Existentes -->
-    {{#each posts}}
-        <div class="post">
-            <h2>{{this.titulo}}</h2>
-                <p><strong>Publicado por:</strong> {{this.usuario_nombre}}</p> <!-- Nombre del usuario -->
+    <div class="flex flex-col space-y-6">
+        {{#each posts}}
+        <div class="w-full bg-white border border-gray-300 rounded-lg overflow-hidden shadow-md">
+            <!-- Header -->
+            <div class="flex items-center p-4">
+                <img alt="Profile picture" class="w-12 h-12 rounded-full" src="https://storage.googleapis.com/a1aa/image/bepKCi3WHI3gPaHzoN3mmbfJBT5T1Tju2cWBr1yxlGSFT1enA.jpg" />
+                <div class="ml-3">
+                    <p class="font-semibold text-lg">{{this.usuario_nombre}}</p>
+                    <p class="text-gray-700 text-base">{{this.contenido}}</p>
+<p id="fecha-{{@index}}" class="text-gray-500 text-sm">{{this.fecha}} <i class="fas fa-globe-americas"></i></p>
+                </div>
+            </div>
 
-            <p>{{this.contenido}}</p>
             {{#if this.imagen_base64}}
-                <img src="data:image/png;base64,{{this.imagen_base64}}" alt="Imagen del post" class="post-image"/>
+            <img class="w-full h-64 object-cover cursor-pointer" src="data:image/png;base64,{{this.imagen_base64}}" alt="Imagen del post" onclick="openModal('data:image/png;base64,{{this.imagen_base64}}')" />
             {{/if}}
-            <div class="post-footer">
-                <p class="date"><strong>Publicado el:</strong> {{this.fecha}}</p>
-                <button class="like-btn">👍 Me gusta</button>
+
+            <!-- Interaction Stats -->
+            <div class="flex items-center justify-between px-4 py-2">
+                <div class="flex items-center">
+                    <i class="fas fa-thumbs-up text-blue-500"></i>
+                    <i class="fas fa-heart text-red-500 ml-1"></i>
+                    <span class="ml-2 text-gray-600">42.3k</span>
+ </div>
+                <div class="text-gray-600">
+                    <span>5k comments</span>
+                    <span class="ml-2">11.5k shares</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+<div class="border-t border-gray-300">
+    <div class="flex justify-around p-2">
+<div class="flex items-center">
+    <button id="like-button-{{this.id}}" class="flex items-center space-x-1 text-gray-600 hover:bg-gray-200 p-2 rounded" onclick="likePost({{this.id}}, {{usuario_id}})">
+        <i class="far fa-thumbs-up"></i>
+        <span>Like</span>
+    </button>
+    <span id="like-count-{{this.id}}" class="ml-2 text-gray-600">{{this.likes}}</span>
+</div>
+                    <button class="flex items-center space-x-1 text-gray-600 hover:bg-gray-200 p-2 rounded">
+                        <i class="far fa-comment"></i>
+                        <span>Comment</span>
+                    </button>
+                    <button class="flex items-center space-x-1 text-gray-600 hover:bg-gray-200 p-2 rounded">
+                        <i class="far fa-share-square"></i>
+                        <span>Share</span>
+                    </button>
+                </div>
             </div>
         </div>
-        <hr/>
-    {{/each}}
+        {{/each}}
+    </div>
+
+    <!-- Modal para Imagen Completa -->
+    <div id="myModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="img01" />
+    </div>
+
 </div>
 
+<script>
+    function openModal(src) {
+        const modal = document.getElementById("myModal");
+        const img = document.getElementById("img01");
+        modal.style.display = "block";
+        img.src = src;
+    }
+
+    function closeModal() {
+        const modal = document.getElementById("myModal");
+        modal.style.display = "none";
+    }
+
+    // Cerrar el modal al hacer clic fuera de la imagen
+    window.onclick = function(event) {
+        const modal = document.getElementById("myModal");
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+</script>
+<script>
+function likePost(postId, usuarioId) {
+    fetch('/like', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ post_id: postId, usuario_id: usuarioId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        const likeCountElement = document.getElementById(`like-count-${postId}`);
+        let currentLikes = parseInt(likeCountElement.textContent);
+
+        if (data.message === 'Like registrado') {
+            // Incrementar el contador de likes
+            currentLikes += 1;
+            likeCountElement.textContent = currentLikes; // Actualizar el contador en la interfaz
+            // Cambiar el estado del botón a "liked"
+            document.getElement ById(`like-button-${postId}`).classList.add('liked');
+        } else if (data.message === 'Like eliminado') {
+            // Decrementar el contador de likes
+            currentLikes -= 1;
+            likeCountElement.textContent = currentLikes; // Actualizar el contador en la interfaz
+            // Cambiar el estado del botón a "not liked"
+            document.getElementById(`like-button-${postId}`).classList.remove('liked');
+        } else {
+            console.error(data.error);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
 </body>
 </html>
