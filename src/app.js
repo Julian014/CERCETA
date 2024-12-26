@@ -4030,6 +4030,7 @@ app.get('/fechas', async (req, res) => {
 
 
 
+
   // Ruta para obtener las fechas de ejecución desde la tabla 'alertas'
   app.get('/actividades-mes', async (req, res) => {
     try {
@@ -4057,9 +4058,70 @@ app.get('/fechas', async (req, res) => {
 
 
 
+  const sharp = require('sharp'); // Asegúrate de instalar sharp si no lo tienes
+
+  app.get('/Blog_administrativo', async (req, res) => {
+    if (req.session.loggedin === true) {
+        const name = req.session.name;
+        const userId = req.session.userId;
+
+        try {
+            // Consulta que obtiene las publicaciones y el nombre del usuario asociado
+            const [resultados] = await pool.query(`
+                SELECT p.*, u.nombre AS usuario_nombre
+                FROM posts_admin p
+                JOIN usuarios u ON p.usuario_id = u.id
+                ORDER BY p.fecha DESC
+            `);
+
+            // Convertir cada imagen BLOB a Base64 (si tiene imagen)
+            for (let post of resultados) {
+                if (post.imagen) { // Cambiado de imagen_data a imagen
+                    // Convertir el BLOB a PNG usando sharp y luego a Base64
+                    const buffer = post.imagen; // BLOB de la base de datos
+                    const imageBuffer = await sharp(buffer).png().toBuffer();
+                    post.imagen_base64 = imageBuffer.toString('base64');
+                    console.log(`Imagen convertida para el post ${post.id}: ${post.imagen_base64.substring(0, 30)}...`); // Log para verificar
+                }
+            }
+
+            // Renderizamos la página, pasando los posts y el nombre del usuario
+            res.render('blog_administrativo/blog_admin.hbs', { 
+                name, 
+                layout: 'layouts/nav_admin.hbs', 
+                posts: resultados 
+            });
+
+        } catch (err) {
+            console.error('Error al obtener publicaciones:', err);
+            res.status(500).send('Error en el servidor');
+        }
+
+    } else {
+        res.redirect('/login');
+    }
+});
 
 
 
+
+app.post('/blog/crear', upload.single('imagen'), async (req, res) => {
+    const { titulo, contenido } = req.body;
+    const imagen = req.file ? req.file.buffer : null; // Convertimos la imagen en un buffer binario
+    const userId = req.session.userId; // Obtener el userId de la sesión
+
+    try {
+        // Inserción en la base de datos incluyendo el usuario_id
+        await pool.query(
+            'INSERT INTO posts_admin (titulo, contenido, imagen, usuario_id) VALUES (?, ?, ?, ?)',
+            [titulo, contenido, imagen, userId] // Añadimos el userId a los parámetros
+        );
+        res.redirect('/Blog_administrativo');
+    } catch (err) {
+        console.error('Error al crear publicación:', err);
+        res.status(500).send('Error en el servidor');
+    }
+});
 
 
 

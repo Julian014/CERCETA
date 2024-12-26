@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Empresarial</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #0078D4;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .create-post {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .create-post h2 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .create-post form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .create-post input,
+        .create-post textarea {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .create-post button {
+            padding: 12px;
+            background: #0078D4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .create-post button:hover {
+            background: #005EA3;
+        }
+
+        .post {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .post:hover {
+            transform: scale(1.02);
+        }
+
+        .post h2 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .post p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .post-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .like-btn {
+            background: #0078D4;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .like-btn:hover {
+            background: #005EA3;
+        }
+
+        .post-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .post-footer .date {
+            font-size: 0.9rem;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Blog Empresarial</h1>
+</header>
+
+<div class="container">
+    <!-- Formulario para Crear una Publicación -->
+    <div class="create-post">
+        <h2>📝 Crear Nueva Publicación</h2>
+        <form action="/blog/crear" method="POST" enctype="multipart/form-data">
+            <input type="text" name="titulo" placeholder="Título de la publicación" required />
+            <textarea name="contenido" placeholder="Contenido de la publicación" required></textarea>
+            <input type="file" name="imagen" accept="image/png" />
+            <button type="submit">Publicar</button>
+        </form>
+    </div>
+
+    <hr/>
+
+    <!-- Lista de Publicaciones Existentes -->
+    {{#each posts}}
+        <div class="post">
+            <h2>{{this.titulo}}</h2>
+                <p><strong>Publicado por:</strong> {{this.usuario_nombre}}</p> <!-- Nombre del usuario -->
+
+            <p>{{this.contenido}}</p>
+            {{#if this.imagen_base64}}
+                <img src="data:image/png;base64,{{this.imagen_base64}}" alt="Imagen del post" class="post-image"/>
+            {{/if}}
+            <div class="post-footer">
+                <p class="date"><strong>Publicado el:</strong> {{this.fecha}}</p>
+                <button class="like-btn">👍 Me gusta</button>
+            </div>
+        </div>
+        <hr/>
+    {{/each}}
+</div>
+
+</body>
+</html>
