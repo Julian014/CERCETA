@@ -2,9 +2,9 @@ const mysql = require('mysql2');
 
 // Crear la conexión a la base de datos
 const pool = mysql.createPool({
-    host: '34.56.87.125',
-    user: 'Julian',
-    password: '1034277764C',
+    host: '147.93.118.246',
+    user: 'root',
+    password: 'F32fBsITy7PywBEMtC3Es6rmWowYGNGzgiwot7TL7UedJSSZUbgxBvARocHO2y6G',
     database: 'cerceta',
     waitForConnections: true,
     connectionLimit: 10,
