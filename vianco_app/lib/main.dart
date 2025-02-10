@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';  // Importa Firebase
 import 'firebase_options.dart';
 import 'screens/login_screen.dart'; // Importa el archivo del login
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'screens/home_screen.dart';
+
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // Manejo de notificación en segundo plano
