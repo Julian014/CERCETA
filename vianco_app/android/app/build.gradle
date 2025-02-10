@@ -1,0 +1,55 @@
+plugins {
+      id "com.android.application"
+    id "kotlin-android"
+    id "com.google.gms.google-services"  // Para usar Firebase y otros servicios de Google
+    id "dev.flutter.flutter-gradle-plugin" // Plugin de Flutter
+}
+
+android {
+    namespace 'com.vianco.app'
+    compileSdkVersion 34
+
+    defaultConfig {
+        applicationId "com.vianco.app"
+        minSdkVersion 23
+        targetSdkVersion 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(project.hasProperty("MY_RELEASE_STORE_FILE") ? MY_RELEASE_STORE_FILE : "debug.keystore")
+            storePassword project.hasProperty("MY_RELEASE_STORE_PASSWORD") ? MY_RELEASE_STORE_PASSWORD : "android"
+            keyAlias project.hasProperty("MY_RELEASE_KEY_ALIAS") ? MY_RELEASE_KEY_ALIAS : "androiddebugkey"
+            keyPassword project.hasProperty("MY_RELEASE_KEY_PASSWORD") ? MY_RELEASE_KEY_PASSWORD : "android"
+        }
+    }
+
+    buildTypes {
+        release {
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            shrinkResources false
+            minifyEnabled false
+        }
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)  // Asegura que se use Java 17
+    }
+}
+
+dependencies {
+    implementation platform('com.google.firebase:firebase-bom:33.0.0')  // Firebase BOM
+    implementation 'com.google.firebase:firebase-auth'  // Para Firebase Auth
+    implementation 'com.google.firebase:firebase-messaging'  // Para Firebase Messaging
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"  // Kotlin Standard Library
+    // Agrega otras dependencias según tus necesidades...
+}

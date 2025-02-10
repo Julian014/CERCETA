@@ -4166,12 +4166,37 @@ app.post('/like', (req, res) => {
     });
 });
 
+app.post('/login_app', async (req, res) => {  // ⬅️ Agregar 'async' aquí
+    console.log('🔹 Solicitud recibida:', req.body);  
 
+    const { email, password, fcm_token } = req.body;  
+    const query = 'SELECT id, email, password FROM usuarios WHERE email = ? AND password = ?';
 
+    try {
+        console.log('🔍 Ejecutando consulta SQL...');
+        const [result] = await pool.execute(query, [email, password]); // ⬅️ Usamos 'await'
 
+        console.log('🔹 Resultado de la consulta:', result);
 
+        if (result.length > 0) {
+            const userId = result[0].id;
+            console.log(`✅ Usuario encontrado. ID: ${userId}`);
 
+            const updateQuery = 'UPDATE usuarios SET fcm_token = ? WHERE email = ?';
+            await pool.execute(updateQuery, [fcm_token, email]); // ⬅️ También usamos 'await'
 
+            console.log('✅ Token FCM actualizado correctamente.');
+            res.json({ message: 'Login exitoso', user_id: userId });
+
+        } else {
+            console.log('❌ Credenciales incorrectas');
+            res.status(401).json({ message: 'Email o contraseña incorrectos' });
+        }
+    } catch (err) {
+        console.error('❌ Error en la base de datos:', err);
+        res.status(500).json({ message: 'Error en la base de datos', error: err });
+    }
+});
 
 
 

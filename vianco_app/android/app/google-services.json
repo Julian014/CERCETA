@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "580041916267",
+    "project_id": "vianco-cd3a3",
+    "storage_bucket": "vianco-cd3a3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:580041916267:android:09c1ad970881f504a7d62e",
+        "android_client_info": {
+          "package_name": "com.vianco.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJcs_64JWaOQVJmxeQ3zMGMVceIl3A1yw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
