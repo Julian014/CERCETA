@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -17,19 +18,16 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
   Future<void> _login() async {
-    print("Iniciando sesión...");
+    print("🔵 Iniciando sesión...");
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
-    final String email = _emailController.text;
-    final String password = _passwordController.text;
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
     final String url = 'http://localhost:3000/login_app';
 
     try {
       String? fcmToken = await FirebaseMessaging.instance.getToken();
-
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
@@ -40,41 +38,49 @@ class _LoginScreenState extends State<LoginScreen> {
         }),
       );
 
-      print("Respuesta del servidor: ${response.body}");
-
-      setState(() {
-        _isLoading = false;
-      });
-
+      print("🟢 Respuesta del servidor: ${response.body}");
       final responseData = json.decode(response.body);
-      if (response.statusCode == 200 && responseData['user_id'] != null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('ID: ${responseData["user_id"]}')),
-          );
-        }
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(
-              userId: responseData['user_id'].toString(),
-            ),
-          ),
-        );
-        print("Navegando a HomeScreen");
+
+      if (response.statusCode == 200 && responseData['user_id'] != null && responseData['token'] != null) {
+        await _saveSession(responseData['token'], responseData['user_id'].toString());
+        _navigateToHome(responseData['user_id'].toString());
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(responseData['message'] ?? 'Error al iniciar sesión')),
-        );
+        _showMessage(responseData['message'] ?? 'Error al iniciar sesión');
       }
     } catch (error) {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No se pudo conectar al servidor: $error')),
+      _showMessage('❌ No se pudo conectar al servidor: $error');
+      print("🔴 Error en la conexión: $error");
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _saveSession(String token, String userId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_token', token);
+      await prefs.setString('user_id', userId);
+      print("✅ Sesión guardada correctamente");
+    } catch (error) {
+      print("🔴 Error al guardar sesión: $error");
+    }
+  }
+
+  void _navigateToHome(String userId) {
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(userId: userId),
+        ),
       );
-      print("Error en la conexión: $error");
+      print("🟢 Navegando a HomeScreen");
+    }
+  }
+
+  void _showMessage(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -127,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 10),
               ElevatedButton(
-                onPressed: _login,
+                onPressed: _isLoading ? null : _login,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pink,
                   padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -135,12 +141,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
-                child: Center(
-                  child: Text(
-                    'Ingresar',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
+                child: _isLoading
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : Text('Ingresar', style: TextStyle(color: Colors.white)),
               ),
               SizedBox(height: 20),
               Text('Visítanos'),
@@ -152,18 +155,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     icon: Icon(FontAwesomeIcons.facebook, color: Colors.blue),
                     onPressed: () async {
                       final Uri url = Uri.parse('https://www.facebook.com');
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url);
-                      }
+                      if (await canLaunchUrl(url)) await launchUrl(url);
                     },
                   ),
                   IconButton(
                     icon: Icon(Icons.language, color: Colors.green),
                     onPressed: () async {
                       final Uri url = Uri.parse('https://cercetasolucionesempresariales.com');
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url);
-                      }
+                      if (await canLaunchUrl(url)) await launchUrl(url);
                     },
                   ),
                 ],
@@ -175,10 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text("No puedo ingresar"),
                   TextButton(
                     onPressed: () {},
-                    child: Text(
-                      'ayuda',
-                      style: TextStyle(color: Colors.pink),
-                    ),
+                    child: Text('ayuda', style: TextStyle(color: Colors.pink)),
                   ),
                 ],
               ),
@@ -188,17 +184,4 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: LoginScreen(),
-    );
-  }
-}
-
-void main() {
-  runApp(MyApp());
 }

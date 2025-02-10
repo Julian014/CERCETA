@@ -23,6 +23,7 @@ dependencies:
   font_awesome_flutter: ^10.8.0
   url_launcher: ^6.1.14 # Asegúrate de tener la última versión
   flutter_svg: ^2.0.9
+  shared_preferences: ^2.5.1
 
 
 dev_dependencies:
@@ -41,5 +42,5 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/images/logo.png"  # Ruta correcta si la imagen está en la carpeta assets/images/
+  image_path: "assets/images/2022cercetafinal_blanco.png"  # Ruta correcta si la imagen está en la carpeta assets/images/
   remove_alpha_ios: true  # Esto eliminará el canal alfa para iOS
