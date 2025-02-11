@@ -153,6 +153,7 @@
             <tr>
                 <th>ID</th>
                 <th>Actividad</th>
+                 <th>Edificio</th>
                 <th>Fecha de Ejecución</th>
                 <th>Frecuencia</th>
                 <th>Días Antes</th>
@@ -161,6 +162,7 @@
                 <th>Tiempo de Recordatorio</th>
                 <th>Responsable</th>
                 <th>Fecha de Creación</th>
+                   <th>Acciones</th>
             </tr>
         </thead>
         <tbody id="alertTableBody">
@@ -168,14 +170,19 @@
             <tr>
                 <td>{{this.id}}</td>
                 <td>{{this.nombre_actividad}}</td>
+<td>{{this.nombre_edificio}}</td>
                 <td>{{formatDate this.fecha_ejecucion}}</td>
                 <td>{{this.frecuencia_alerta}}</td>
                 <td>{{this.dias_antes_alerta}}</td>
                 <td>{{this.metodo_notificacion}}</td>
                 <td>{{this.prioridad}}</td>
                 <td>{{this.tiempo_recordatorio}}</td>
-                <td>{{this.responsable_id}}</td>
+<td>{{this.responsable_nombre}}</td>
                 <td>{{formatDate this.fecha_creacion}}</td>
+                   <td>
+            <button onclick="editarAlerta({{this.id}})">✏️ Editar</button>
+            <button onclick="eliminarAlerta({{this.id}})">🗑️ Eliminar</button>
+        </td>
             </tr>
             {{/each}}
         </tbody>
@@ -246,5 +253,27 @@
     }
   });
 </script>
+<script>
+    function editarAlerta(id) {
+        window.location.href = `/editar_alerta/${id}`;
+    }
+
+    function eliminarAlerta(id) {
+        if (confirm("¿Estás seguro de que deseas eliminar esta alerta?")) {
+            fetch(`/eliminar_alerta/${id}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Alerta eliminada correctamente.");
+                        location.reload(); // Recargar la página
+                    } else {
+                        alert("Error al eliminar la alerta.");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        }
+    }
+</script>
+
 </body>
 </html>

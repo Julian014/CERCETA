@@ -2369,7 +2369,6 @@ app.post('/guardar_usuario', upload.single('foto'), async (req, res) => {
 
 
 
-
 app.get('/crear_alerta', async (req, res) => {
     if (req.session.loggedin === true) {
         const name = req.session.name;
@@ -2378,10 +2377,18 @@ app.get('/crear_alerta', async (req, res) => {
             // Consulta para obtener los administradores
             const [administradores] = await pool.query(`SELECT id, nombre, email FROM usuarios WHERE role = 'admin'`);
             
-            // Renderiza la vista y pasa los administradores
-            res.render('administrativo/alertas/crear_alerta.hbs', { name, administradores, layout: 'layouts/nav_admin.hbs' });
+            // Consulta para obtener los edificios
+            const [edificios] = await pool.query(`SELECT id, nombre FROM edificios`);
+
+            // Renderiza la vista y pasa los datos
+            res.render('administrativo/alertas/crear_alerta.hbs', { 
+                name, 
+                administradores, 
+                edificios, 
+                layout: 'layouts/nav_admin.hbs' 
+            });
         } catch (error) {
-            console.error("Error al obtener administradores:", error);
+            console.error("Error al obtener datos:", error);
             res.status(500).send("Hubo un problema al cargar los datos.");
         }
     } else {
@@ -2391,35 +2398,38 @@ app.get('/crear_alerta', async (req, res) => {
 
 
 
-
 app.post('/crear_alerta', async (req, res) => {
-    console.log(req.body); // Verificar qué datos están llegando
-
-    const {
-        nombreActividad,
-        fechaEjecucion,
-        frecuenciaAlerta,
-        diasAntesAlerta,
-        prioridad,
-        tiempoRecordatorio,
-        responsable
-    } = req.body;
-
-    // Acceder a los métodos de notificación seleccionados
-    const metodoNotificacion = req.body['metodoNotificacion[]'];
-
     try {
-        // Convertir el array de métodos de notificación en una cadena separada por comas
-        const metodosNotificacion = Array.isArray(metodoNotificacion)
-            ? metodoNotificacion.join(',') // Convierte a "email,sms" por ejemplo
-            : '';
+        console.log(req.body); // Verificar qué datos están llegando
 
-        console.log("Métodos de Notificación antes de la consulta:", metodosNotificacion); // Verificar el valor final
+        const {
+            nombreActividad,
+            fechaEjecucion,
+            frecuenciaAlerta,
+            diasAntesAlerta,
+            prioridad,
+            tiempoRecordatorio,
+            responsable,
+            edificio // Nuevo campo
+        } = req.body;
 
-        // Inserción en la tabla alertas
+        // Acceder a los métodos de notificación seleccionados
+        let metodoNotificacion = req.body['metodoNotificacion[]'];
+
+        // Si solo hay un valor seleccionado, lo convertimos en un array
+        if (!Array.isArray(metodoNotificacion)) {
+            metodoNotificacion = metodoNotificacion ? [metodoNotificacion] : [];
+        }
+
+        const metodosNotificacion = metodoNotificacion.join(',');
+
+        console.log("Métodos de Notificación antes de la consulta:", metodosNotificacion);
+
+        // Inserción en la tabla alertas incluyendo el edificio
         const query = `INSERT INTO alertas 
-            (nombre_actividad, fecha_ejecucion, frecuencia_alerta, dias_antes_alerta, metodo_notificacion, prioridad, tiempo_recordatorio, responsable_id) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+            (nombre_actividad, fecha_ejecucion, frecuencia_alerta, dias_antes_alerta, metodo_notificacion, prioridad, tiempo_recordatorio, responsable_id, edificio_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
         await pool.query(query, [
             nombreActividad,
             fechaEjecucion,
@@ -2428,17 +2438,20 @@ app.post('/crear_alerta', async (req, res) => {
             metodosNotificacion, 
             prioridad,
             tiempoRecordatorio !== "" ? tiempoRecordatorio : null,
-            responsable
+            responsable,
+            edificio
         ]);
 
         console.log("Alerta creada exitosamente con métodos de notificación:", metodosNotificacion);
-
         res.redirect('/crear_alerta'); 
+
     } catch (error) {
         console.error("Error al crear alerta:", error);
         res.status(500).send("Hubo un problema al crear la alerta.");
     }
 });
+
+
 
 
 async function verificarAlertasPendientes() {
@@ -2654,14 +2667,23 @@ app.post('/marcarNotificacionesComoLeidas/:user_id', async (req, res) => {
     }
 });
 
-
-app.get('/consultar_alertas', async (req, res) => {
+app.get('/consultar_alertas', async (req, res) => { 
     if (req.session.loggedin === true) {
         const name = req.session.name;
         const userId = req.session.userId;
 
         try {
-            const [alertas] = await pool.query('SELECT * FROM alertas ORDER BY fecha_creacion DESC');
+            const [alertas] = await pool.query(`
+                SELECT 
+                    a.*, 
+                    u.nombre AS responsable_nombre, 
+                    e.nombre AS nombre_edificio
+                FROM alertas a
+                LEFT JOIN usuarios u ON a.responsable_id = u.id
+                LEFT JOIN edificios e ON a.edificio_id = e.id
+                ORDER BY a.fecha_creacion DESC
+            `);
+
             res.render('administrativo/alertas/consultar_todas.hbs', { name, userId, alertas, layout: 'layouts/nav_admin.hbs' });
         } catch (error) {
             console.error('Error al obtener alertas:', error);
@@ -2671,6 +2693,120 @@ app.get('/consultar_alertas', async (req, res) => {
         res.redirect('/login');
     }
 });
+
+
+hbs.registerHelper('ifEquals', function(arg1, arg2, options) {
+    return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
+});
+
+
+
+
+
+// Registrar helper "contains"
+hbs.registerHelper('contains', function (value, substring, options) {
+    if (typeof value === 'string' && value.includes(substring)) {
+        return options.fn(this); // Renderiza el contenido dentro del `{{#contains}}...{{/contains}}`
+    }
+    return options.inverse(this); // Si no se encuentra, no se renderiza
+});
+
+
+app.get('/editar_alerta/:id', async (req, res) => {
+    if (req.session.loggedin) {
+        try {
+            const [alerta] = await pool.query('SELECT * FROM alertas WHERE id = ?', [req.params.id]);
+            const [usuarios] = await pool.query('SELECT id, nombre FROM usuarios'); // Lista de usuarios
+            const [edificios] = await pool.query('SELECT id, nombre FROM edificios'); // Lista de edificios
+
+            if (alerta.length > 0) {
+                // Formatear la fecha para el input "date"
+                if (alerta[0].fecha_ejecucion) {
+                    const fecha = new Date(alerta[0].fecha_ejecucion);
+                    alerta[0].fecha_ejecucion = fecha.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+                }
+
+                res.render('administrativo/alertas/editar_alerta.hbs', { 
+                    alerta: alerta[0], 
+                    usuarios, 
+                    edificios, // Pasamos la lista de edificios
+                    layout: 'layouts/nav_admin.hbs' 
+                });
+            } else {
+                res.status(404).send('Alerta no encontrada');
+            }
+        } catch (error) {
+            console.error("Error al obtener la alerta:", error);
+            res.status(500).send("Error interno");
+        }
+    } else {
+        res.redirect('/login');
+    }
+});
+
+app.post('/editar_alerta/:id', async (req, res) => {
+    if (!req.session.loggedin) {
+        return res.redirect('/login');
+    }
+
+    try {
+        const { 
+            nombre_actividad, 
+            fecha_ejecucion, 
+            frecuencia_alerta, 
+            prioridad, 
+            metodo_notificacion, 
+            dias_antes, 
+            tiempo_recordatorio, 
+            responsable,
+            edificio_id // Usamos edificio_id directamente
+        } = req.body;
+        
+        const id = req.params.id;
+        const responsable_id = Number(responsable) || null;
+        const edificio_id_num = Number(edificio_id) || null; // Convertir a número o null
+        const metodo_notificacion_str = Array.isArray(metodo_notificacion) ? metodo_notificacion.join(',') : metodo_notificacion;
+
+        const [alertaExistente] = await pool.query('SELECT id FROM alertas WHERE id = ?', [id]);
+        if (alertaExistente.length === 0) {
+            return res.status(404).send("La alerta no existe.");
+        }
+
+        await pool.query(
+            'UPDATE alertas SET nombre_actividad = ?, fecha_ejecucion = ?, frecuencia_alerta = ?, prioridad = ?, metodo_notificacion = ?, dias_antes_alerta = ?, tiempo_recordatorio = ?, responsable_id = ?, edificio_id = ? WHERE id = ?',
+            [nombre_actividad, fecha_ejecucion, frecuencia_alerta, prioridad, metodo_notificacion_str, dias_antes, tiempo_recordatorio, responsable_id, edificio_id_num, id]
+        );
+
+        res.redirect('/consultar_alertas'); 
+    } catch (error) {
+        console.error("Error al actualizar la alerta:", error);
+        res.status(500).send("Error interno al actualizar la alerta.");
+    }
+});
+
+
+
+// Ruta para eliminar alerta
+app.delete('/eliminar_alerta/:id', async (req, res) => {
+    if (req.session.loggedin) {
+        try {
+            await pool.query('DELETE FROM alertas WHERE id = ?', [req.params.id]);
+            res.json({ success: true });
+        } catch (error) {
+            console.error("Error al eliminar la alerta:", error);
+            res.status(500).json({ success: false });
+        }
+    } else {
+        res.status(401).json({ success: false });
+    }
+});
+
+
+
+
+
+
+
 
 
 const obtenerEdificios = async () => {
