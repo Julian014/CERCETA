@@ -205,7 +205,7 @@ border: 1px solid black;
 
         
       <h2 class="section-title">
-        <input class="input-title" placeholder="Agrega un Titulo">
+        <input class="input-title" placeholder="">
       </h2>
 <div class="section-content">
  <label for="edificio" class="section-title">Seleccione el Edificio:</label>
@@ -254,31 +254,35 @@ border: 1px solid black;
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-  // Función para crear una nueva sección
-  function agregarSeccion() {
-    const container = document.getElementById('contenido');
-    
-    // Crear un nuevo div de sección
-    const nuevaSeccion = document.createElement('div');
-    nuevaSeccion.className = 'section';
+function agregarSeccion() {
+  const container = document.getElementById('contenido');
 
-    nuevaSeccion.innerHTML = `
-      <h2 class="section-title">
-        <input class="input-title" placeholder="Agrega un subtítulo aquí">
-      </h2>
-      <div class="section-content">
-        <div class="image-section">
-          <div class="upload-section">
-            <input type="file" accept="image/*">
-            <p>Arrastra y suelta una imagen o haz clic para subir</p>
-            <img class="image" alt="Vista previa de imagen" style="display: none;">
-          </div>
-        </div>
-        <div class="text-section">
-          <textarea class="textarea-content" placeholder="Escribe aquí la información del subtítulo"></textarea>
+  // Crear un nuevo div de sección
+  const nuevaSeccion = document.createElement('div');
+  nuevaSeccion.className = 'section';
+
+  nuevaSeccion.innerHTML = `
+    <h2 class="section-title">
+      <input class="input-title" placeholder="">
+    </h2>
+    <div class="section-content">
+      <div class="image-section">
+        <div class="upload-section">
+          <input type="file" accept="image/*">
+          <p>Subir imagen</p>
+          <img class="image" alt="Vista previa de imagen" style="display: none;">
         </div>
       </div>
-    `;
+      <div class="image-section">
+        <div class="upload-section">
+          <input type="file" accept="image/*">
+          <p>Subir imagen</p>
+          <img class="image" alt="Vista previa de imagen" style="display: none;">
+        </div>
+      </div>
+    </div>
+  `;
+
     
     container.appendChild(nuevaSeccion);
   }
